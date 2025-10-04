@@ -1,0 +1,4 @@
+# Swagger documentation will be generated here
+# Run: make swag
+# Or: swag init -g ./cmd/server/main.go -o ./api/docs
+

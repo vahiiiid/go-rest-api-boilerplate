@@ -1,0 +1,18 @@
+# Example configuration file
+# Note: Environment variables take precedence over this file
+
+server:
+  port: 8080
+  env: development
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  name: go_api
+
+jwt:
+  secret: your-secret-key-change-in-production
+  ttl_hours: 24
+
