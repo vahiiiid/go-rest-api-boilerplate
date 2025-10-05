@@ -2,76 +2,60 @@
 
 ![GRAB Logo](https://vahiiiid.github.io/go-rest-api-docs/images/logo.png)
 
-# 🧩 GRAB
 **G**o **R**EST **A**PI **B**oilerplate
 
-*Grab it and Go — a clean, lightweight, production-ready REST API starter kit in Go with JWT, PostgreSQL, Docker, and Swagger.*
+*Grab it and Go — a best-practice layered structure REST API starter kit in Go with JWT, PostgreSQL, Docker, and Swagger.*
 
 **🚀 Start building in under 2 minutes** • **📚 Fully documented** • **🧪 100% tested** • **🐳 Docker ready**
+
+**[Explore the docs »](https://vahiiiid.github.io/go-rest-api-docs/)**
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/vahiiiid/go-rest-api-boilerplate/releases/tag/v1.0.0)
 [![CI](https://github.com/vahiiiid/go-rest-api-boilerplate/workflows/CI/badge.svg)](https://github.com/vahiiiid/go-rest-api-boilerplate/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vahiiiid/go-rest-api-boilerplate)](https://goreportcard.com/report/github.com/vahiiiid/go-rest-api-boilerplate)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go)](https://go.dev/)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://vahiiiid.github.io/go-rest-api-docs/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![GitHub Stars](https://img.shields.io/github/stars/vahiiiid/go-rest-api-boilerplate?style=social)](https://github.com/vahiiiid/go-rest-api-boilerplate/stargazers)
+
+[Quick Start](#-quick-start) • [Features](#-features) • [Documentation](https://vahiiiid.github.io/go-rest-api-docs/) • [Examples](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/)
 
 </div>
 
-## ✨ Features
+---
 
-- ✅ **JWT Authentication** - Secure token-based auth (HS256)
-- ✅ **User Management** - Complete CRUD with validation
-- ✅ **PostgreSQL + GORM** - Robust database with ORM
-- ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback)
-- ✅ **Docker Production** - Optimized multi-stage builds
-- ✅ **Swagger/OpenAPI** - Interactive API documentation
-- ✅ **Database Migrations** - Version-controlled schema changes
-- ✅ **Automated Testing** - Unit & integration tests
-- ✅ **GitHub Actions CI** - Automated linting and testing
-- ✅ **Make Commands** - Simplified workflow automation
-- ✅ **Helper Scripts** - Quick setup and verification tools
-- ✅ **Postman Collection** - Pre-configured API tests
-- ✅ **Clean Architecture** - Layered, maintainable structure
-- ✅ **Security Best Practices** - Bcrypt hashing, input validation
-- ✅ **CORS Support** - Configurable cross-origin requests
+## 🎯 Looking to Build a REST API in Go?
 
-## 🎯 Why GRAB?
+**You need a REST API project with Go** and you're looking for:
+- ✨ **Best-practice clean architecture** that scales with your team
+- 🛠️ **CLI tools ready to go** - migrations, linting, testing, all configured
+- 🚀 **Production-ready structure** - not a toy project, but battle-tested patterns
+- 📚 **Real documentation** - not just comments, but guides and examples
+- 🐳 **Docker-first development** - consistent environments, zero "works on my machine"
+- ⚡ **Hot-reload that actually works** - see changes in 2 seconds, not 20
 
-**Stop wasting time on boilerplate. Start building features.**
-
-- **⚡ 2-Minute Setup** - One command gets you a fully working API
-- **📚 Learn by Example** - Complete TODO list tutorial in the docs
-- **🔥 Hot-Reload** - See changes in ~2 seconds, no restart needed
-- **✅ Production Ready** - Used in real projects, not just a demo
-- **📖 Actually Documented** - Every feature explained with examples
-- **🧪 Fully Tested** - All endpoints have working tests you can learn from
+**Stop spending days setting up.** This boilerplate gives you everything you need to start building features in minutes, not hours. Real authentication, real database migrations, real tests - all wired up and ready to extend.
 
 **Perfect for:**
-- 🚀 Starting new Go projects quickly
-- 📖 Learning Go web development best practices
-- 🏗️ Building production-ready APIs
-- 👥 Team projects with consistent structure
-
-## 📑 Table of Contents
-
-- [Quick Start](#-quick-start)
-- [Development](#-development)
-- [Production](#-production)
-- [API Documentation](#-api-documentation)
-- [Testing](#-testing)
-- [Documentation](#-documentation)
-- [Project Structure](#️-project-structure)
-- [Contributing](#-contributing)
+- 🚀 Starting new Go projects without the setup headache
+- 📖 Learning Go web development with production-quality examples
+- 🏗️ Building APIs that need to scale and be maintained
+- 👥 Team projects where consistency and standards matter
 
 ---
 
 ## 🚀 Quick Start
 
-Get up and running in **under 2 minutes**:
+Get your API running in **under 2 minutes**:
 
 ### Prerequisites
 - [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
 - [Git](https://git-scm.com/downloads)
+
+> **💡 Want to run without Docker?** See the [Manual Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/) in the documentation.
 
 ### One-Command Setup ⚡
 
@@ -86,31 +70,25 @@ make quick-start
 - **Swagger UI:** http://localhost:8080/swagger/index.html
 - **Health Check:** http://localhost:8080/health
 
-### What Just Happened?
+### Explore Your API 🧪
 
-The `quick-start` command automatically:
-1. ✅ Installed development tools (swag, golangci-lint, migrate, air)
-2. ✅ Verified all prerequisites and dependencies
-3. ✅ Created `.env` file from template
-4. ✅ Generated Swagger documentation
-5. ✅ Built and started Docker containers
-6. ✅ Ran database migrations (via AutoMigrate)
+**Interactive Swagger Documentation:**
 
-### 🚀 Ready to Build Your Own Features?
+<div align="center">
+  <img src="https://vahiiiid.github.io/go-rest-api-docs/images/swagger-ui.png" alt="Swagger UI" width="700">
+</div>
 
-Now that your API is running, learn how to add your own endpoints!
+Open [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) to explore and test all endpoints interactively.
 
-**📖 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** - Complete guide showing you how to:
-- Understand the codebase structure
-- Add new models, routes, and handlers
-- Implement CRUD operations
-- Follow best practices
+**Or Use Postman:**
 
-**Or if you learn by example**, check out the **[TODO List Example](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/)** - a complete step-by-step tutorial implementing a TODO feature from scratch!
+<div align="center">
+  <img src="https://vahiiiid.github.io/go-rest-api-docs/images/postman-collection.png" alt="Postman Collection" width="700">
+</div>
 
-Visit the [documentation site](https://vahiiiid.github.io/go-rest-api-docs/) for the full guide!
+Import the pre-configured collection from `api/postman_collection.json` with example requests and tests.
 
-### Try It Out 🧪
+### Quick Test
 
 ```bash
 # Check health
@@ -124,103 +102,139 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
     "email": "alice@example.com",
     "password": "secret123"
   }'
-
-# Visit Swagger UI for interactive docs
-open http://localhost:8080/swagger/index.html
 ```
+
+### 🚀 Ready to Build Your Own Features?
+
+**📖 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** - Learn how to add models, routes, and handlers
+
+**💡 [TODO List Example](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/)** - Complete step-by-step tutorial implementing a feature from scratch
+
+---
+
+## ✨ Features
+
+- ✅ **JWT Authentication** - Secure token-based auth (HS256)
+- ✅ **User Management** - Complete CRUD with validation
+- ✅ **PostgreSQL + GORM** - Robust database with ORM
+- ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback)
+- ✅ **Docker Production** - Optimized multi-stage builds
+- ✅ **Swagger/OpenAPI** - Interactive API documentation
+- ✅ **Database Migrations** - Version-controlled schema changes with CLI tools
+- ✅ **Automated Testing** - Unit & integration tests
+- ✅ **GitHub Actions CI** - Automated linting and testing
+- ✅ **Make Commands** - Simplified workflow automation
+- ✅ **Postman Collection** - Pre-configured API tests
+- ✅ **Clean Architecture** - Layered, maintainable structure
+- ✅ **Security Best Practices** - Bcrypt hashing, input validation
+- ✅ **CORS Support** - Configurable cross-origin requests
+
+## 📑 Table of Contents
+
+- [Development](#-development)
+- [Production](#-production)
+- [API Documentation](#-api-documentation)
+- [Testing](#-testing)
+- [Documentation](#-documentation)
+- [Project Structure](#️-project-structure)
+- [Contributing](#-contributing)
+
 
 ---
 
 ## 💻 Development
 
-### Automated Setup (Recommended)
+### With Docker (Recommended) 🐳
+
+The easiest way to develop with hot-reload and zero setup:
 
 ```bash
+# Start everything
 make quick-start
+
+# Or manually
+make up
+
+# Edit code in your IDE
+# Changes auto-reload in ~2 seconds! ✨
+
+# View logs
+make logs
+
+# Stop containers
+make down
 ```
 
-This starts the development environment with:
+**Features:**
 - 🔥 **Hot-reload** - Code changes reflect in ~2 seconds (powered by Air)
 - 📦 **Volume mounts** - Edit code in your IDE, runs in container
 - 🗄️ **PostgreSQL** - Database on internal Docker network
-- 📚 **Swagger** - Auto-generated API documentation
-
-### Manual Docker Setup
-
-If you prefer to see what's happening step-by-step:
-
-```bash
-# 1. Install development tools
-make install-tools
-# or
-./scripts/install-tools.sh
-
-# 2. Create environment file
-cp .env.example .env
-
-# 3. Generate Swagger docs
-make swag
-# or
-./scripts/init-swagger.sh
-
-# 4. Start containers with hot-reload
-docker-compose up --build
-```
-
-**That's it!** The API will automatically reload when you edit code.
-
-> 💡 **Next Step:** Check out the **[Development Guide](https://vahiiiid.github.io/go-rest-api-docs/development-guide/)** to learn how to add your own endpoints! It includes a complete TODO list example with all the code you need.
+- 📚 **All tools pre-installed** - No Go installation needed on host
 
 ### Development Workflow
 
 ```bash
 # Start containers
-make docker-up
-
-# Edit code in your IDE
-# Changes auto-reload in ~2 seconds! ✨
-
-# Check code quality
-make lint
+make up
 
 # Run tests
 make test
 
+# Check code quality
+make lint
+
+# Fix linting issues
+make lint-fix
+
 # Generate/update Swagger docs
 make swag
 
-# Stop containers
-make docker-down
+# Database migrations
+make migrate-create NAME=add_new_table
+make migrate-up
+make migrate-down
+make migrate-version
 
 # View logs
-docker-compose logs -f app
+make logs
+
+# Stop containers
+make down
 ```
 
 ### Available Make Commands
 
+Run `make help` to see all commands. Key commands:
+
 ```bash
-make help              # Show all available commands
 make quick-start       # Complete automated setup
-make docker-up         # Start development containers
-make docker-down       # Stop containers
-make lint              # Run linter (golangci-lint)
-make lint-fix          # Auto-fix linting issues
-make test              # Run all tests
-make test-coverage     # Run tests with coverage report
-make swag              # Generate Swagger documentation
-make migrate-create    # Create new migration file
-make migrate-docker-up # Run migrations in container
-make verify            # Verify project setup
-make install-tools     # Install development tools
+make up                # Start development containers
+make down              # Stop containers
+make test              # Run tests (auto-detects environment)
+make lint              # Run linter (auto-detects environment)
+make swag              # Generate Swagger docs (auto-detects environment)
+make migrate-up        # Run migrations (auto-detects environment)
+make build-binary      # Build Go binary directly (requires Go on host)
+make run-binary        # Build and run binary directly (requires Go on host)
 ```
 
-### Without Docker (Manual Development)
+> 💡 **Most commands auto-detect** whether to run in Docker or on your host machine!
 
-For local development without Docker, see the [Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/) for detailed instructions on:
-- Installing Go 1.23+
+### Without Docker (Native Development)
+
+**Want to run without Docker?** You'll need Go 1.23+ installed on your machine.
+
+See the **[Manual Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** for detailed instructions on:
+- Installing Go and development tools
 - Setting up PostgreSQL locally
-- Running the app directly on your machine
+- Building and running the binary directly
 - Manual migration commands
+
+**Quick native build:**
+```bash
+make build-binary    # Build binary to bin/server
+make run-binary      # Build and run (requires PostgreSQL on localhost)
+```
 
 ---
 
@@ -466,10 +480,12 @@ For contributing to the codebase, see [CONTRIBUTING.md](CONTRIBUTING.md)
 go-rest-api-boilerplate/
 ├── api/
 │   ├── docs/                      # Swagger documentation (auto-generated)
-│   │   ├── docs.go
-│   │   ├── swagger.json
-│   │   └── swagger.yaml
+│   │   ├── docs.go                # Swagger Go package
+│   │   ├── swagger.json           # OpenAPI JSON spec
+│   │   └── swagger.yaml           # OpenAPI YAML spec
 │   └── postman_collection.json    # Postman API tests with examples
+├── bin/                           # Compiled binaries (gitignored)
+│   └── server                     # Built Go binary (from make build-binary)
 ├── cmd/
 │   └── server/
 │       └── main.go                # Application entry point
@@ -481,44 +497,53 @@ go-rest-api-boilerplate/
 │   │   ├── middleware.go          # JWT middleware
 │   │   └── service.go             # Token generation & validation
 │   ├── db/
-│   │   └── db.go                  # Database connection setup
+│   │   └── db.go                  # Database connection setup (GORM)
 │   ├── server/
 │   │   └── router.go              # Route definitions & middleware
 │   └── user/                      # User domain (example feature)
 │       ├── dto.go                 # Request/Response DTOs
-│       ├── handler.go             # HTTP handlers with Swagger docs
+│       ├── handler.go             # HTTP handlers with Swagger annotations
 │       ├── model.go               # GORM database model
 │       ├── repository.go          # Data access layer (CRUD)
 │       └── service.go             # Business logic layer
-├── migrations/                    # Database migration files
+├── migrations/                    # Database migration files (SQL)
 │   ├── 000001_create_users_table.up.sql
 │   └── 000001_create_users_table.down.sql
 ├── scripts/                       # Helper automation scripts
-│   ├── install-tools.sh           # Install dev tools (swag, air, etc.)
-│   ├── quick-start.sh             # One-command setup
-│   ├── init-swagger.sh            # Generate Swagger docs
-│   └── verify-setup.sh            # Verify project setup
+│   └── quick-start.sh             # One-command Docker setup
 ├── tests/
-│   ├── handler_test.go            # Integration tests (httptest)
+│   ├── handler_test.go            # Integration tests (httptest + SQLite)
 │   └── README.md                  # Testing guide
-├── .air.toml                      # Hot-reload configuration
-├── .env.example                   # Environment variables template
-├── .gitignore
+├── tmp/                           # Air hot-reload temp files (gitignored)
+├── .air.toml                      # Hot-reload configuration (Air)
+├── .gitignore                     # Git ignore rules
 ├── .golangci.yml                  # Linter configuration
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                 # GitHub Actions CI/CD
-├── CHANGELOG.md                   # Version history
+│       └── ci.yml                 # GitHub Actions CI/CD pipeline
+├── CHANGELOG.md                   # Version history (SemVer)
 ├── CONTRIBUTING.md                # Contribution guidelines
-├── docker-compose.yml             # Development with hot-reload
-├── docker-compose.prod.yml        # Production optimized
+├── docker-compose.yml             # Development with hot-reload & volumes
+├── docker-compose.prod.yml        # Production optimized (no volumes)
 ├── Dockerfile                     # Multi-stage build (dev + prod)
+│                                  # Dev: All tools pre-installed
+│                                  # Prod: Minimal Alpine image
 ├── go.mod                         # Go module dependencies
 ├── go.sum                         # Dependency checksums
 ├── LICENSE                        # MIT License
 ├── Makefile                       # Build automation & shortcuts
+│                                  # Auto-detects Docker/host environment
 └── README.md                      # This file
 ```
+
+### Key Highlights
+
+- **🐳 Docker-First**: All dev tools pre-installed in container (swag, golangci-lint, migrate, air)
+- **🔥 Hot-Reload**: Code changes reflect in ~2 seconds via Air + volume mounts
+- **🗄️ Migrations**: SQL-based migrations with golang-migrate
+- **📚 Clean Architecture**: Clear separation: Handler → Service → Repository
+- **🧪 Fully Tested**: Unit & integration tests with in-memory SQLite
+- **⚙️ Auto-Detection**: Make commands work in Docker or on host automatically
 
 **📚 Documentation**: All guides, tutorials, and API docs are in a [separate repository](https://github.com/vahiiiid/go-rest-api-docs) and published at [vahiiiid.github.io/go-rest-api-docs](https://vahiiiid.github.io/go-rest-api-docs/)
 

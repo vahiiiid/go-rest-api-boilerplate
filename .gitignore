@@ -13,7 +13,7 @@ tmp/
 
 # Output of the go coverage tool
 *.out
-coverage.txt
+coverage.html
 
 # Dependency directories
 vendor/

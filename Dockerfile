@@ -1,17 +1,29 @@
 # Development stage with hot-reload
-FROM golang:1.23-alpine AS development
+# Using Debian-based image for better CGO/SQLite compatibility
+FROM golang:1.23-bookworm AS development
 
-# Install development tools
-RUN apk add --no-cache git curl
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    bash \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
+# Enable CGO for development (required for SQLite in tests)
+ENV CGO_ENABLED=1
 
 # Copy go mod files
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Install air for hot-reload (pinned to compatible version with Go 1.23)
-RUN go install github.com/air-verse/air@v1.52.3
+# Install all development tools
+RUN go install github.com/air-verse/air@v1.52.3 && \
+    go install github.com/swaggo/swag/cmd/swag@latest && \
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest && \
+    go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 # Copy source code (in docker-compose, we'll mount a volume over this)
 COPY . .
