@@ -22,7 +22,6 @@ type Service interface {
 	RegisterUser(ctx context.Context, req RegisterRequest) (*User, error)
 	AuthenticateUser(ctx context.Context, req LoginRequest) (*User, error)
 	GetUserByID(ctx context.Context, id uint) (*User, error)
-	ListUsers(ctx context.Context, page, size int) ([]User, int64, error)
 	UpdateUser(ctx context.Context, id uint, req UpdateUserRequest) (*User, error)
 	DeleteUser(ctx context.Context, id uint) error
 }
@@ -97,24 +96,6 @@ func (s *service) GetUserByID(ctx context.Context, id uint) (*User, error) {
 		return nil, ErrUserNotFound
 	}
 	return user, nil
-}
-
-// ListUsers returns a paginated list of users
-func (s *service) ListUsers(ctx context.Context, page, size int) ([]User, int64, error) {
-	if page < 1 {
-		page = 1
-	}
-	if size < 1 || size > 100 {
-		size = 10
-	}
-
-	offset := (page - 1) * size
-	users, total, err := s.repo.List(ctx, size, offset)
-	if err != nil {
-		return nil, 0, fmt.Errorf("failed to list users: %w", err)
-	}
-
-	return users, total, nil
 }
 
 // UpdateUser updates a user's information

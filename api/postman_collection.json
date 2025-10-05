@@ -113,33 +113,6 @@
       "name": "Users",
       "item": [
         {
-          "name": "List Users",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/users?page=1&size=10",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
-            }
-          }
-        },
-        {
           "name": "Get User by ID",
           "request": {
             "method": "GET",

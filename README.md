@@ -353,7 +353,6 @@ api/postman_collection.json
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| GET | `/api/v1/users` | List users (paginated) | ✅ |
 | GET | `/api/v1/users/:id` | Get user by ID | ✅ |
 | PUT | `/api/v1/users/:id` | Update user | ✅ |
 | DELETE | `/api/v1/users/:id` | Delete user | ✅ |
@@ -387,12 +386,6 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
   }'
 ```
 
-**List Users (with auth):**
-```bash
-curl -X GET http://localhost:8080/api/v1/users \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
 For more examples, see the [Quick Reference Guide](https://vahiiiid.github.io/go-rest-api-docs/QUICK_REFERENCE/).
 
 ---
@@ -424,7 +417,6 @@ The project includes:
 **Test Suites:**
 - `TestRegisterHandler` - User registration flows
 - `TestLoginHandler` - Authentication flows
-- `TestProtectedEndpoints` - Authorization checks
 - `TestHealthEndpoint` - Health check validation
 
 ### Continuous Integration

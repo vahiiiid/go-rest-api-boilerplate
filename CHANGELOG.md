@@ -68,7 +68,6 @@ The first production-ready release of GRAB - Go REST API Boilerplate.
 #### API Endpoints
 - `POST /api/v1/auth/register` - User registration
 - `POST /api/v1/auth/login` - User login
-- `GET /api/v1/users` - List users (protected)
 - `GET /api/v1/users/:id` - Get user by ID (protected)
 - `PUT /api/v1/users/:id` - Update user (protected)
 - `DELETE /api/v1/users/:id` - Delete user (protected)
