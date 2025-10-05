@@ -65,6 +65,10 @@ cd go-rest-api-boilerplate
 make quick-start
 ```
 
+<div align="center">
+  <img src="https://vahiiiid.github.io/go-rest-api-docs/images/quick-start-light.gif" alt="Quick Start Demo" width="800">
+</div>
+
 **🎉 Done!** Your API is now running at:
 - **API Base URL:** http://localhost:8080/api/v1
 - **Swagger UI:** http://localhost:8080/swagger/index.html
