@@ -1,165 +1,302 @@
-.PHONY: run build docker-build docker-up docker-down test swag clean help
+.PHONY: help quick-start up down restart logs build test test-coverage lint lint-fix swag migrate-create migrate-up migrate-down migrate-version build-binary run-binary clean
 
-# Variables
-BINARY_NAME=server
-DOCKER_IMAGE=go-rest-api-boilerplate
+# Container name (from docker-compose.yml)
+CONTAINER_NAME := go_api_app
 
-help: ## Show this help message
-	@echo 'Usage: make [target]'
-	@echo ''
-	@echo 'Available targets:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+# Check if container is running
+CONTAINER_RUNNING := $(shell docker ps --format '{{.Names}}' 2>/dev/null | grep -E '^$(CONTAINER_NAME)$$')
 
-run: ## Run the application locally binary
-	go run ./cmd/server
+# Determine execution command
+ifdef CONTAINER_RUNNING
+	EXEC_CMD = docker exec $(CONTAINER_RUNNING)
+	ENV_MSG = 🐳 Running in Docker container
+else
+	EXEC_CMD = 
+	ENV_MSG = 💻 Running on host (Docker not available)
+endif
 
-build: ## Build the application binary
-	go build -o bin/$(BINARY_NAME) ./cmd/server
+## help: Show this help message
+help:
+	@echo "Go REST API Boilerplate - Available Commands"
+	@echo "=============================================="
+	@echo ""
+	@echo "🚀 Quick Start:"
+	@echo "  make quick-start    - Complete setup and start (Docker required)"
+	@echo ""
+	@echo "🐳 Docker Commands:"
+	@echo "  make up             - Start containers"
+	@echo "  make down           - Stop containers"
+	@echo "  make restart        - Restart containers"
+	@echo "  make logs           - View container logs"
+	@echo "  make build          - Rebuild containers"
+	@echo ""
+	@echo "🧪 Development Commands:"
+	@echo "  make test           - Run tests"
+	@echo "  make test-coverage  - Run tests with coverage"
+	@echo "  make lint           - Run linter"
+	@echo "  make lint-fix       - Run linter and fix issues"
+	@echo "  make swag           - Generate Swagger docs"
+	@echo ""
+	@echo "🗄️  Database Commands:"
+	@echo "  make migrate-create NAME=<name>  - Create new migration"
+	@echo "  make migrate-up                  - Run migrations"
+	@echo "  make migrate-down                - Rollback last migration"
+	@echo "  make migrate-version             - Show current migration version"
+	@echo ""
+	@echo "⚙️  Native Build (requires Go on host):"
+	@echo "  make build-binary   - Build Go binary directly (no Docker)"
+	@echo "  make run-binary     - Build and run binary directly (no Docker)"
+	@echo ""
+	@echo "🧹 Utility:"
+	@echo "  make clean          - Clean build artifacts"
+	@echo ""
+	@echo "💡 Most commands auto-detect Docker/host environment"
+	@echo "💡 Native build commands require Go installed on your machine"
 
-quick-start: ## Quick start with Docker (runs the script)
+## quick-start: Complete setup and start the project
+quick-start:
+	@chmod +x scripts/quick-start.sh
 	@./scripts/quick-start.sh
 
-docker-build: ## Build Docker image
-	docker build -t $(DOCKER_IMAGE) .
+## up: Start Docker containers
+up:
+	@echo "🐳 Starting Docker containers..."
+	@docker-compose up -d --build
+	@echo "✅ Containers started"
+	@echo "📍 API: http://localhost:8080"
 
-docker-up: ## Start Docker Compose services (development with hot-reload)
-	docker-compose up --build
+## down: Stop Docker containers
+down:
+	@echo "🛑 Stopping Docker containers..."
+	@docker-compose down
+	@echo "✅ Containers stopped"
 
-docker-up-prod: ## Start Docker Compose services (production build)
-	docker-compose -f docker-compose.prod.yml up --build
+## restart: Restart Docker containers
+restart:
+	@echo "🔄 Restarting Docker containers..."
+	@docker-compose restart
+	@echo "✅ Containers restarted"
 
-docker-down: ## Stop Docker Compose services
-	docker-compose down
+## logs: View container logs
+logs:
+	@docker-compose logs -f app
 
-docker-down-prod: ## Stop production Docker Compose services
-	docker-compose -f docker-compose.prod.yml down
+## build: Rebuild Docker containers
+build:
+	@echo "🔨 Building Docker containers..."
+	@docker-compose build
+	@echo "✅ Build complete"
 
-test: ## Run tests
-	go test ./... -v -cover
-
-test-coverage: ## Run tests with coverage report
-	go test ./... -coverprofile=coverage.out
-	go tool cover -html=coverage.out
-
-swag: ## Generate Swagger documentation
-	@./scripts/init-swagger.sh
-
-lint: ## Run linter
-	@GOBIN=$$(go env GOPATH)/bin; \
-	if command -v golangci-lint >/dev/null 2>&1; then \
-		golangci-lint run; \
-	elif [ -f "$$GOBIN/golangci-lint" ]; then \
-		$$GOBIN/golangci-lint run; \
+## test: Run tests
+test:
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD) go test ./... -v
+else
+	@if command -v go >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		go test ./... -v; \
 	else \
-		echo "❌ golangci-lint not installed."; \
-		echo ""; \
-		echo "Install with:"; \
-		echo "  make install-tools"; \
-		echo ""; \
-		echo "Or manually:"; \
-		echo "  go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest"; \
-		echo ""; \
-		echo "Or using brew (macOS):"; \
-		echo "  brew install golangci-lint"; \
-		echo ""; \
-		echo "Note: After installation, add Go bin to PATH:"; \
-		echo "  export PATH=\"\$$PATH:\$$(go env GOPATH)/bin\""; \
-		echo ""; \
+		echo "❌ Error: Docker container not running and Go not installed"; \
+		echo "Please run: make up"; \
 		exit 1; \
 	fi
+endif
 
-lint-fix: ## Run linter and auto-fix issues
-	@GOBIN=$$(go env GOPATH)/bin; \
-	if command -v golangci-lint >/dev/null 2>&1; then \
-		golangci-lint run --fix; \
-	elif [ -f "$$GOBIN/golangci-lint" ]; then \
-		$$GOBIN/golangci-lint run --fix; \
+## test-coverage: Run tests with coverage
+test-coverage:
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD) go test ./... -v -coverprofile=coverage.out
+	@$(EXEC_CMD) go tool cover -html=coverage.out -o coverage.html
+	@echo "✅ Coverage report: coverage.html"
+else
+	@if command -v go >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		go test ./... -v -coverprofile=coverage.out; \
+		go tool cover -html=coverage.out -o coverage.html; \
+		echo "✅ Coverage report: coverage.html"; \
 	else \
-		echo "❌ golangci-lint not installed. Run: make install-tools"; \
+		echo "❌ Error: Docker container not running and Go not installed"; \
+		echo "Please run: make up"; \
 		exit 1; \
 	fi
+endif
 
-verify: ## Verify project setup
-	@./scripts/verify-setup.sh
-
-clean: ## Clean build artifacts
-	rm -rf bin/
-	rm -f coverage.out
-
-deps: ## Download dependencies
-	go mod download
-	go mod tidy
-
-install-tools: ## Install development tools (swag, golangci-lint, migrate, air)
-	@./scripts/install-tools.sh
-
-migrate-up: ## Run database migrations (requires golang-migrate)
-	@GOBIN=$$(go env GOPATH)/bin; \
-	if command -v migrate >/dev/null 2>&1; then \
-		migrate -path migrations -database "postgres://postgres:postgres@localhost:5432/go_api?sslmode=disable" up; \
-	elif [ -f "$$GOBIN/migrate" ]; then \
-		$$GOBIN/migrate -path migrations -database "postgres://postgres:postgres@localhost:5432/go_api?sslmode=disable" up; \
+## lint: Run linter
+lint:
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@echo "🔍 Running golangci-lint..."
+	@$(EXEC_CMD) golangci-lint run --timeout=5m && echo "✅ No linting issues found!" || exit 1
+else
+	@if command -v golangci-lint >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		echo "🔍 Running golangci-lint..."; \
+		golangci-lint run --timeout=5m && echo "✅ No linting issues found!" || exit 1; \
 	else \
-		echo "❌ golang-migrate not installed. Run: make install-tools"; \
-		echo "Or see: migrations/MIGRATIONS.md"; \
-	fi
-
-migrate-down: ## Rollback last migration
-	@GOBIN=$$(go env GOPATH)/bin; \
-	if command -v migrate >/dev/null 2>&1; then \
-		migrate -path migrations -database "postgres://postgres:postgres@localhost:5432/go_api?sslmode=disable" down 1; \
-	elif [ -f "$$GOBIN/migrate" ]; then \
-		$$GOBIN/migrate -path migrations -database "postgres://postgres:postgres@localhost:5432/go_api?sslmode=disable" down 1; \
-	else \
-		echo "❌ golang-migrate not installed. Run: make install-tools"; \
-	fi
-
-migrate-create: ## Create new migration (usage: make migrate-create NAME=add_user_field)
-	@if [ -z "$(NAME)" ]; then \
-		echo "❌ Please provide NAME. Usage: make migrate-create NAME=add_user_field"; \
+		echo "❌ Error: Docker container not running and golangci-lint not installed"; \
+		echo "Please run: make up"; \
+		echo "Or install: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest"; \
 		exit 1; \
 	fi
-	@GOBIN=$$(go env GOPATH)/bin; \
-	if command -v migrate >/dev/null 2>&1; then \
+endif
+
+## lint-fix: Run linter and fix issues
+lint-fix:
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@echo "🔧 Running golangci-lint with auto-fix..."
+	@$(EXEC_CMD) golangci-lint run --fix --timeout=5m && echo "✅ Linting complete! Issues auto-fixed where possible." || exit 1
+else
+	@if command -v golangci-lint >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		echo "🔧 Running golangci-lint with auto-fix..."; \
+		golangci-lint run --fix --timeout=5m && echo "✅ Linting complete! Issues auto-fixed where possible." || exit 1; \
+	else \
+		echo "❌ Error: Docker container not running and golangci-lint not installed"; \
+		echo "Please run: make up"; \
+		exit 1; \
+	fi
+endif
+
+## swag: Generate Swagger documentation
+swag:
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD) swag init -g ./cmd/server/main.go -o ./api/docs
+	@echo "✅ Swagger docs generated"
+else
+	@if command -v swag >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		swag init -g ./cmd/server/main.go -o ./api/docs; \
+		echo "✅ Swagger docs generated"; \
+	else \
+		echo "❌ Error: Docker container not running and swag not installed"; \
+		echo "Please run: make up"; \
+		echo "Or install: go install github.com/swaggo/swag/cmd/swag@latest"; \
+		exit 1; \
+	fi
+endif
+
+## migrate-create: Create a new migration file
+migrate-create:
+ifndef NAME
+	@echo "❌ Error: NAME is required"
+	@echo "Usage: make migrate-create NAME=create_users_table"
+	@exit 1
+endif
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD) migrate create -ext sql -dir migrations -seq $(NAME)
+	@echo "✅ Migration created: migrations/*_$(NAME).sql"
+else
+	@if command -v migrate >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
 		migrate create -ext sql -dir migrations -seq $(NAME); \
-		echo "✅ Created migration files for: $(NAME)"; \
-	elif [ -f "$$GOBIN/migrate" ]; then \
-		$$GOBIN/migrate create -ext sql -dir migrations -seq $(NAME); \
-		echo "✅ Created migration files for: $(NAME)"; \
+		echo "✅ Migration created: migrations/*_$(NAME).sql"; \
 	else \
-		echo "❌ golang-migrate not installed. Run: make install-tools"; \
+		echo "❌ Error: Docker container not running and migrate not installed"; \
+		echo "Please run: make up"; \
+		echo "Or install: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest"; \
+		exit 1; \
 	fi
+endif
 
-migrate-version: ## Show current migration version
-	@GOBIN=$$(go env GOPATH)/bin; \
-	if command -v migrate >/dev/null 2>&1; then \
-		migrate -path migrations -database "postgres://postgres:postgres@localhost:5432/go_api?sslmode=disable" version; \
-	elif [ -f "$$GOBIN/migrate" ]; then \
-		$$GOBIN/migrate -path migrations -database "postgres://postgres:postgres@localhost:5432/go_api?sslmode=disable" version; \
+## migrate-up: Run database migrations
+migrate-up:
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD) migrate -path migrations -database "postgresql://postgres:postgres@db:5432/go_api?sslmode=disable" up
+	@echo "✅ Migrations applied"
+else
+	@if command -v migrate >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		echo "⚠️  Using localhost database (ensure PostgreSQL is running on host)"; \
+		migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/go_api?sslmode=disable" up; \
+		echo "✅ Migrations applied"; \
 	else \
-		echo "❌ golang-migrate not installed. Run: make install-tools"; \
+		echo "❌ Error: Docker container not running and migrate not installed"; \
+		echo "Please run: make up"; \
+		echo "Or install: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest"; \
+		exit 1; \
 	fi
+endif
 
-migrate-docker-up: ## Run migrations inside Docker container
-	@if docker ps | grep -q go_api_app; then \
-		docker exec go_api_app sh -c 'go run -tags "postgres" github.com/golang-migrate/migrate/v4/cmd/migrate@latest -path /app/migrations -database "postgres://postgres:postgres@db:5432/go_api?sslmode=disable" up'; \
+## migrate-down: Rollback last migration
+migrate-down:
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD) migrate -path migrations -database "postgresql://postgres:postgres@db:5432/go_api?sslmode=disable" down 1
+	@echo "✅ Migration rolled back"
+else
+	@if command -v migrate >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		echo "⚠️  Using localhost database (ensure PostgreSQL is running on host)"; \
+		migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/go_api?sslmode=disable" down 1; \
+		echo "✅ Migration rolled back"; \
 	else \
-		echo "❌ Container not running. Start with: make docker-up"; \
+		echo "❌ Error: Docker container not running and migrate not installed"; \
+		echo "Please run: make up"; \
+		echo "Or install: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest"; \
+		exit 1; \
 	fi
+endif
 
-migrate-docker-down: ## Rollback last migration inside Docker container
-	@if docker ps | grep -q go_api_app; then \
-		docker exec go_api_app sh -c 'go run -tags "postgres" github.com/golang-migrate/migrate/v4/cmd/migrate@latest -path /app/migrations -database "postgres://postgres:postgres@db:5432/go_api?sslmode=disable" down 1'; \
+## migrate-version: Show current migration version
+migrate-version:
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD) migrate -path migrations -database "postgresql://postgres:postgres@db:5432/go_api?sslmode=disable" version
+else
+	@if command -v migrate >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		echo "⚠️  Using localhost database (ensure PostgreSQL is running on host)"; \
+		migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/go_api?sslmode=disable" version; \
 	else \
-		echo "❌ Container not running. Start with: make docker-up"; \
+		echo "❌ Error: Docker container not running and migrate not installed"; \
+		echo "Please run: make up"; \
+		echo "Or install: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest"; \
+		exit 1; \
 	fi
+endif
 
-migrate-docker-version: ## Show migration version inside Docker container
-	@if docker ps | grep -q go_api_app; then \
-		docker exec go_api_app sh -c 'go run -tags "postgres" github.com/golang-migrate/migrate/v4/cmd/migrate@latest -path /app/migrations -database "postgres://postgres:postgres@db:5432/go_api?sslmode=disable" version'; \
-	else \
-		echo "❌ Container not running. Start with: make docker-up"; \
+## build-binary: Build Go binary directly on host (requires Go)
+build-binary:
+	@if ! command -v go >/dev/null 2>&1; then \
+		echo "❌ Error: Go is not installed on your machine"; \
+		echo ""; \
+		echo "Please install Go first:"; \
+		echo "  https://golang.org/doc/install"; \
+		echo ""; \
+		echo "Or use Docker instead:"; \
+		echo "  make up"; \
+		exit 1; \
 	fi
+	@echo "🔨 Building Go binary..."
+	@mkdir -p bin
+	@go build -o bin/server ./cmd/server
+	@echo "✅ Binary built successfully: bin/server"
+	@echo ""
+	@echo "To run the binary:"
+	@echo "  make run-binary"
+	@echo "  OR"
+	@echo "  ./bin/server"
 
-.DEFAULT_GOAL := help
+## run-binary: Build and run Go binary directly on host (requires Go)
+run-binary: build-binary
+	@echo ""
+	@echo "🚀 Starting server..."
+	@echo ""
+	@echo "⚠️  Note: Ensure PostgreSQL is running on localhost:5432"
+	@echo "⚠️  Note: Set environment variables or use .env file"
+	@echo ""
+	@./bin/server
 
+## clean: Clean build artifacts
+clean:
+	@echo "🧹 Cleaning build artifacts..."
+	@rm -f coverage.out coverage.html
+	@rm -f bin/*
+	@docker-compose down -v 2>/dev/null || true
+	@echo "✅ Clean complete"
