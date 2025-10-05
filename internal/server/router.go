@@ -54,7 +54,6 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service) *gin.Engin
 		usersGroup := v1.Group("/users")
 		usersGroup.Use(auth.AuthMiddleware(authService))
 		{
-			usersGroup.GET("", userHandler.ListUsers)
 			usersGroup.GET("/:id", userHandler.GetUser)
 			usersGroup.PUT("/:id", userHandler.UpdateUser)
 			usersGroup.DELETE("/:id", userHandler.DeleteUser)

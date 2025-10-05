@@ -34,14 +34,6 @@ type AuthResponse struct {
 	User  UserResponse `json:"user"`
 }
 
-// ListUsersResponse represents list users response with pagination
-type ListUsersResponse struct {
-	Users []UserResponse `json:"users"`
-	Total int64          `json:"total"`
-	Page  int            `json:"page"`
-	Size  int            `json:"size"`
-}
-
 // ToUserResponse converts User model to UserResponse DTO
 func ToUserResponse(user *User) UserResponse {
 	return UserResponse{

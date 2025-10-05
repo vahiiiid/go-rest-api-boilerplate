@@ -12,7 +12,6 @@ type Repository interface {
 	Create(ctx context.Context, user *User) error
 	FindByEmail(ctx context.Context, email string) (*User, error)
 	FindByID(ctx context.Context, id uint) (*User, error)
-	List(ctx context.Context, limit, offset int) ([]User, int64, error)
 	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id uint) error
 }
@@ -59,30 +58,6 @@ func (r *repository) FindByID(ctx context.Context, id uint) (*User, error) {
 		return nil, result.Error
 	}
 	return &user, nil
-}
-
-// List returns a paginated list of users
-func (r *repository) List(ctx context.Context, limit, offset int) ([]User, int64, error) {
-	var users []User
-	var total int64
-
-	// Get total count
-	if err := r.db.WithContext(ctx).Model(&User{}).Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-
-	// Get paginated results
-	result := r.db.WithContext(ctx).
-		Limit(limit).
-		Offset(offset).
-		Order("created_at DESC").
-		Find(&users)
-
-	if result.Error != nil {
-		return nil, 0, result.Error
-	}
-
-	return users, total, nil
 }
 
 // Update updates a user in the database

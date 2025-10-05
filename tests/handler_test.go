@@ -236,68 +236,6 @@ func TestLoginHandler(t *testing.T) {
 	}
 }
 
-func TestProtectedEndpoints(t *testing.T) {
-	router := setupTestRouter(t)
-
-	// Register and login to get a token
-	registerPayload := map[string]string{
-		"name":     "Protected User",
-		"email":    "protected@example.com",
-		"password": "password123",
-	}
-	jsonPayload, _ := json.Marshal(registerPayload)
-	req, _ := http.NewRequest(http.MethodPost, "/api/v1/auth/register", bytes.NewBuffer(jsonPayload))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	var registerResponse map[string]interface{}
-	if err := json.Unmarshal(w.Body.Bytes(), &registerResponse); err != nil {
-		t.Fatalf("Failed to unmarshal register response: %v", err)
-	}
-	token := registerResponse["token"].(string)
-
-	t.Run("list users without token", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/users", nil)
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		if w.Code != http.StatusUnauthorized {
-			t.Errorf("Expected status %d, got %d", http.StatusUnauthorized, w.Code)
-		}
-	})
-
-	t.Run("list users with valid token", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/users", nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		if w.Code != http.StatusOK {
-			t.Errorf("Expected status %d, got %d", http.StatusOK, w.Code)
-		}
-
-		var response map[string]interface{}
-		if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
-			t.Fatalf("Failed to unmarshal response: %v", err)
-		}
-		if users, ok := response["users"].([]interface{}); !ok || len(users) == 0 {
-			t.Error("Expected users array in response")
-		}
-	})
-
-	t.Run("list users with invalid token", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/users", nil)
-		req.Header.Set("Authorization", "Bearer invalid-token")
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		if w.Code != http.StatusUnauthorized {
-			t.Errorf("Expected status %d, got %d", http.StatusUnauthorized, w.Code)
-		}
-	})
-}
-
 func TestHealthEndpoint(t *testing.T) {
 	router := setupTestRouter(t)
 

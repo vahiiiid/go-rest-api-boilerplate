@@ -142,41 +142,6 @@ func (h *Handler) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, ToUserResponse(user))
 }
 
-// ListUsers godoc
-// @Summary List users
-// @Description Get a paginated list of users (requires authentication)
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param page query int false "Page number" default(1)
-// @Param size query int false "Page size" default(10)
-// @Security BearerAuth
-// @Success 200 {object} ListUsersResponse
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/users [get]
-func (h *Handler) ListUsers(c *gin.Context) {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	size, _ := strconv.Atoi(c.DefaultQuery("size", "10"))
-
-	users, total, err := h.userService.ListUsers(c.Request.Context(), page, size)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list users"})
-		return
-	}
-
-	userResponses := make([]UserResponse, len(users))
-	for i, user := range users {
-		userResponses[i] = ToUserResponse(&user)
-	}
-
-	c.JSON(http.StatusOK, ListUsersResponse{
-		Users: userResponses,
-		Total: total,
-		Page:  page,
-		Size:  size,
-	})
-}
-
 // UpdateUser godoc
 // @Summary Update user
 // @Description Update user information (requires authentication)
