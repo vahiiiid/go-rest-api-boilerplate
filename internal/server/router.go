@@ -9,6 +9,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 )
 
@@ -20,7 +21,7 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service) *gin.Engin
 	router := gin.New()
 
 	// Middleware
-	router.Use(gin.Logger())
+	router.Use(middleware.Logger(middleware.DefaultLoggerConfig()))
 	router.Use(gin.Recovery())
 
 	// CORS configuration - permissive for development
