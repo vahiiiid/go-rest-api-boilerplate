@@ -132,6 +132,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 - ✅ **Clean Architecture** - Layered, maintainable structure
 - ✅ **Security Best Practices** - Bcrypt hashing, input validation
 - ✅ **CORS Support** - Configurable cross-origin requests
+- ✅ **Request Logging** - Structured JSON logging with request tracking
 
 ## 📑 Table of Contents
 

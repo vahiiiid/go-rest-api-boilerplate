@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- ✨ **Request Logging Middleware** - Structured JSON logging for all HTTP requests
+  - Logs request method, path, status code, duration, client IP, and request ID
+  - Uses Go's standard `log/slog` for structured logging
+  - Configurable to skip specific paths (e.g., health checks)
+  - Automatic request ID generation and propagation
+  - Log level adjustment based on response status (INFO/WARN/ERROR)
+  - Comprehensive unit tests with 100% coverage
+  - Location: `internal/middleware/logger.go`
+
 ### Planned
 - Rate limiting middleware
 - Email verification for user registration
