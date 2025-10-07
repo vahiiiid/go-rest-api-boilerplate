@@ -174,9 +174,9 @@ func TestLoggerWithProvidedRequestID(t *testing.T) {
 // TestLoggerStatusCodes tests logging of different status codes
 func TestLoggerStatusCodes(t *testing.T) {
 	testCases := []struct {
-		name           string
-		statusCode     int
-		expectedLevel  string
+		name          string
+		statusCode    int
+		expectedLevel string
 	}{
 		{"Success", http.StatusOK, "INFO"},
 		{"Client Error", http.StatusBadRequest, "WARN"},
