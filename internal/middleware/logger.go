@@ -30,6 +30,19 @@ func DefaultLoggerConfig() *LoggerConfig {
 	}
 }
 
+// NewLoggerConfig creates a logger configuration from logging config
+func NewLoggerConfig(logLevel slog.Level, skipPaths []string) *LoggerConfig {
+	// Create a JSON logger that writes to stdout
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: logLevel,
+	}))
+
+	return &LoggerConfig{
+		SkipPaths: skipPaths,
+		Logger:    logger,
+	}
+}
+
 // Logger returns a Gin middleware for structured request logging
 func Logger(config *LoggerConfig) gin.HandlerFunc {
 	if config == nil {

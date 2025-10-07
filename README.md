@@ -132,7 +132,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 - ✅ **Clean Architecture** - Layered, maintainable structure
 - ✅ **Security Best Practices** - Bcrypt hashing, input validation
 - ✅ **CORS Support** - Configurable cross-origin requests
-- ✅ **Request Logging** - Structured JSON logging with request tracking
+- ✅ **Request Logging** - Configurable structured JSON logging with request tracking
 
 ## 📑 Table of Contents
 
@@ -488,13 +488,34 @@ go-rest-api-boilerplate/
 │       └── main.go                # Application entry point
 ├── configs/
 │   └── config.yaml                # Configuration file example
+├── docs/                          # Documentation site (MkDocs)
+│   ├── docs/                      # Documentation source files
+│   │   ├── DEVELOPMENT_GUIDE.md   # Development tutorial
+│   │   ├── DOCKER.md              # Docker setup guide
+│   │   ├── LOGGING.md             # Logging configuration
+│   │   ├── MIGRATIONS_GUIDE.md    # Database migration guide
+│   │   ├── SETUP.md               # Manual setup instructions
+│   │   ├── SWAGGER.md             # API documentation guide
+│   │   ├── TESTING.md             # Testing guide
+│   │   ├── TODO_EXAMPLE.md        # Complete feature implementation example
+│   │   └── images/                # Documentation images and assets
+│   ├── site/                      # Generated documentation site
+│   ├── mkdocs.yml                 # MkDocs configuration
+│   └── requirements.txt           # Python dependencies for docs
 ├── internal/                      # Private application code
 │   ├── auth/                      # Authentication & authorization
 │   │   ├── dto.go                 # JWT claims & auth DTOs
 │   │   ├── middleware.go          # JWT middleware
 │   │   └── service.go             # Token generation & validation
+│   ├── config/                    # Configuration management
+│   │   ├── config.go              # Config structs and loading logic
+│   │   └── config_test.go         # Configuration tests
 │   ├── db/
 │   │   └── db.go                  # Database connection setup (GORM)
+│   ├── middleware/                # HTTP middleware
+│   │   ├── logger.go              # Request logging middleware
+│   │   ├── logger_test.go         # Logger middleware tests
+│   │   └── README.md              # Middleware documentation
 │   ├── server/
 │   │   └── router.go              # Route definitions & middleware
 │   └── user/                      # User domain (example feature)
@@ -530,7 +551,8 @@ go-rest-api-boilerplate/
 ├── LICENSE                        # MIT License
 ├── Makefile                       # Build automation & shortcuts
 │                                  # Auto-detects Docker/host environment
-└── README.md                      # This file
+├── README.md                      # This file
+└── server.log                     # Application logs (gitignored)
 ```
 
 ### Key Highlights
