@@ -16,7 +16,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go)](https://go.dev/)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://vahiiiid.github.io/go-rest-api-docs/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![GitHub Stars](https://img.shields.io/github/stars/vahiiiid/go-rest-api-boilerplate?style=social)](https://github.com/vahiiiid/go-rest-api-boilerplate/stargazers)
@@ -27,6 +26,19 @@
 
 ---
 
+## 🎃 Hacktoberfest 2025
+
+<div align="center">
+
+![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2025-orange?style=for-the-badge&logo=digitalocean&logoColor=white)
+
+**We're participating in Hacktoberfest 2025! 🚀**
+
+</div>
+
+We welcome contributions from developers of all skill levels! Pick up any [open issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) labeled `hacktoberfest` or `good first issue`, fork the repository, make your changes, and submit a pull request. Whether it's bug fixes, new features, documentation improvements, or test enhancements - every contribution counts! 🎉
+
+---
 ## 🎯 Looking to Build a REST API in Go?
 
 **You need a REST API project with Go** and you're looking for:
@@ -92,22 +104,6 @@ Open [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/in
 
 Import the pre-configured collection from `api/postman_collection.json` with example requests and tests.
 
-### Quick Test
-
-```bash
-# Check health
-curl http://localhost:8080/health
-
-# Register a user
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Alice Smith",
-    "email": "alice@example.com",
-    "password": "secret123"
-  }'
-```
-
 ### 🚀 Ready to Build Your Own Features?
 
 **📖 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** - Learn how to add models, routes, and handlers
@@ -120,7 +116,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 
 - ✅ **JWT Authentication** - Secure token-based auth (HS256)
 - ✅ **User Management** - Complete CRUD with validation
-- ✅ **PostgreSQL + GORM** - Robust database with ORM
+- ✅ **GORM** - Robust database with ORM
 - ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback)
 - ✅ **Docker Production** - Optimized multi-stage builds
 - ✅ **Swagger/OpenAPI** - Interactive API documentation
@@ -173,7 +169,6 @@ make down
 **Features:**
 - 🔥 **Hot-reload** - Code changes reflect in ~2 seconds (powered by Air)
 - 📦 **Volume mounts** - Edit code in your IDE, runs in container
-- 🗄️ **PostgreSQL** - Database on internal Docker network
 - 📚 **All tools pre-installed** - No Go installation needed on host
 
 ### Development Workflow
@@ -193,12 +188,6 @@ make lint-fix
 
 # Generate/update Swagger docs
 make swag
-
-# Database migrations
-make migrate-create NAME=add_new_table
-make migrate-up
-make migrate-down
-make migrate-version
 
 # View logs
 make logs
