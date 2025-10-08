@@ -16,6 +16,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go)](https://go.dev/)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://vahiiiid.github.io/go-rest-api-docs/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![GitHub Stars](https://img.shields.io/github/stars/vahiiiid/go-rest-api-boilerplate?style=social)](https://github.com/vahiiiid/go-rest-api-boilerplate/stargazers)
@@ -116,7 +117,7 @@ Import the pre-configured collection from `api/postman_collection.json` with exa
 
 - ✅ **JWT Authentication** - Secure token-based auth (HS256)
 - ✅ **User Management** - Complete CRUD with validation
-- ✅ **GORM** - Robust database with ORM
+- ✅ **PostgreSQL + GORM** - Robust database with ORM
 - ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback)
 - ✅ **Docker Production** - Optimized multi-stage builds
 - ✅ **Swagger/OpenAPI** - Interactive API documentation
@@ -169,6 +170,7 @@ make down
 **Features:**
 - 🔥 **Hot-reload** - Code changes reflect in ~2 seconds (powered by Air)
 - 📦 **Volume mounts** - Edit code in your IDE, runs in container
+- 🗄️ **PostgreSQL** - Database on internal Docker network
 - 📚 **All tools pre-installed** - No Go installation needed on host
 
 ### Development Workflow
@@ -188,6 +190,12 @@ make lint-fix
 
 # Generate/update Swagger docs
 make swag
+
+# Database migrations
+make migrate-create NAME=add_new_table
+make migrate-up
+make migrate-down
+make migrate-version
 
 # View logs
 make logs
