@@ -27,6 +27,19 @@
 
 ---
 
+## 🎃 Hacktoberfest 2025
+
+<div align="center">
+
+![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2025-orange?style=for-the-badge&logo=digitalocean&logoColor=white)
+
+**We're participating in Hacktoberfest 2025! 🚀**
+
+</div>
+
+We welcome contributions from developers of all skill levels! Pick up any [open issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) labeled `hacktoberfest` or `good first issue`, fork the repository, make your changes, and submit a pull request. Whether it's bug fixes, new features, documentation improvements, or test enhancements - every contribution counts! 🎉
+
+---
 ## 🎯 Looking to Build a REST API in Go?
 
 **You need a REST API project with Go** and you're looking for:
@@ -91,22 +104,6 @@ Open [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/in
 </div>
 
 Import the pre-configured collection from `api/postman_collection.json` with example requests and tests.
-
-### Quick Test
-
-```bash
-# Check health
-curl http://localhost:8080/health
-
-# Register a user
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Alice Smith",
-    "email": "alice@example.com",
-    "password": "secret123"
-  }'
-```
 
 ### 🚀 Ready to Build Your Own Features?
 
