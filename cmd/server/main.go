@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 
 	_ "github.com/vahiiiid/go-rest-api-boilerplate/api/docs" // swagger docs
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/db"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/server"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
@@ -35,8 +35,20 @@ import (
 func main() {
 	log.Println("Starting Go REST API Boilerplate...")
 
-	// Load database configuration from environment
-	dbConfig := db.LoadConfigFromEnv()
+	// Load configuration
+	cfg, err := config.LoadConfig("")
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v", err)
+	}
+
+	// Convert config to database config
+	dbConfig := db.Config{
+		Host:     cfg.Database.Host,
+		Port:     cfg.Database.Port,
+		User:     cfg.Database.User,
+		Password: cfg.Database.Password,
+		Name:     cfg.Database.Name,
+	}
 
 	// Connect to database
 	database, err := db.NewPostgresDB(dbConfig)
@@ -57,11 +69,11 @@ func main() {
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
-	// Setup router
-	router := server.SetupRouter(userHandler, authService)
+	// Setup router with configuration
+	router := server.SetupRouter(userHandler, authService, cfg)
 
-	// Get port from environment or use default
-	port := os.Getenv("PORT")
+	// Get port from config or environment
+	port := cfg.Server.Port
 	if port == "" {
 		port = "8080"
 	}

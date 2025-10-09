@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/db"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/server"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
@@ -36,8 +37,18 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
+	// Create test configuration
+	testConfig := &config.Config{
+		Server: config.ServerConfig{
+			Env: "test",
+		},
+		Logging: config.LoggingConfig{
+			Level: "info",
+		},
+	}
+
 	// Setup router
-	return server.SetupRouter(userHandler, authService)
+	return server.SetupRouter(userHandler, authService, testConfig)
 }
 
 func TestRegisterHandler(t *testing.T) {

@@ -9,25 +9,32 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 )
 
 // SetupRouter creates and configures the Gin router
-func SetupRouter(userHandler *user.Handler, authService auth.Service) *gin.Engine {
+func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *config.Config) *gin.Engine {
 	// Set Gin mode based on environment
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.New()
 
-	// Middleware
-	router.Use(gin.Logger())
+	// Middleware - use configurable logging with environment-based skip paths
+	skipPaths := config.GetSkipPaths(cfg.Server.Env)
+	loggerConfig := middleware.NewLoggerConfig(
+		cfg.Logging.GetLogLevel(),
+		skipPaths,
+	)
+	router.Use(middleware.Logger(loggerConfig))
 	router.Use(gin.Recovery())
 
 	// CORS configuration - permissive for development
-	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	config.AllowHeaders = append(config.AllowHeaders, "Authorization")
-	router.Use(cors.New(config))
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowAllOrigins = true
+	corsConfig.AllowHeaders = append(corsConfig.AllowHeaders, "Authorization")
+	router.Use(cors.New(corsConfig))
 
 	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {

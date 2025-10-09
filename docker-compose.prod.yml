@@ -37,6 +37,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_TTL_HOURS: ${JWT_TTL_HOURS:-24}
       ENV: production
+      LOG_LEVEL: ${LOG_LEVEL:-warn}  # debug, info, warn, error
     ports:
       - "8080:8080"
     # No volumes in production - code is baked into the image

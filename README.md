@@ -27,6 +27,19 @@
 
 ---
 
+## 🎃 Hacktoberfest 2025
+
+<div align="center">
+
+![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2025-orange?style=for-the-badge&logo=digitalocean&logoColor=white)
+
+**We're participating in Hacktoberfest 2025! 🚀**
+
+</div>
+
+We welcome contributions from developers of all skill levels! Pick up any [open issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) labeled `hacktoberfest` or `good first issue`, fork the repository, make your changes, and submit a pull request. Whether it's bug fixes, new features, documentation improvements, or test enhancements - every contribution counts! 🎉
+
+---
 ## 🎯 Looking to Build a REST API in Go?
 
 **You need a REST API project with Go** and you're looking for:
@@ -92,22 +105,6 @@ Open [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/in
 
 Import the pre-configured collection from `api/postman_collection.json` with example requests and tests.
 
-### Quick Test
-
-```bash
-# Check health
-curl http://localhost:8080/health
-
-# Register a user
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Alice Smith",
-    "email": "alice@example.com",
-    "password": "secret123"
-  }'
-```
-
 ### 🚀 Ready to Build Your Own Features?
 
 **📖 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** - Learn how to add models, routes, and handlers
@@ -133,6 +130,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 - ✅ **Clean Architecture** - Layered, maintainable structure
 - ✅ **Security Best Practices** - Bcrypt hashing, input validation
 - ✅ **CORS Support** - Configurable cross-origin requests
+- ✅ **Request Logging** - Configurable structured JSON logging with request tracking
 
 ## 🎯 Context Helpers
 
@@ -535,13 +533,34 @@ go-rest-api-boilerplate/
 │       └── main.go                # Application entry point
 ├── configs/
 │   └── config.yaml                # Configuration file example
+├── docs/                          # Documentation site (MkDocs)
+│   ├── docs/                      # Documentation source files
+│   │   ├── DEVELOPMENT_GUIDE.md   # Development tutorial
+│   │   ├── DOCKER.md              # Docker setup guide
+│   │   ├── LOGGING.md             # Logging configuration
+│   │   ├── MIGRATIONS_GUIDE.md    # Database migration guide
+│   │   ├── SETUP.md               # Manual setup instructions
+│   │   ├── SWAGGER.md             # API documentation guide
+│   │   ├── TESTING.md             # Testing guide
+│   │   ├── TODO_EXAMPLE.md        # Complete feature implementation example
+│   │   └── images/                # Documentation images and assets
+│   ├── site/                      # Generated documentation site
+│   ├── mkdocs.yml                 # MkDocs configuration
+│   └── requirements.txt           # Python dependencies for docs
 ├── internal/                      # Private application code
 │   ├── auth/                      # Authentication & authorization
 │   │   ├── dto.go                 # JWT claims & auth DTOs
 │   │   ├── middleware.go          # JWT middleware
 │   │   └── service.go             # Token generation & validation
+│   ├── config/                    # Configuration management
+│   │   ├── config.go              # Config structs and loading logic
+│   │   └── config_test.go         # Configuration tests
 │   ├── db/
 │   │   └── db.go                  # Database connection setup (GORM)
+│   ├── middleware/                # HTTP middleware
+│   │   ├── logger.go              # Request logging middleware
+│   │   ├── logger_test.go         # Logger middleware tests
+│   │   └── README.md              # Middleware documentation
 │   ├── server/
 │   │   └── router.go              # Route definitions & middleware
 │   └── user/                      # User domain (example feature)
@@ -577,7 +596,8 @@ go-rest-api-boilerplate/
 ├── LICENSE                        # MIT License
 ├── Makefile                       # Build automation & shortcuts
 │                                  # Auto-detects Docker/host environment
-└── README.md                      # This file
+├── README.md                      # This file
+└── server.log                     # Application logs (gitignored)
 ```
 
 ### Key Highlights
