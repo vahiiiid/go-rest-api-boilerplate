@@ -28,6 +28,9 @@ RUN go install github.com/air-verse/air@v1.52.3 && \
 # Copy source code (in docker compose, we'll mount a volume over this)
 COPY . .
 
+# Create swag docs
+RUN make swag
+
 # Expose port
 EXPOSE 8080
 
