@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/spf13/viper"
@@ -24,10 +25,8 @@ type Config struct {
 
 // NewPostgresDB creates a new PostgreSQL database connection
 func NewPostgresDB(cfg Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		cfg.Host, cfg.User, cfg.Password, cfg.Name, cfg.Port,
-	)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		cfg.Host, cfg.User, cfg.Password, cfg.Name, cfg.Port, viper.GetString("database.sslmode"))
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
@@ -90,7 +89,7 @@ func NewSQLiteDB(dbPath string) (*gorm.DB, error) {
 	return db, nil
 }
 
-// LoadConfigFromEnv loads database configuration from environment variables
+// LoadConfigFromEnv loads database configuration using Viper (env overrides + defaults)
 func LoadConfigFromEnv() Config {
 	return Config{
 		Host:     viper.GetString("database.host"),
