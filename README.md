@@ -132,10 +132,8 @@ Import the pre-configured collection from `api/postman_collection.json` with exa
 - ✅ **CORS Support** - Configurable cross-origin requests
 - ✅ **Request Logging** - Configurable structured JSON logging with request tracking
 
-
 ## 📑 Table of Contents
 
-- [Context Helpers](#-context-helpers)
 - [Development](#-development)
 - [Production](#-production)
 - [API Documentation](#-api-documentation)
