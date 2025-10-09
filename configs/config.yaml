@@ -19,3 +19,7 @@ jwt:
 logging:
   level: info  # debug, info, warn, error
 
+ratelimit:
+  rate_limit_enabled: true 
+  rate_limit_requests: 50
+  rate_limit_window: 1m 

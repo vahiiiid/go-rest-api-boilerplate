@@ -5,16 +5,19 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strconv"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
 
 // Config represents the application configuration
 type Config struct {
-	Server   ServerConfig   `yaml:"server"`
-	Database DatabaseConfig `yaml:"database"`
-	JWT      JWTConfig      `yaml:"jwt"`
-	Logging  LoggingConfig  `yaml:"logging"`
+	Server    ServerConfig    `yaml:"server"`
+	Database  DatabaseConfig  `yaml:"database"`
+	JWT       JWTConfig       `yaml:"jwt"`
+	Logging   LoggingConfig   `yaml:"logging"`
+	Ratelimit RateLimitConfig `yaml:"ratelimit"`
 }
 
 // ServerConfig holds server-related configuration
@@ -41,6 +44,13 @@ type JWTConfig struct {
 // LoggingConfig holds logging-related configuration
 type LoggingConfig struct {
 	Level string `yaml:"level"`
+}
+
+// RateLimitConfig holds rate-limit configuration
+type RateLimitConfig struct {
+	Enabled  bool          `yaml:"rate_limit_enabled"`
+	Requests int           `yaml:"rate_limit_requests"`
+	Window   time.Duration `yaml:"rate_limit_window"`
 }
 
 // LoadConfig loads configuration from YAML file and environment variables
@@ -109,6 +119,23 @@ func (c *Config) loadFromEnv() {
 	// Logging config
 	if level := os.Getenv("LOG_LEVEL"); level != "" {
 		c.Logging.Level = level
+	}
+
+	// Ratelimit config
+	if enabled := os.Getenv("RATE_LIMIT_ENABLED"); enabled != "" {
+		if enabledBool, err := strconv.ParseBool(enabled); err == nil {
+			c.Ratelimit.Enabled = enabledBool
+		}
+	}
+	if requests := os.Getenv("RATE_LIMIT_REQUESTS"); requests != "" {
+		if requestsNum, err := strconv.Atoi(requests); err == nil && requestsNum > 0 {
+			c.Ratelimit.Requests = requestsNum
+		}
+	}
+	if window := os.Getenv("RATE_LIMIT_WINDOW"); window != "" {
+		if windowDur, err := time.ParseDuration(window); err == nil && windowDur > 0 {
+			c.Ratelimit.Window = windowDur
+		}
 	}
 }
 
