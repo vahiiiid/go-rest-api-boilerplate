@@ -26,7 +26,7 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check Docker Compose
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null 2>&1; then
+if ! docker compose version &> /dev/null 2>&1; then
     echo -e "${RED}❌ Docker Compose is not installed${NC}"
     echo ""
     echo "Please install Docker Compose:"
@@ -53,20 +53,20 @@ echo "🐳 Starting Docker containers..."
 echo ""
 
 # Stop existing containers if running
-if docker-compose ps | grep -q "Up"; then
+if docker compose ps | grep -q "Up"; then
     echo "Stopping existing containers..."
-    docker-compose down
+    docker compose down
 fi
 
 # Start containers
-if docker-compose up -d --build; then
+if docker compose up -d --build; then
     echo ""
     echo -e "${GREEN}✅ Containers started successfully${NC}"
 else
     echo ""
     echo -e "${RED}❌ Failed to start containers${NC}"
     echo ""
-    echo "Check logs with: docker-compose logs"
+    echo "Check logs with: docker compose logs"
     exit 1
 fi
 
@@ -85,9 +85,9 @@ echo "   • Swagger UI:  http://localhost:8080/swagger/index.html"
 echo "   • Health:      http://localhost:8080/health"
 echo ""
 echo "🐳 Docker Commands:"
-echo "   • View logs:   docker-compose logs -f app"
-echo "   • Stop:        docker-compose down"
-echo "   • Restart:     docker-compose restart"
+echo "   • View logs:   docker compose logs -f app"
+echo "   • Stop:        docker compose down"
+echo "   • Restart:     docker compose restart"
 echo ""
 echo "🛠️  Development Commands:"
 echo "   • Run tests:   make test"

@@ -1,4 +1,4 @@
-# Development docker-compose with hot-reload
+# Development docker compose with hot-reload
 services:
   db:
     image: postgres:15-alpine
