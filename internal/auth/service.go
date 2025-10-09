@@ -19,7 +19,7 @@ var (
 
 // Service defines authentication service interface
 type Service interface {
-	GenerateToken(userID uint) (string, error)
+	GenerateToken(userID uint, email string, name string) (string, error)
 	ValidateToken(tokenString string) (*Claims, error)
 }
 
@@ -49,14 +49,16 @@ func NewService() Service {
 }
 
 // GenerateToken generates a JWT token for a user
-func (s *service) GenerateToken(userID uint) (string, error) {
+func (s *service) GenerateToken(userID uint, email string, name string) (string, error) {
 	now := time.Now()
 	expirationTime := now.Add(s.jwtTTL)
 
 	claims := jwt.MapClaims{
-		"sub": fmt.Sprintf("%d", userID),
-		"exp": expirationTime.Unix(),
-		"iat": now.Unix(),
+		"sub":   fmt.Sprintf("%d", userID),
+		"email": email,
+		"name":  name,
+		"exp":   expirationTime.Unix(),
+		"iat":   now.Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -105,7 +107,15 @@ func (s *service) ValidateToken(tokenString string) (*Claims, error) {
 		return nil, ErrInvalidToken
 	}
 
+	// Extract email from "email" claim
+	email, _ := claims["email"].(string) // email is optional
+
+	// Extract name from "name" claim
+	name, _ := claims["name"].(string) // name is optional
+
 	return &Claims{
 		UserID: uint(userID),
+		Email:  email,
+		Name:   name,
 	}, nil
 }

@@ -116,6 +116,7 @@ Import the pre-configured collection from `api/postman_collection.json` with exa
 ## ✨ Features
 
 - ✅ **JWT Authentication** - Secure token-based auth (HS256)
+- ✅ **Context Helpers** - Type-safe user extraction from request context
 - ✅ **User Management** - Complete CRUD with validation
 - ✅ **PostgreSQL + GORM** - Robust database with ORM
 - ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback)
