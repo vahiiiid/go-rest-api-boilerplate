@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -49,6 +50,31 @@ func NewPostgresDB(cfg Config) (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	log.Println("Database connection established")
+	return db, nil
+}
+
+// NewPostgresDBFromDatabaseConfig creates a new PostgreSQL DB connection from typed config
+func NewPostgresDBFromDatabaseConfig(cfg config.DatabaseConfig) (*gorm.DB, error) {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s",
+		cfg.Host, cfg.User, cfg.Password, cfg.Name, cfg.Port, cfg.SSLMode)
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to postgres database: %w", err)
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get sql.DB from gorm DB: %w", err)
+	}
+
+	// sensible defaults
+	sqlDB.SetConnMaxLifetime(time.Minute * 30)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+
 	return db, nil
 }
 
