@@ -191,6 +191,10 @@ make lint-fix
 make swag
 
 # Database migrations
+make migrate-create NAME=add_new_table
+make migrate-up
+make migrate-down
+make migrate-version
 
 # View logs
 make logs
