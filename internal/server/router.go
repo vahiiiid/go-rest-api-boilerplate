@@ -54,7 +54,20 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 			middleware.NewRateLimitMiddleware(
 				rlCfg.Window,
 				rlCfg.Requests,
-				func(c *gin.Context) string { return c.ClientIP() },
+				func(c *gin.Context) string {
+					ip := c.ClientIP()
+					if ip == "" {
+						// Fallback for test environments or when ClientIP is empty
+						ip = c.GetHeader("X-Forwarded-For")
+						if ip == "" {
+							ip = c.GetHeader("X-Real-IP")
+						}
+						if ip == "" {
+							ip = "unknown"
+						}
+					}
+					return ip
+				},
 				nil, // default in-memory LRU
 			),
 		)

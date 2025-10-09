@@ -49,6 +49,7 @@ func NewRateLimitMiddleware(
 		lim, ok := store.Get(key)
 		if !ok {
 			lim = rate.NewLimiter(r, burst)
+			// Try to add to store, but don't fail if it doesn't work
 			store.Add(key, lim)
 		}
 
@@ -72,6 +73,14 @@ func NewRateLimitMiddleware(
 			})
 			return
 		}
+
+		// Set rate limit headers for successful requests
+		remaining := lim.Tokens()
+		resetAt := time.Now().Add(window).Unix()
+
+		c.Header("X-RateLimit-Limit", strconv.Itoa(requests))
+		c.Header("X-RateLimit-Remaining", strconv.Itoa(int(remaining)))
+		c.Header("X-RateLimit-Reset", strconv.FormatInt(resetAt, 10))
 
 		c.Next()
 	}
