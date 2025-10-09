@@ -119,6 +119,7 @@ func (h *Handler) Login(c *gin.Context) {
 // @Success 200 {object} UserResponse
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 429 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/users/{id} [get]
 func (h *Handler) GetUser(c *gin.Context) {
@@ -155,6 +156,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 409 {object} map[string]string
+// @Failure 429 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/users/{id} [put]
 func (h *Handler) UpdateUser(c *gin.Context) {
@@ -199,6 +201,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 429 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/users/{id} [delete]
 func (h *Handler) DeleteUser(c *gin.Context) {
