@@ -116,6 +116,7 @@ Import the pre-configured collection from `api/postman_collection.json` with exa
 
 - ✅ **JWT Authentication** - Secure token-based auth (HS256)
 - ✅ **User Management** - Complete CRUD with validation
+- ✅**PostgreSQL + GORM** - Robust database with ORM
 - ✅ **GORM** - Robust database with ORM
 - ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback)
 - ✅ **Docker Production** - Optimized multi-stage builds
@@ -188,6 +189,8 @@ make lint-fix
 
 # Generate/update Swagger docs
 make swag
+
+# Database migrations
 
 # View logs
 make logs
