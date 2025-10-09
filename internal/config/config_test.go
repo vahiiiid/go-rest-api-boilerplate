@@ -3,32 +3,131 @@ package config
 import (
 	"log/slog"
 	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestLoadConfig(t *testing.T) {
-	// Test loading config from default path
-	cfg, err := LoadConfig("../../configs/config.yaml")
+// createTempConfigFile creates a temporary YAML config file for testing.
+func createTempConfigFile(t *testing.T, dir, filename, content string) string {
+	t.Helper()
+	path := filepath.Join(dir, filename)
+	err := os.WriteFile(path, []byte(content), 0644)
 	if err != nil {
-		t.Fatalf("Failed to load config: %v", err)
+		t.Fatalf("Failed to create temp config file: %v", err)
 	}
+	return path
+}
 
-	// Verify basic structure
-	if cfg.Server.Port == "" {
-		t.Error("Server port should not be empty")
-	}
+func TestLoadConfig_Comprehensive(t *testing.T) {
+	// Reset viper before each test to ensure a clean state
+	viper.Reset()
 
-	if cfg.Database.Host == "" {
-		t.Error("Database host should not be empty")
-	}
+	t.Run("loads from default config file", func(t *testing.T) {
+		viper.Reset()
+		tempDir := t.TempDir()
+		createTempConfigFile(t, tempDir, "config.yaml", `
+app:
+  name: "File API"
+database:
+  host: "filehost"
+jwt:
+  secret: "file-secret"
+`)
+		// Point viper to our temp directory
+		viper.AddConfigPath(tempDir)
 
-	if cfg.JWT.Secret == "" {
-		t.Error("JWT secret should not be empty")
-	}
+		cfg, err := LoadConfig("")
+		assert.NoError(t, err)
+		assert.NotNil(t, cfg)
+		assert.Equal(t, "File API", cfg.App.Name)
+		assert.Equal(t, "filehost", cfg.Database.Host)
+		assert.Equal(t, "file-secret", cfg.JWT.Secret)
+	})
 
-	if cfg.Logging.Level == "" {
-		t.Error("Logging level should not be empty")
-	}
+	t.Run("environment variables override file values", func(t *testing.T) {
+		viper.Reset()
+		tempDir := t.TempDir()
+		createTempConfigFile(t, tempDir, "config.yaml", `
+database:
+  host: "filehost"
+  port: 5432
+jwt:
+  secret: "file-secret"
+`)
+		viper.AddConfigPath(tempDir)
+
+		// Set env vars that should override the file
+		t.Setenv("DATABASE_HOST", "envhost")
+		t.Setenv("JWT_SECRET", "env-secret")
+
+		cfg, err := LoadConfig("")
+		assert.NoError(t, err)
+		assert.NotNil(t, cfg)
+		assert.Equal(t, "envhost", cfg.Database.Host) // Assert override
+		assert.Equal(t, 5432, cfg.Database.Port)      // Assert value from file is still present
+		assert.Equal(t, "env-secret", cfg.JWT.Secret) // Assert override
+	})
+
+	t.Run("uses default values when no file or env var is set", func(t *testing.T) {
+		viper.Reset()
+		// Ensure no config file is found
+		viper.AddConfigPath(t.TempDir())
+		// Ensure a required value is set to pass validation
+		t.Setenv("JWT_SECRET", "some-secret")
+
+		cfg, err := LoadConfig("")
+		assert.NoError(t, err)
+		assert.NotNil(t, cfg)
+		// This value is not in any file or env var, so it should be the default
+		assert.Equal(t, 10, cfg.Server.ReadTimeout)
+		assert.Equal(t, "development", cfg.App.Environment)
+	})
+
+	t.Run("fails validation if required JWT_SECRET is missing", func(t *testing.T) {
+		viper.Reset()
+		viper.AddConfigPath(t.TempDir()) // No config file
+
+		_, err := LoadConfig("")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "JWT secret is required")
+	})
+
+	t.Run("fails validation if DB_PASSWORD is missing in production", func(t *testing.T) {
+		viper.Reset()
+		viper.AddConfigPath(t.TempDir()) // No config file
+		t.Setenv("APP_ENVIRONMENT", "production")
+		t.Setenv("JWT_SECRET", "prod-secret") // Satisfy JWT validation
+
+		_, err := LoadConfig("")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "database.password is required in production")
+	})
+
+	t.Run("loads environment-specific config file", func(t *testing.T) {
+		viper.Reset()
+		tempDir := t.TempDir()
+		// Create a default and a production config file
+		createTempConfigFile(t, tempDir, "config.yaml", `app: {name: "Default API"}`)
+		createTempConfigFile(t, tempDir, "config.production.yaml", `
+app:
+  name: "Production API"
+jwt:
+  secret: "prod-secret"
+database:
+  password: "prod-password"
+`)
+		viper.AddConfigPath(tempDir)
+		t.Setenv("APP_ENVIRONMENT", "production")
+
+		cfg, err := LoadConfig("")
+		assert.NoError(t, err)
+		assert.NotNil(t, cfg)
+		// Assert it loaded the production file, not the default one
+		assert.Equal(t, "Production API", cfg.App.Name)
+	})
 }
 
 func TestLoggingConfig_GetLogLevel(t *testing.T) {
@@ -49,9 +148,7 @@ func TestLoggingConfig_GetLogLevel(t *testing.T) {
 		t.Run(tt.level, func(t *testing.T) {
 			cfg := &LoggingConfig{Level: tt.level}
 			result := cfg.GetLogLevel()
-			if result != tt.expected {
-				t.Errorf("GetLogLevel() = %v, want %v", result, tt.expected)
-			}
+			assert.Equal(t, tt.expected, result)
 		})
 	}
 }
@@ -71,59 +168,7 @@ func TestGetSkipPaths(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.env, func(t *testing.T) {
 			result := GetSkipPaths(tt.env)
-			if len(result) != len(tt.expected) {
-				t.Errorf("GetSkipPaths() length = %d, want %d", len(result), len(tt.expected))
-				return
-			}
-			for i, path := range result {
-				if path != tt.expected[i] {
-					t.Errorf("GetSkipPaths()[%d] = %v, want %v", i, path, tt.expected[i])
-				}
-			}
+			assert.Equal(t, tt.expected, result)
 		})
-	}
-}
-
-func TestConfig_LoadFromEnv(t *testing.T) {
-	// Set environment variables
-	if err := os.Setenv("PORT", "9090"); err != nil {
-		t.Fatalf("Failed to set PORT env var: %v", err)
-	}
-	if err := os.Setenv("DB_HOST", "test-host"); err != nil {
-		t.Fatalf("Failed to set DB_HOST env var: %v", err)
-	}
-	if err := os.Setenv("LOG_LEVEL", "debug"); err != nil {
-		t.Fatalf("Failed to set LOG_LEVEL env var: %v", err)
-	}
-	defer func() {
-		if err := os.Unsetenv("PORT"); err != nil {
-			t.Errorf("Failed to unset PORT env var: %v", err)
-		}
-		if err := os.Unsetenv("DB_HOST"); err != nil {
-			t.Errorf("Failed to unset DB_HOST env var: %v", err)
-		}
-		if err := os.Unsetenv("LOG_LEVEL"); err != nil {
-			t.Errorf("Failed to unset LOG_LEVEL env var: %v", err)
-		}
-	}()
-
-	cfg := &Config{
-		Server:   ServerConfig{Port: "8080"},
-		Database: DatabaseConfig{Host: "localhost"},
-		Logging:  LoggingConfig{Level: "info"},
-	}
-
-	cfg.loadFromEnv()
-
-	if cfg.Server.Port != "9090" {
-		t.Errorf("Expected port 9090, got %s", cfg.Server.Port)
-	}
-
-	if cfg.Database.Host != "test-host" {
-		t.Errorf("Expected host test-host, got %s", cfg.Database.Host)
-	}
-
-	if cfg.Logging.Level != "debug" {
-		t.Errorf("Expected log level debug, got %s", cfg.Logging.Level)
 	}
 }
