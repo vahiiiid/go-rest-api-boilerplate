@@ -119,6 +119,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 ## ✨ Features
 
 - ✅ **JWT Authentication** - Secure token-based auth (HS256)
+- ✅ **Context Helpers** - Type-safe user extraction from request context
 - ✅ **User Management** - Complete CRUD with validation
 - ✅ **PostgreSQL + GORM** - Robust database with ORM
 - ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback)
@@ -133,8 +134,55 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 - ✅ **Security Best Practices** - Bcrypt hashing, input validation
 - ✅ **CORS Support** - Configurable cross-origin requests
 
+## 🎯 Context Helpers
+
+**DRY Authentication Code** - Extract authenticated user information from request context without repetitive boilerplate.
+
+### Before (Repetitive Code)
+```go
+// Every protected handler needed this boilerplate
+claims, exists := c.Get("user")
+if !exists {
+    c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+    return
+}
+userClaims := claims.(*auth.Claims)
+userID := userClaims.UserID
+```
+
+### After (Clean & Type-Safe)
+```go
+// Clean, type-safe, and reusable
+userID := ctx.GetUserID(c)
+
+// With error handling
+userID, err := ctx.MustGetUserID(c)
+if err != nil {
+    c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+    return
+}
+
+// Authorization checks
+if !ctx.CanAccessUser(c, targetUserID) {
+    c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
+    return
+}
+```
+
+### Available Helpers
+
+- `ctx.GetUser(c)` - Get full user claims
+- `ctx.GetUserID(c)` - Get authenticated user ID (returns 0 if not found)
+- `ctx.MustGetUserID(c)` - Get user ID with error (returns error if not found)
+- `ctx.GetEmail(c)` - Get authenticated user's email
+- `ctx.GetUserName(c)` - Get authenticated user's name
+- `ctx.IsAuthenticated(c)` - Check if request has valid authentication
+- `ctx.CanAccessUser(c, targetID)` - Check if authenticated user can access target user
+- `ctx.HasRole(c, role)` - Check if user has specific role (future RBAC)
+
 ## 📑 Table of Contents
 
+- [Context Helpers](#-context-helpers)
 - [Development](#-development)
 - [Production](#-production)
 - [API Documentation](#-api-documentation)
