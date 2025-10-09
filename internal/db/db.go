@@ -3,9 +3,9 @@ package db
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 
+	"github.com/spf13/viper"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -93,17 +93,10 @@ func NewSQLiteDB(dbPath string) (*gorm.DB, error) {
 // LoadConfigFromEnv loads database configuration from environment variables
 func LoadConfigFromEnv() Config {
 	return Config{
-		Host:     getEnv("DB_HOST", "localhost"),
-		Port:     getEnv("DB_PORT", "5432"),
-		User:     getEnv("DB_USER", "postgres"),
-		Password: getEnv("DB_PASSWORD", "postgres"),
-		Name:     getEnv("DB_NAME", "go_api"),
+		Host:     viper.GetString("database.host"),
+		Port:     viper.GetString("database.port"),
+		User:     viper.GetString("database.user"),
+		Password: viper.GetString("database.password"),
+		Name:     viper.GetString("database.name"),
 	}
-}
-
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
 }

@@ -93,9 +93,10 @@ func LoadConfig(configPath string) (*Config, error) {
 
 	// Backwards compatibility: if Server.Env not set, prefer APP_ENVIRONMENT/ENV
 	if cfg.App.Environment == "" {
-		if e := os.Getenv("APP_ENVIRONMENT"); e != "" {
+		// prefer viper (env vars are already bound via AutomaticEnv and key replacer)
+		if e := viper.GetString("app.environment"); e != "" {
 			cfg.App.Environment = e
-		} else if e := os.Getenv("ENV"); e != "" {
+		} else if e := viper.GetString("ENV"); e != "" {
 			cfg.App.Environment = e
 		}
 	}
