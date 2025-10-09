@@ -190,7 +190,7 @@ make lint
 # Fix linting issues
 make lint-fix
 
-# Generate/update Swagger docs
+# Generate/update Swagger docs (if running locally)
 make swag
 
 # Database migrations
@@ -267,8 +267,8 @@ make install-tools
 cp .env.example .env
 nano .env  # Edit with production values (database, JWT secret, etc.)
 
-# Generate API documentation
-make swag
+# Note: Swagger docs are automatically generated during Docker build
+# Only run 'make swag' if you're running the binary directly (not in Docker)
 
 # Start production containers
 make docker-up-prod

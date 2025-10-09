@@ -48,9 +48,9 @@ services:
       - go_api_network
     healthcheck:
       test: ["CMD-SHELL", "curl http://localhost:${PORT:-8000}/health"]
-      interval: 2s
-      timeout: 2s
-      retries: 5
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: always
 
 networks:

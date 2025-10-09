@@ -61,8 +61,8 @@ quick-start:
 ## up: Start Docker containers
 up:
 	@echo "🐳 Starting Docker containers..."
-	@docker compose up -d --build
-	@echo "✅ Containers started"
+	@docker compose up -d --build --wait
+	@echo "✅ Containers started and healthy"
 	@echo "📍 API: http://localhost:8080"
 
 ## down: Stop Docker containers

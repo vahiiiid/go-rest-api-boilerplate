@@ -43,7 +43,7 @@ services:
       # Mount source code for hot-reload in development
       - ./:/app
       - /app/tmp  # Exclude tmp directory
-      - /app/api/docs
+      - /app/api/docs  # Exclude api/docs directory (keep generated docs)
     depends_on:
       db:
         condition: service_healthy
@@ -51,8 +51,8 @@ services:
       - go_api_network
     healthcheck:
       test: ["CMD-SHELL", "curl http://localhost:${PORT:-8000}/health"]
-      interval: 2s
-      timeout: 2s
+      interval: 10s
+      timeout: 5s
       retries: 5
     restart: unless-stopped
 

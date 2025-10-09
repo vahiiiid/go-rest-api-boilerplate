@@ -59,7 +59,7 @@ if docker compose ps | grep -q "Up"; then
 fi
 
 # Start containers
-if docker compose up -d --build; then
+if docker compose up -d --build --wait; then
     echo ""
     echo -e "${GREEN}✅ Containers started successfully${NC}"
 else
@@ -69,10 +69,6 @@ else
     echo "Check logs with: docker compose logs"
     exit 1
 fi
-
-echo ""
-echo "Waiting for services to be ready..."
-sleep 5
 
 echo ""
 echo "================================================"
