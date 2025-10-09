@@ -61,30 +61,30 @@ quick-start:
 ## up: Start Docker containers
 up:
 	@echo "🐳 Starting Docker containers..."
-	@docker-compose up -d --build
+	@docker compose up -d --build
 	@echo "✅ Containers started"
 	@echo "📍 API: http://localhost:8080"
 
 ## down: Stop Docker containers
 down:
 	@echo "🛑 Stopping Docker containers..."
-	@docker-compose down
+	@docker compose down
 	@echo "✅ Containers stopped"
 
 ## restart: Restart Docker containers
 restart:
 	@echo "🔄 Restarting Docker containers..."
-	@docker-compose restart
+	@docker compose restart
 	@echo "✅ Containers restarted"
 
 ## logs: View container logs
 logs:
-	@docker-compose logs -f app
+	@docker compose logs -f app
 
 ## build: Rebuild Docker containers
 build:
 	@echo "🔨 Building Docker containers..."
-	@docker-compose build
+	@docker compose build
 	@echo "✅ Build complete"
 
 ## test: Run tests
@@ -298,5 +298,5 @@ clean:
 	@echo "🧹 Cleaning build artifacts..."
 	@rm -f coverage.out coverage.html
 	@rm -f bin/*
-	@docker-compose down -v 2>/dev/null || true
+	@docker compose down -v 2>/dev/null || true
 	@echo "✅ Clean complete"
