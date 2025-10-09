@@ -1,0 +1,24 @@
+app:
+  name: "GRAB API (development)"
+  environment: "development"
+  debug: true
+
+database:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "postgres"
+  name: "grab_dev"
+  sslmode: "disable"
+
+jwt:
+  secret: "dev-secret-change-me"
+  ttlhours: 24
+
+server:
+  port: "8080"
+  readtimeout: 10
+  writetimeout: 10
+
+logging:
+  level: "debug"

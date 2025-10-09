@@ -58,12 +58,19 @@ type LoggingConfig struct {
 // LoadConfig loads configuration using Viper. If configPath is non-empty it
 // will be used as the exact config file path, otherwise Viper searches common locations.
 func LoadConfig(configPath string) (*Config, error) {
-	// If a specific file path is passed, use it directly
 	if configPath != "" {
 		viper.SetConfigFile(configPath)
 	} else {
-		// Search default locations
-		viper.SetConfigName("config")
+		// choose config.<env>.yaml if APP_ENVIRONMENT is set; otherwise use config.yaml
+		env := os.Getenv("APP_ENVIRONMENT")
+		if env == "" {
+			// allow viper to pick up APP_ENVIRONMENT from env after AutomaticEnv,
+			// but AutomaticEnv is already called below so fallback to "development".
+			env = "development"
+		}
+
+		// Try env-specific file first
+		viper.SetConfigName(fmt.Sprintf("config.%s", env))
 		viper.SetConfigType("yaml")
 		viper.AddConfigPath("configs")
 		viper.AddConfigPath(".")
