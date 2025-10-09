@@ -36,6 +36,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-change-in-production}
       JWT_TTL_HOURS: 24
       ENV: development
+      LOG_LEVEL: ${LOG_LEVEL:-info}  # debug, info, warn, error
     ports:
       - "8080:8080"
     volumes:

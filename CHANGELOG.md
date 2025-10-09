@@ -15,6 +15,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2025-01-15
+
+### Added
+- ✨ **Request Logging Middleware** - Structured JSON logging for all HTTP requests
+  - Logs request method, path, status code, duration, client IP, and request ID
+  - Uses Go's standard `log/slog` for structured logging
+  - Configurable to skip specific paths (e.g., health checks)
+  - Automatic request ID generation and propagation
+  - Log level adjustment based on response status (INFO/WARN/ERROR)
+  - Comprehensive unit tests with 100% coverage
+  - Location: `internal/middleware/logger.go`
+
+### Changed
+- Updated project structure documentation to reflect new directories
+- Enhanced README.md to clarify configurable request logging feature
+
+### Fixed
+- Updated go.mod dependencies after adding yaml.v3 import
+- Fixed GitHub Actions go mod tidy error
+
+---
+
 ## [1.0.0] - 2025-01-05
 
 ### 🎉 Initial Release
