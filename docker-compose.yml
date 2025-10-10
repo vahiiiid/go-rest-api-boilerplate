@@ -43,7 +43,6 @@ services:
       # Mount source code for hot-reload in development
       - ./:/app
       - /app/tmp  # Exclude tmp directory
-      - /app/api/docs  # Exclude api/docs directory (keep generated docs)
     depends_on:
       db:
         condition: service_healthy
