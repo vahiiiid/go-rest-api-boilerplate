@@ -24,6 +24,8 @@ type Service interface {
 	GetUserByID(ctx context.Context, id uint) (*User, error)
 	UpdateUser(ctx context.Context, id uint, req UpdateUserRequest) (*User, error)
 	DeleteUser(ctx context.Context, id uint) error
+	UpdatePassword(ctx context.Context, id uint, newPlainPassword string) error
+	FindByEmail(ctx context.Context, email string) (*User, error)
 }
 
 type service struct {
@@ -137,6 +139,58 @@ func (s *service) DeleteUser(ctx context.Context, id uint) error {
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
 	return nil
+}
+
+// UpdatePassword updates a user's password hash
+func (s *service) UpdatePassword(ctx context.Context, id uint, newPlainPassword string) error {
+	user, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to find user: %w", err)
+	}
+	if user == nil {
+		return ErrUserNotFound
+	}
+
+	hashedPassword, err := hashPassword(newPlainPassword)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	user.PasswordHash = hashedPassword
+	if err := s.repo.Update(ctx, user); err != nil {
+		return fmt.Errorf("failed to update user password: %w", err)
+	}
+	return nil
+}
+
+// FindByEmail exposes repository's FindByEmail for consumers that need it
+func (s *service) FindByEmail(ctx context.Context, email string) (*User, error) {
+	return s.repo.FindByEmail(ctx, email)
+}
+
+// UserPasswordAdapter implements auth.UserPasswordPort on top of user.Service
+type UserPasswordAdapter struct {
+	svc Service
+}
+
+// NewUserPasswordAdapter wraps a user.Service to satisfy the minimal port
+func NewUserPasswordAdapter(svc Service) *UserPasswordAdapter {
+	return &UserPasswordAdapter{svc: svc}
+}
+
+func (a *UserPasswordAdapter) FindUserIDByEmail(ctx context.Context, email string) (uint, error) {
+	user, err := a.svc.FindByEmail(ctx, email)
+	if err != nil {
+		return 0, err
+	}
+	if user == nil {
+		return 0, nil
+	}
+	return user.ID, nil
+}
+
+func (a *UserPasswordAdapter) UpdatePassword(ctx context.Context, id uint, newPlainPassword string) error {
+	return a.svc.UpdatePassword(ctx, id, newPlainPassword)
 }
 
 // hashPassword hashes a plain text password using bcrypt
