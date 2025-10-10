@@ -28,14 +28,14 @@ RUN go install github.com/air-verse/air@v1.52.3 && \
 # Copy source code (in docker compose, we'll mount a volume over this)
 COPY . .
 
-# Create swag docs
-RUN make swag
-
 # Expose port
 EXPOSE 8080
 
-# Run with air for hot-reload
-CMD ["air", "-c", ".air.toml"]
+# Set executable permission for app_entrypoint.sh
+RUN chmod +x scripts/app_entrypoint.sh
+
+# Use entrypoint
+ENTRYPOINT ["./scripts/app_entrypoint.sh"]
 
 # Production builder stage
 FROM golang:1.23-alpine AS builder
