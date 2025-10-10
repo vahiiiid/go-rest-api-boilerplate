@@ -52,6 +52,32 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 	// Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// Global rate-limit middleware (per client IP)
+	rlCfg := cfg.Ratelimit
+	if rlCfg.Enabled {
+		router.Use(
+			middleware.NewRateLimitMiddleware(
+				rlCfg.Window,
+				rlCfg.Requests,
+				func(c *gin.Context) string {
+					ip := c.ClientIP()
+					if ip == "" {
+						// Fallback for test environments or when ClientIP is empty
+						ip = c.GetHeader("X-Forwarded-For")
+						if ip == "" {
+							ip = c.GetHeader("X-Real-IP")
+						}
+						if ip == "" {
+							ip = "unknown"
+						}
+					}
+					return ip
+				},
+				nil, // default in-memory LRU
+			),
+		)
+	}
+
 	// API v1 routes
 	v1 := router.Group("/api/v1")
 	{

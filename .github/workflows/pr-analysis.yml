@@ -1,0 +1,183 @@
+name: PR Size and Complexity Analysis
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  analyze-pr:
+    name: Analyze PR Size and Complexity
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get PR stats
+      id: pr-stats
+      run: |
+        # Get the base branch
+        BASE_SHA=$(git merge-base origin/${{ github.base_ref }} HEAD)
+        
+        # Count changed files
+        CHANGED_FILES=$(git diff --name-only $BASE_SHA HEAD | wc -l)
+        
+        # Count lines added/removed
+        LINES_ADDED=$(git diff --numstat $BASE_SHA HEAD | awk '{sum+=$1} END {print sum+0}')
+        LINES_REMOVED=$(git diff --numstat $BASE_SHA HEAD | awk '{sum+=$2} END {print sum+0}')
+        TOTAL_CHANGES=$((LINES_ADDED + LINES_REMOVED))
+        
+        # Count Go files changed
+        GO_FILES=$(git diff --name-only $BASE_SHA HEAD | grep '\.go$' | wc -l)
+        
+        # Count test files
+        TEST_FILES=$(git diff --name-only $BASE_SHA HEAD | grep '_test\.go$' | wc -l)
+        
+        echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+        echo "lines_added=$LINES_ADDED" >> $GITHUB_OUTPUT
+        echo "lines_removed=$LINES_REMOVED" >> $GITHUB_OUTPUT
+        echo "total_changes=$TOTAL_CHANGES" >> $GITHUB_OUTPUT
+        echo "go_files=$GO_FILES" >> $GITHUB_OUTPUT
+        echo "test_files=$TEST_FILES" >> $GITHUB_OUTPUT
+
+    - name: Determine PR size
+      id: pr-size
+      run: |
+        TOTAL_CHANGES=${{ steps.pr-stats.outputs.total_changes }}
+        
+        if [ $TOTAL_CHANGES -le 10 ]; then
+          SIZE="XS"
+          COLOR="28a745"
+        elif [ $TOTAL_CHANGES -le 50 ]; then
+          SIZE="S"
+          COLOR="28a745"
+        elif [ $TOTAL_CHANGES -le 200 ]; then
+          SIZE="M"
+          COLOR="dbab09"
+        elif [ $TOTAL_CHANGES -le 500 ]; then
+          SIZE="L"
+          COLOR="d93f0b"
+        else
+          SIZE="XL"
+          COLOR="d93f0b"
+        fi
+        
+        echo "size=$SIZE" >> $GITHUB_OUTPUT
+        echo "color=$COLOR" >> $GITHUB_OUTPUT
+
+    - name: Add size label
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const size = '${{ steps.pr-size.outputs.size }}';
+          const color = '${{ steps.pr-size.outputs.color }}';
+          
+          // Remove existing size labels
+          const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number
+          });
+          
+          const sizeLabels = labels.filter(label => 
+            label.name.startsWith('size/'));
+          
+          for (const label of sizeLabels) {
+            await github.rest.issues.removeLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              name: label.name
+            });
+          }
+          
+          // Add new size label
+          await github.rest.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            labels: [`size/${size}`]
+          });
+
+    - name: Post PR analysis comment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const stats = {
+            changedFiles: ${{ steps.pr-stats.outputs.changed_files }},
+            linesAdded: ${{ steps.pr-stats.outputs.lines_added }},
+            linesRemoved: ${{ steps.pr-stats.outputs.lines_removed }},
+            totalChanges: ${{ steps.pr-stats.outputs.total_changes }},
+            goFiles: ${{ steps.pr-stats.outputs.go_files }},
+            testFiles: ${{ steps.pr-stats.outputs.test_files }}
+          };
+          
+          const size = '${{ steps.pr-size.outputs.size }}';
+          
+          let sizeEmoji = '📦';
+          let sizeComment = '';
+          
+          switch(size) {
+            case 'XS':
+              sizeEmoji = '🟢';
+              sizeComment = 'Very small PR - easy to review!';
+              break;
+            case 'S':
+              sizeEmoji = '🟢';
+              sizeComment = 'Small PR - should be quick to review.';
+              break;
+            case 'M':
+              sizeEmoji = '🟡';
+              sizeComment = 'Medium-sized PR - might take some time to review.';
+              break;
+            case 'L':
+              sizeEmoji = '🟠';
+              sizeComment = 'Large PR - consider breaking into smaller PRs if possible.';
+              break;
+            case 'XL':
+              sizeEmoji = '🔴';
+              sizeComment = 'Very large PR - strongly consider breaking into smaller, focused PRs.';
+              break;
+          }
+          
+          const testCoverage = stats.goFiles > 0 ? 
+            `${Math.round((stats.testFiles / stats.goFiles) * 100)}%` : 
+            'N/A';
+          
+          const comment = `## 📊 PR Analysis
+          
+          ${sizeEmoji} **Size**: ${size} - ${sizeComment}
+          
+          ### 📈 Statistics
+          - **Files changed**: ${stats.changedFiles}
+          - **Lines added**: +${stats.linesAdded}
+          - **Lines removed**: -${stats.linesRemoved}
+          - **Total changes**: ${stats.totalChanges}
+          - **Go files**: ${stats.goFiles}
+          - **Test files**: ${stats.testFiles}
+          - **Test coverage ratio**: ${testCoverage}
+          
+          ### 💡 Recommendations
+          ${stats.testFiles === 0 && stats.goFiles > 0 ? 
+            '- ⚠️ **Consider adding tests** for the Go code changes\n' : ''}
+          ${stats.totalChanges > 500 ? 
+            '- 🔄 **Consider breaking this PR** into smaller, focused changes\n' : ''}
+          ${stats.changedFiles > 20 ? 
+            '- 📝 **Large number of files changed** - ensure changes are related\n' : ''}
+          
+          ---
+          *This analysis was automatically generated to help with code review.*`;
+          
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });

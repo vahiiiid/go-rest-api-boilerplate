@@ -12,6 +12,8 @@ const (
 	AuthorizationHeader = "Authorization"
 	// UserIDKey is the context key for user ID
 	UserIDKey = "userID"
+	// KeyUser is the context key for JWT claims
+	KeyUser = "user"
 )
 
 // AuthMiddleware creates a middleware that validates JWT tokens
@@ -49,8 +51,8 @@ func AuthMiddleware(authService Service) gin.HandlerFunc {
 			return
 		}
 
-		// Set user ID in context
-		c.Set(UserIDKey, claims.UserID)
+		// Set user claims in context using the constant key
+		c.Set(KeyUser, claims)
 		c.Next()
 	}
 }
