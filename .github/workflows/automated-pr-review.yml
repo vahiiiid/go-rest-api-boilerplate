@@ -1,0 +1,192 @@
+name: Automated PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  automated-review:
+    name: Automated Code Review
+    runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
+
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v40
+      with:
+        files: |
+          **/*.go
+          **/*.md
+          **/*.yml
+          **/*.yaml
+          **/*.json
+          go.mod
+          go.sum
+          Dockerfile
+          docker-compose*.yml
+
+    - name: Run automated code analysis
+      if: steps.changed-files.outputs.any_changed == 'true'
+      run: |
+        echo "## 🤖 Automated Code Review" >> review_comment.md
+        echo "" >> review_comment.md
+        echo "I've analyzed the changes in this PR. Here are my findings:" >> review_comment.md
+        echo "" >> review_comment.md
+        
+        # Check for Go files
+        if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "\.go$"; then
+          echo "### 🐹 Go Code Analysis" >> review_comment.md
+          echo "" >> review_comment.md
+          
+          # Run go vet
+          if go vet ./...; then
+            echo "- ✅ **go vet**: No issues found" >> review_comment.md
+          else
+            echo "- ❌ **go vet**: Issues detected (see CI logs)" >> review_comment.md
+          fi
+          
+          # Check for common patterns
+          echo "- 🔍 **Code Patterns Check**:" >> review_comment.md
+          
+          # Check for error handling
+          if grep -r "if err != nil" ${{ steps.changed-files.outputs.all_changed_files }} > /dev/null 2>&1; then
+            echo "  - ✅ Error handling patterns found" >> review_comment.md
+          else
+            echo "  - ⚠️ Consider adding proper error handling" >> review_comment.md
+          fi
+          
+          # Check for logging
+          if grep -r "log\." ${{ steps.changed-files.outputs.all_changed_files }} > /dev/null 2>&1; then
+            echo "  - ✅ Logging statements present" >> review_comment.md
+          else
+            echo "  - 💡 Consider adding logging for better debugging" >> review_comment.md
+          fi
+          
+          # Check for tests
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "_test\.go$"; then
+            echo "  - ✅ Test files included" >> review_comment.md
+          else
+            echo "  - 📝 Consider adding tests for new functionality" >> review_comment.md
+          fi
+          
+          echo "" >> review_comment.md
+        fi
+        
+        # Check for API changes
+        if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "handler\|router\|api"; then
+          echo "### 🌐 API Changes Detected" >> review_comment.md
+          echo "" >> review_comment.md
+          echo "- 🔍 **API Review Checklist**:" >> review_comment.md
+          echo "  - [ ] Are new endpoints properly documented?" >> review_comment.md
+          echo "  - [ ] Are authentication/authorization requirements clear?" >> review_comment.md
+          echo "  - [ ] Are request/response schemas validated?" >> review_comment.md
+          echo "  - [ ] Are error responses consistent?" >> review_comment.md
+          echo "  - [ ] Is rate limiting considered?" >> review_comment.md
+          echo "" >> review_comment.md
+        fi
+        
+        # Check for database changes
+        if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "migration\|model\|repository\|\.sql"; then
+          echo "### 🗄️ Database Changes Detected" >> review_comment.md
+          echo "- 🔍 **Database Review Checklist**:" >> review_comment.md
+          echo "  - [ ] Are migrations backward compatible?" >> review_comment.md
+          echo "  - [ ] Are indexes properly defined?" >> review_context.md
+          echo "  - [ ] Are foreign key constraints appropriate?" >> review_comment.md
+          echo "  - [ ] Is data validation handled?" >> review_comment.md
+          echo "" >> review_comment.md
+        fi
+        
+        # Check for Docker changes
+        if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "Dockerfile\|docker-compose"; then
+          echo "### 🐳 Docker Changes Detected" >> review_comment.md
+          echo "- 🔍 **Docker Review Checklist**:" >> review_comment.md
+          echo "  - [ ] Are image sizes optimized?" >> review_comment.md
+          echo "  - [ ] Are security best practices followed?" >> review_comment.md
+          echo "  - [ ] Are environment variables properly handled?" >> review_comment.md
+          echo "  - [ ] Are health checks included?" >> review_comment.md
+          echo "" >> review_comment.md
+        fi
+        
+        # General recommendations
+        echo "### 💡 General Recommendations" >> review_comment.md
+        echo "" >> review_comment.md
+        echo "- 🧪 **Testing**: Ensure all new functionality is covered by tests" >> review_comment.md
+        echo "- 📚 **Documentation**: Update README or API docs if needed" >> review_comment.md
+        echo "- 🔒 **Security**: Review for potential security vulnerabilities" >> review_comment.md
+        echo "- ⚡ **Performance**: Consider performance implications of changes" >> review_comment.md
+        echo "" >> review_comment.md
+        echo "---" >> review_comment.md
+        echo "*This review was automatically generated. Please address any concerns before merging.*" >> review_comment.md
+
+    - name: Post review comment
+      if: steps.changed-files.outputs.any_changed == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Check if review comment file exists
+          if (fs.existsSync('review_comment.md')) {
+            const comment = fs.readFileSync('review_comment.md', 'utf8');
+            
+            // Post the review comment
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }
+
+    - name: Auto-assign reviewers
+      uses: actions/github-script@v7
+      with:
+        script: |
+          // Auto-assign the repository owner as reviewer
+          await github.rest.pulls.requestReviewers({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number,
+            reviewers: ['vahiiiid']
+          });
+
+    - name: Add labels based on changes
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const changedFiles = '${{ steps.changed-files.outputs.all_changed_files }}';
+          const labels = [];
+          
+          if (changedFiles.includes('.go')) labels.push('go');
+          if (changedFiles.includes('_test.go')) labels.push('tests');
+          if (changedFiles.includes('Dockerfile') || changedFiles.includes('docker-compose')) labels.push('docker');
+          if (changedFiles.includes('.md')) labels.push('documentation');
+          if (changedFiles.includes('handler') || changedFiles.includes('router')) labels.push('api');
+          if (changedFiles.includes('migration') || changedFiles.includes('.sql')) labels.push('database');
+          if (changedFiles.includes('.yml') || changedFiles.includes('.yaml')) labels.push('ci/cd');
+          
+          if (labels.length > 0) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: labels
+            });
+          }
