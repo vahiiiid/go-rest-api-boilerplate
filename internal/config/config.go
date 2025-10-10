@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
 )
 
 // Config represents the application configuration
@@ -127,8 +126,8 @@ func setDefaults() {
 	viper.SetDefault("database.port", 5432)
 	viper.SetDefault("database.sslmode", "disable")
 	viper.SetDefault("database.user", "postgres")
-	viper.SetDefault("database.password", "postgres")
 	viper.SetDefault("database.name", "grab")
+	// Do not set a default for password, so validation can catch it.
 
 	// JWT
 	viper.SetDefault("jwt.ttlhours", 24)

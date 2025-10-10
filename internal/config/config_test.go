@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/com/spf13/viper"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,7 +28,7 @@ func TestLoadConfig_Comprehensive(t *testing.T) {
 	t.Run("loads from default config file", func(t *testing.T) {
 		viper.Reset()
 		tempDir := t.TempDir()
-		createTempConfigFile(t, tempDir, "config.yaml", `
+		path := createTempConfigFile(t, tempDir, "config.yaml", `
 app:
   name: "File API"
 database:
@@ -36,10 +36,7 @@ database:
 jwt:
   secret: "file-secret"
 `)
-		// Point viper to our temp directory
-		viper.AddConfigPath(tempDir)
-
-		cfg, err := LoadConfig("")
+		cfg, err := LoadConfig(path) // Pass the explicit path
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
 		assert.Equal(t, "File API", cfg.App.Name)
@@ -50,20 +47,18 @@ jwt:
 	t.Run("environment variables override file values", func(t *testing.T) {
 		viper.Reset()
 		tempDir := t.TempDir()
-		createTempConfigFile(t, tempDir, "config.yaml", `
+		path := createTempConfigFile(t, tempDir, "config.yaml", `
 database:
   host: "filehost"
   port: 5432
 jwt:
   secret: "file-secret"
 `)
-		viper.AddConfigPath(tempDir)
-
 		// Set env vars that should override the file
 		t.Setenv("DATABASE_HOST", "envhost")
 		t.Setenv("JWT_SECRET", "env-secret")
 
-		cfg, err := LoadConfig("")
+		cfg, err := LoadConfig(path) // Pass the explicit path
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
 		assert.Equal(t, "envhost", cfg.Database.Host) // Assert override
@@ -109,9 +104,13 @@ jwt:
 	t.Run("loads environment-specific config file", func(t *testing.T) {
 		viper.Reset()
 		tempDir := t.TempDir()
-		// Create a default and a production config file
-		createTempConfigFile(t, tempDir, "config.yaml", `app: {name: "Default API"}`)
-		createTempConfigFile(t, tempDir, "config.production.yaml", `
+		configsDir := filepath.Join(tempDir, "configs")
+		err := os.Mkdir(configsDir, 0755)
+		assert.NoError(t, err)
+
+		// Create a default and a production config file inside the temp configs dir
+		createTempConfigFile(t, configsDir, "config.yaml", `app: {name: "Default API"}`)
+		createTempConfigFile(t, configsDir, "config.production.yaml", `
 app:
   name: "Production API"
 jwt:
@@ -119,7 +118,12 @@ jwt:
 database:
   password: "prod-password"
 `)
-		viper.AddConfigPath(tempDir)
+		// Temporarily change working directory so LoadConfig can find the "configs" folder
+		oldWd, _ := os.Getwd()
+		err = os.Chdir(tempDir)
+		assert.NoError(t, err)
+		defer os.Chdir(oldWd)
+
 		t.Setenv("APP_ENVIRONMENT", "production")
 
 		cfg, err := LoadConfig("")

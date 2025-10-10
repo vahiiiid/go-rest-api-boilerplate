@@ -2,29 +2,6 @@ package config
 
 import "fmt"
 
-// Config represents the application configuration
-type Config struct {
-	App      AppConfig
-	Database DatabaseConfig
-	JWT      JWTConfig
-}
-
-// AppConfig holds application-level configuration
-type AppConfig struct {
-	Environment string
-}
-
-// DatabaseConfig holds database configuration
-type DatabaseConfig struct {
-	Host     string
-	Password string
-}
-
-// JWTConfig holds JWT configuration
-type JWTConfig struct {
-	Secret string
-}
-
 // Validate checks required configuration values
 func (c *Config) Validate() error {
 	if c.JWT.Secret == "" {

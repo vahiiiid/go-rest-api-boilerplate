@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
@@ -17,38 +18,29 @@ import (
 )
 
 func setupTestRouter(t *testing.T) *gin.Engine {
-	// Set Gin to test mode
 	gin.SetMode(gin.TestMode)
 
-	// Create in-memory SQLite database for testing
+	// Use the test config helper to get a valid configuration
+	testCfg := config.NewTestConfig()
+
+	// Setup in-memory SQLite database for testing
 	database, err := db.NewSQLiteDB(":memory:")
-	if err != nil {
-		t.Fatalf("Failed to create test database: %v", err)
-	}
+	assert.NoError(t, err)
 
 	// Run migrations
-	if err := database.AutoMigrate(&user.User{}); err != nil {
-		t.Fatalf("Failed to run migrations: %v", err)
-	}
+	err = database.AutoMigrate(&user.User{})
+	assert.NoError(t, err)
 
-	// Initialize services
-	authService := auth.NewService()
+	// Initialize services with the test config
+	authService := auth.NewService(&testCfg.JWT)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
-	// Create test configuration
-	testConfig := &config.Config{
-		Server: config.ServerConfig{
-			Env: "test",
-		},
-		Logging: config.LoggingConfig{
-			Level: "info",
-		},
-	}
+	// Setup router with all dependencies and the test config
+	router := server.SetupRouter(userHandler, authService, testCfg)
 
-	// Setup router
-	return server.SetupRouter(userHandler, authService, testConfig)
+	return router
 }
 
 func TestRegisterHandler(t *testing.T) {

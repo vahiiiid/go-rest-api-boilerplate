@@ -3,7 +3,6 @@ package db
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/spf13/viper"
