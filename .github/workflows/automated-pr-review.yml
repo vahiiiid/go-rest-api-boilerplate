@@ -159,13 +159,20 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
-          // Auto-assign the repository owner as reviewer
-          await github.rest.pulls.requestReviewers({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number,
-            reviewers: ['vahiiiid']
-          });
+          // Only assign reviewer if PR author is not the repository owner
+          const prAuthor = context.payload.pull_request.user.login;
+          const repoOwner = context.repo.owner;
+          
+          if (prAuthor !== repoOwner) {
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [repoOwner]
+            });
+          } else {
+            console.log('Skipping reviewer assignment: PR author is the repository owner');
+          }
 
     - name: Add labels based on changes
       uses: actions/github-script@v7
