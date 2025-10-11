@@ -58,7 +58,7 @@ func main() {
 
 	// Run migrations
 	log.Println("Running database migrations...")
-	if err := database.AutoMigrate(&user.User{}); err != nil {
+	if err := database.AutoMigrate(&user.User{}, &auth.PasswordResetToken{}); err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 	log.Println("Migrations completed successfully")
@@ -68,9 +68,12 @@ func main() {
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
+	passwordResetService := auth.NewPasswordResetService(database)
+	userPasswordPort := user.NewUserPasswordAdapter(userService)
+	authHandler := auth.NewHandler(passwordResetService, userPasswordPort)
 
 	// Setup router with configuration
-	router := server.SetupRouter(userHandler, authService, cfg)
+	router := server.SetupRouterWithAuth(userHandler, authService, authHandler, cfg)
 
 	// Get port from config or environment
 	port := cfg.Server.Port

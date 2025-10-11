@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -14,8 +15,8 @@ import (
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 )
 
-// SetupRouter creates and configures the Gin router
-func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *config.Config) *gin.Engine {
+// SetupRouterWithAuth creates and configures the Gin router (with optional authHandler)
+func SetupRouterWithAuth(userHandler *user.Handler, authService auth.Service, authHandler *auth.Handler, cfg *config.Config) *gin.Engine {
 	// Set Gin mode based on environment
 	gin.SetMode(gin.ReleaseMode)
 
@@ -81,6 +82,11 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 		{
 			authGroup.POST("/register", userHandler.Register)
 			authGroup.POST("/login", userHandler.Login)
+			// Forgot/reset password (public)
+			if authHandler != nil {
+				authGroup.POST("/forgot-password", middleware.RateLimitByEmail(5, time.Hour), authHandler.ForgotPassword)
+				authGroup.POST("/reset-password", authHandler.ResetPassword)
+			}
 		}
 
 		// Protected user routes
@@ -94,4 +100,9 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 	}
 
 	return router
+}
+
+// SetupRouter creates and configures the Gin router (backward-compatible wrapper without password reset handlers)
+func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *config.Config) *gin.Engine {
+	return SetupRouterWithAuth(userHandler, authService, nil, cfg)
 }
