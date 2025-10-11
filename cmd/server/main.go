@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	//_ "github.com/vahiiiid/go-rest-api-boilerplate/api/docs" // swagger docs
+	_ "github.com/vahiiiid/go-rest-api-boilerplate/api/docs" // swagger docs
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/db"
