@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/ctx"
 )
 
 // Handler handles user-related HTTP requests
@@ -54,7 +55,7 @@ func (h *Handler) Register(c *gin.Context) {
 	}
 
 	// Generate token
-	token, err := h.authService.GenerateToken(user.ID)
+	token, err := h.authService.GenerateToken(user.ID, user.Email, user.Name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
@@ -96,7 +97,7 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 
 	// Generate token
-	token, err := h.authService.GenerateToken(user.ID)
+	token, err := h.authService.GenerateToken(user.ID, user.Email, user.Name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
@@ -118,14 +119,22 @@ func (h *Handler) Login(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} UserResponse
 // @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 429 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/users/{id} [get]
 func (h *Handler) GetUser(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	// Parse ID from URL
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	// Authorization check
+	if !ctx.CanAccessUser(c, uint(id)) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
 		return
 	}
 
@@ -153,15 +162,23 @@ func (h *Handler) GetUser(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} UserResponse
 // @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 409 {object} map[string]string
+// @Failure 429 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/users/{id} [put]
 func (h *Handler) UpdateUser(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	// Parse ID from URL
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	// Authorization check
+	if !ctx.CanAccessUser(c, uint(id)) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
 		return
 	}
 
@@ -198,14 +215,22 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 // @Security BearerAuth
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 429 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/users/{id} [delete]
 func (h *Handler) DeleteUser(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	// Parse ID from URL
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	// Authorization check
+	if !ctx.CanAccessUser(c, uint(id)) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
 		return
 	}
 

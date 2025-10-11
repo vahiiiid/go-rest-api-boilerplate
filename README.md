@@ -27,6 +27,19 @@
 
 ---
 
+## 🎃 Hacktoberfest 2025
+
+<div align="center">
+
+![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2025-orange?style=for-the-badge&logo=digitalocean&logoColor=white)
+
+**We're participating in Hacktoberfest 2025! 🚀**
+
+</div>
+
+We welcome contributions from developers of all skill levels! Pick up any [open issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) labeled `hacktoberfest` or `good first issue`, fork the repository, make your changes, and submit a pull request. Whether it's bug fixes, new features, documentation improvements, or test enhancements - every contribution counts! 🎉
+
+---
 ## 🎯 Looking to Build a REST API in Go?
 
 **You need a REST API project with Go** and you're looking for:
@@ -92,22 +105,6 @@ Open [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/in
 
 Import the pre-configured collection from `api/postman_collection.json` with example requests and tests.
 
-### Quick Test
-
-```bash
-# Check health
-curl http://localhost:8080/health
-
-# Register a user
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Alice Smith",
-    "email": "alice@example.com",
-    "password": "secret123"
-  }'
-```
-
 ### 🚀 Ready to Build Your Own Features?
 
 **📖 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** - Learn how to add models, routes, and handlers
@@ -119,6 +116,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 ## ✨ Features
 
 - ✅ **JWT Authentication** - Secure token-based auth (HS256)
+- ✅ **Context Helpers** - Type-safe user extraction from request context
 - ✅ **User Management** - Complete CRUD with validation
 - ✅ **PostgreSQL + GORM** - Robust database with ORM
 - ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback)
@@ -133,6 +131,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 - ✅ **Security Best Practices** - Bcrypt hashing, input validation
 - ✅ **CORS Support** - Configurable cross-origin requests
 - ✅ **Request Logging** - Configurable structured JSON logging with request tracking
+- ✅ **Rate Limiting** - Smart token-bucket protection against abuse
 
 ## 📑 Table of Contents
 
@@ -191,7 +190,7 @@ make lint
 # Fix linting issues
 make lint-fix
 
-# Generate/update Swagger docs
+# Generate/update Swagger docs (if running locally)
 make swag
 
 # Database migrations
@@ -268,8 +267,8 @@ make install-tools
 cp .env.example .env
 nano .env  # Edit with production values (database, JWT secret, etc.)
 
-# Generate API documentation
-make swag
+# Note: Swagger docs are automatically generated during Docker build
+# Only run 'make swag' if you're running the binary directly (not in Docker)
 
 # Start production containers
 make docker-up-prod

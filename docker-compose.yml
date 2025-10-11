@@ -1,4 +1,4 @@
-# Development docker-compose with hot-reload
+# Development docker compose with hot-reload
 services:
   db:
     image: postgres:15-alpine
@@ -43,11 +43,17 @@ services:
       # Mount source code for hot-reload in development
       - ./:/app
       - /app/tmp  # Exclude tmp directory
+      - /app/api/docs  # Exclude api/docs directory (keep generated docs)
     depends_on:
       db:
         condition: service_healthy
     networks:
       - go_api_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl http://localhost:${PORT:-8000}/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
 networks:
