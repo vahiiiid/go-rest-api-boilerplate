@@ -226,7 +226,7 @@ make run-binary        # Build and run binary directly (requires Go on host)
 
 ### Without Docker (Native Development)
 
-**Want to run without Docker?** You'll need Go 1.23+ installed on your machine.
+**Want to run without Docker?** You'll need Go 1.25 installed on your machine.
 
 See the **[Manual Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** for detailed instructions on:
 - Installing Go and development tools
