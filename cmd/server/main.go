@@ -35,23 +35,14 @@ import (
 func main() {
 	log.Println("Starting Go REST API Boilerplate...")
 
-	// Load configuration
+	// Load configuration (viper-based)
 	cfg, err := config.LoadConfig("")
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	// Convert config to database config
-	dbConfig := db.Config{
-		Host:     cfg.Database.Host,
-		Port:     cfg.Database.Port,
-		User:     cfg.Database.User,
-		Password: cfg.Database.Password,
-		Name:     cfg.Database.Name,
-	}
-
-	// Connect to database
-	database, err := db.NewPostgresDB(dbConfig)
+	// Connect to database using typed config
+	database, err := db.NewPostgresDBFromDatabaseConfig(cfg.Database)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -64,7 +55,7 @@ func main() {
 	log.Println("Migrations completed successfully")
 
 	// Initialize services
-	authService := auth.NewService()
+	authService := auth.NewService(&cfg.JWT)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
@@ -72,7 +63,7 @@ func main() {
 	// Setup router with configuration
 	router := server.SetupRouter(userHandler, authService, cfg)
 
-	// Get port from config or environment
+	// Get port from config
 	port := cfg.Server.Port
 	if port == "" {
 		port = "8080"

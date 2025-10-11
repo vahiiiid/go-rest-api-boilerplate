@@ -1,0 +1,24 @@
+app:
+  name: "GRAB API"
+  environment: "production"
+  debug: false
+
+database:
+  host: "db.production.example"
+  port: 5432
+  user: "postgres"
+  password: "CHANGE_ME"   # REQUIRED: set a strong DB password in production
+  name: "grab"
+  sslmode: "require"
+
+jwt:
+  secret: "CHANGE_ME"     # REQUIRED: set a strong JWT secret in production
+  ttlhours: 24
+
+server:
+  port: "8080"
+  readtimeout: 10
+  writetimeout: 10
+
+logging:
+  level: "info"

@@ -16,13 +16,18 @@ import (
 
 // SetupRouter creates and configures the Gin router
 func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *config.Config) *gin.Engine {
-	// Set Gin mode based on environment
-	gin.SetMode(gin.ReleaseMode)
-
 	router := gin.New()
 
+	// Set Gin mode
+	if cfg.App.Environment == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	} else {
+		gin.SetMode(gin.DebugMode)
+	}
+
+	// Global middleware
 	// Middleware - use configurable logging with environment-based skip paths
-	skipPaths := config.GetSkipPaths(cfg.Server.Env)
+	skipPaths := config.GetSkipPaths(cfg.App.Environment)
 	loggerConfig := middleware.NewLoggerConfig(
 		cfg.Logging.GetLogLevel(),
 		skipPaths,
