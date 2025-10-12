@@ -1,6 +1,6 @@
 # Development stage with hot-reload
 # Using Debian-based image for better CGO/SQLite compatibility
-FROM golang:1.25-bookworm AS development
+FROM golang:1.24-bookworm AS development
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -37,8 +37,8 @@ RUN chmod +x scripts/app_entrypoint.sh
 # Use entrypoint
 ENTRYPOINT ["./scripts/app_entrypoint.sh"]
 
-# Production builder stage
-FROM golang:1.25-alpine AS builder
+# Production build stage
+FROM golang:1.24-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git
