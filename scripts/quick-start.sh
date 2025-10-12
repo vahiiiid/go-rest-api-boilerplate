@@ -49,6 +49,19 @@ else
 fi
 
 echo ""
+echo "Reading .env file..."
+echo ""
+# Load environment variables from .env file
+if [ -f .env ]; then
+    export $(cat .env | grep -v '^#' | grep -v '^$' | xargs)
+fi
+
+echo -e "${GREEN}✅ .env file read${NC}"
+
+# Fallback for env variable(s)
+PORT=${PORT:-8080}
+
+echo ""
 echo "🐳 Starting Docker containers..."
 echo ""
 
@@ -76,9 +89,9 @@ echo -e "${GREEN}🎉 Success! Your API is ready!${NC}"
 echo "================================================"
 echo ""
 echo "📍 Your API is running at:"
-echo "   • API Base:    http://localhost:8080/api/v1"
-echo "   • Swagger UI:  http://localhost:8080/swagger/index.html"
-echo "   • Health:      http://localhost:8080/health"
+echo "   • API Base:    http://localhost:${PORT}/api/v1"
+echo "   • Swagger UI:  http://localhost:${PORT}/swagger/index.html"
+echo "   • Health:      http://localhost:${PORT}/health"
 echo ""
 echo "🐳 Docker Commands:"
 echo "   • View logs:   docker compose logs -f app"
