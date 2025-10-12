@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -30,6 +31,12 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 	router.Use(middleware.Logger(loggerConfig))
 	router.Use(gin.Recovery())
 
+	// Metrics middleware - track HTTP requests
+	if cfg.Metrics.Enabled {
+		metricsConfig := middleware.NewMetricsConfig(skipPaths)
+		router.Use(middleware.Metrics(metricsConfig))
+	}
+
 	// CORS configuration - permissive for development
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
@@ -43,6 +50,11 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 			"message": "Server is running",
 		})
 	})
+
+	// Metrics endpoint - expose Prometheus metrics
+	if cfg.Metrics.Enabled {
+		router.GET(cfg.Metrics.Path, gin.WrapH(promhttp.Handler()))
+	}
 
 	// Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
