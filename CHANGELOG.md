@@ -103,7 +103,7 @@ The first production-ready release of GRAB - Go REST API Boilerplate.
 - Graceful shutdown handling
 
 ### Technical Stack
-- **Language**: Go 1.23+
+- **Language**: Go 1.25
 - **Framework**: Gin Web Framework
 - **ORM**: GORM
 - **Database**: PostgreSQL 15
