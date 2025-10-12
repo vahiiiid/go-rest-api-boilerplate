@@ -610,11 +610,16 @@ go-rest-api-boilerplate/
 │   ├── config/                    # Configuration management
 │   │   ├── config.go              # Config structs and loading logic
 │   │   └── config_test.go         # Configuration tests
+│   ├── ctx/
+│   │   └── context.go             # Request context helpers
 │   ├── db/
 │   │   └── db.go                  # Database connection setup (GORM)
 │   ├── middleware/                # HTTP middleware
 │   │   ├── logger.go              # Request logging middleware
 │   │   ├── logger_test.go         # Logger middleware tests
+│   │   ├── metrics.go             # Prometheus metrics middleware
+│   │   ├── metrics_test.go        # Metrics middleware tests
+│   │   ├── rate_limit.go          # Rate limiting middleware
 │   │   └── README.md              # Middleware documentation
 │   ├── server/
 │   │   └── router.go              # Route definitions & middleware
@@ -634,6 +639,7 @@ go-rest-api-boilerplate/
 │   └── README.md                  # Testing guide
 ├── tmp/                           # Air hot-reload temp files (gitignored)
 ├── .air.toml                      # Hot-reload configuration (Air)
+├── .gitattributes                 # Git line ending normalization
 ├── .gitignore                     # Git ignore rules
 ├── .golangci.yml                  # Linter configuration
 ├── .github/
@@ -642,6 +648,7 @@ go-rest-api-boilerplate/
 ├── CHANGELOG.md                   # Version history (SemVer)
 ├── CONTRIBUTING.md                # Contribution guidelines
 ├── docker-compose.yml             # Development with hot-reload & volumes
+│                                  # Includes Prometheus & Grafana
 ├── docker-compose.prod.yml        # Production optimized (no volumes)
 ├── Dockerfile                     # Multi-stage build (dev + prod)
 │                                  # Dev: All tools pre-installed
@@ -651,6 +658,7 @@ go-rest-api-boilerplate/
 ├── LICENSE                        # MIT License
 ├── Makefile                       # Build automation & shortcuts
 │                                  # Auto-detects Docker/host environment
+├── prometheus.yml                 # Prometheus scrape configuration
 ├── README.md                      # This file
 └── server.log                     # Application logs (gitignored)
 ```
