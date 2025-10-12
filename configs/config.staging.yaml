@@ -1,0 +1,24 @@
+app:
+  name: "GRAB API (staging)"
+  environment: "staging"
+  debug: false
+
+database:
+  host: "db.staging.example"
+  port: 5432
+  user: "postgres"
+  password: "staging-password-placeholder"
+  name: "grab_staging"
+  sslmode: "require"
+
+jwt:
+  secret: "staging-secret-placeholder"
+  ttlhours: 24
+
+server:
+  port: "8080"
+  readtimeout: 10
+  writetimeout: 10
+
+logging:
+  level: "info"

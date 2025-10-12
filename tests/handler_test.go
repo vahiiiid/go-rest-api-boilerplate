@@ -5,9 +5,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
@@ -17,8 +21,41 @@ import (
 )
 
 func setupTestRouter(t *testing.T) *gin.Engine {
+	gin.SetMode(gin.TestMode)
+
+	// Use the test config helper to get a valid configuration
+	testCfg := config.NewTestConfig()
+
+	// Setup in-memory SQLite database for testing
+	database, err := db.NewSQLiteDB(":memory:")
+	assert.NoError(t, err)
+
+	// Run migrations
+	err = database.AutoMigrate(&user.User{})
+	assert.NoError(t, err)
+
+	// Initialize services with the test config
+	authService := auth.NewService(&testCfg.JWT)
+	userRepo := user.NewRepository(database)
+	userService := user.NewService(userRepo)
+	userHandler := user.NewHandler(userService, authService)
+
+	// Setup router with all dependencies and the test config
+	router := server.SetupRouter(userHandler, authService, testCfg)
+
+	return router
+}
+
+func setupRateLimitTestRouter(t *testing.T) *gin.Engine {
 	// Set Gin to test mode
 	gin.SetMode(gin.TestMode)
+
+	// Use the test config helper to get a valid base configuration
+	testCfg := config.NewTestConfig()
+	// Override rate limit settings specifically for this test
+	testCfg.Ratelimit.Enabled = true
+	testCfg.Ratelimit.Requests = 10
+	testCfg.Ratelimit.Window = time.Minute
 
 	// Create in-memory SQLite database for testing
 	database, err := db.NewSQLiteDB(":memory:")
@@ -31,24 +68,14 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 		t.Fatalf("Failed to run migrations: %v", err)
 	}
 
-	// Initialize services
-	authService := auth.NewService()
+	// Initialize services with the test config
+	authService := auth.NewService(&testCfg.JWT)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
-	// Create test configuration
-	testConfig := &config.Config{
-		Server: config.ServerConfig{
-			Env: "test",
-		},
-		Logging: config.LoggingConfig{
-			Level: "info",
-		},
-	}
-
 	// Setup router
-	return server.SetupRouter(userHandler, authService, testConfig)
+	return server.SetupRouter(userHandler, authService, testCfg)
 }
 
 func TestRegisterHandler(t *testing.T) {
@@ -264,5 +291,79 @@ func TestHealthEndpoint(t *testing.T) {
 	}
 	if status, ok := response["status"].(string); !ok || status != "ok" {
 		t.Error("Expected status 'ok' in health check response")
+	}
+}
+
+func TestRateLimit_BlocksThenAllows(t *testing.T) {
+	// Skip this test in CI environment to avoid flaky failures
+	if os.Getenv("CI") == "true" {
+		t.Skip("Skipping rate limiting test in CI environment")
+	}
+
+	r := setupRateLimitTestRouter(t)
+
+	// Arrange: register a user (this also consumes 1 token on /auth if the limiter is on the group)
+	registerBody, _ := json.Marshal(map[string]string{
+		"name":     "Rate Test",
+		"email":    "rate@example.com",
+		"password": "secret123",
+	})
+	req, _ := http.NewRequest(http.MethodPost, "/api/v1/auth/register", bytes.NewBuffer(registerBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Forwarded-For", "192.168.1.100") // Use consistent IP for testing
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("register expected 200, got %d", rr.Code)
+	}
+
+	// Arrange: login payload
+	loginBody, _ := json.Marshal(map[string]string{
+		"email":    "rate@example.com",
+		"password": "secret123",
+	})
+
+	// Act: consume remaining budget (limit=10/min, 1 was used by register → 9 left)
+	for i := 0; i < 9; i++ {
+		req, _ := http.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewBuffer(loginBody))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Forwarded-For", "192.168.1.100") // Use consistent IP for testing
+		rr := httptest.NewRecorder()
+		r.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Fatalf("login #%d expected 200, got %d", i+1, rr.Code)
+		}
+	}
+
+	// Assert: next login should be blocked with 429 and include Retry-After
+	req, _ = http.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewBuffer(loginBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Forwarded-For", "192.168.1.100") // Use consistent IP for testing
+	rr = httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+	if rr.Code != http.StatusTooManyRequests {
+		t.Fatalf("expected 429 after limit exhausted, got %d", rr.Code)
+	}
+	retryAfterStr := rr.Header().Get("Retry-After")
+	if retryAfterStr == "" {
+		t.Fatalf("expected Retry-After header on 429")
+	}
+	retryAfterSec, err := strconv.Atoi(retryAfterStr)
+	if err != nil || retryAfterSec <= 0 {
+		t.Fatalf("Retry-After should be positive integer seconds, got %q (err=%v)", retryAfterStr, err)
+	}
+
+	// Arrange/Act: wait for the advised cooldown, then retry once
+	time.Sleep(time.Duration(retryAfterSec)*time.Second + 10*time.Millisecond)
+
+	req, _ = http.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewBuffer(loginBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Forwarded-For", "192.168.1.100") // Use consistent IP for testing
+	rr = httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+
+	// Assert: request should pass after cooldown
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200 after waiting Retry-After=%ds, got %d", retryAfterSec, rr.Code)
 	}
 }

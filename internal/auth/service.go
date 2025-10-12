@@ -3,11 +3,11 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 )
 
 var (
@@ -19,7 +19,7 @@ var (
 
 // Service defines authentication service interface
 type Service interface {
-	GenerateToken(userID uint) (string, error)
+	GenerateToken(userID uint, email string, name string) (string, error)
 	ValidateToken(tokenString string) (*Claims, error)
 }
 
@@ -28,18 +28,16 @@ type service struct {
 	jwtTTL    time.Duration
 }
 
-// NewService creates a new authentication service
-func NewService() Service {
-	jwtSecret := os.Getenv("JWT_SECRET")
+// NewService creates a new authentication service using typed config
+func NewService(cfg *config.JWTConfig) Service {
+	jwtSecret := cfg.Secret
 	if jwtSecret == "" {
 		jwtSecret = "default-secret-change-in-production"
 	}
 
-	ttlHours := 24
-	if ttlStr := os.Getenv("JWT_TTL_HOURS"); ttlStr != "" {
-		if hours, err := strconv.Atoi(ttlStr); err == nil {
-			ttlHours = hours
-		}
+	ttlHours := cfg.TTLHours
+	if ttlHours == 0 {
+		ttlHours = 24
 	}
 
 	return &service{
@@ -49,14 +47,16 @@ func NewService() Service {
 }
 
 // GenerateToken generates a JWT token for a user
-func (s *service) GenerateToken(userID uint) (string, error) {
+func (s *service) GenerateToken(userID uint, email string, name string) (string, error) {
 	now := time.Now()
 	expirationTime := now.Add(s.jwtTTL)
 
 	claims := jwt.MapClaims{
-		"sub": fmt.Sprintf("%d", userID),
-		"exp": expirationTime.Unix(),
-		"iat": now.Unix(),
+		"sub":   fmt.Sprintf("%d", userID),
+		"email": email,
+		"name":  name,
+		"exp":   expirationTime.Unix(),
+		"iat":   now.Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -105,7 +105,15 @@ func (s *service) ValidateToken(tokenString string) (*Claims, error) {
 		return nil, ErrInvalidToken
 	}
 
+	// Extract email from "email" claim
+	email, _ := claims["email"].(string) // email is optional
+
+	// Extract name from "name" claim
+	name, _ := claims["name"].(string) // name is optional
+
 	return &Claims{
 		UserID: uint(userID),
+		Email:  email,
+		Name:   name,
 	}, nil
 }

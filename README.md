@@ -14,7 +14,7 @@
 [![CI](https://github.com/vahiiiid/go-rest-api-boilerplate/workflows/CI/badge.svg)](https://github.com/vahiiiid/go-rest-api-boilerplate/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vahiiiid/go-rest-api-boilerplate)](https://goreportcard.com/report/github.com/vahiiiid/go-rest-api-boilerplate)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go)](https://go.dev/)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://vahiiiid.github.io/go-rest-api-docs/)
@@ -27,6 +27,19 @@
 
 ---
 
+## 🎃 Hacktoberfest 2025
+
+<div align="center">
+
+![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2025-orange?style=for-the-badge&logo=digitalocean&logoColor=white)
+
+**We're participating in Hacktoberfest 2025! 🚀**
+
+</div>
+
+We welcome contributions from developers of all skill levels! Pick up any [open issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) labeled `hacktoberfest` or `good first issue`, fork the repository, make your changes, and submit a pull request. Whether it's bug fixes, new features, documentation improvements, or test enhancements - every contribution counts! 🎉
+
+---
 ## 🎯 Looking to Build a REST API in Go?
 
 **You need a REST API project with Go** and you're looking for:
@@ -92,22 +105,6 @@ Open [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/in
 
 Import the pre-configured collection from `api/postman_collection.json` with example requests and tests.
 
-### Quick Test
-
-```bash
-# Check health
-curl http://localhost:8080/health
-
-# Register a user
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Alice Smith",
-    "email": "alice@example.com",
-    "password": "secret123"
-  }'
-```
-
 ### 🚀 Ready to Build Your Own Features?
 
 **📖 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** - Learn how to add models, routes, and handlers
@@ -119,6 +116,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 ## ✨ Features
 
 - ✅ **JWT Authentication** - Secure token-based auth (HS256)
+- ✅ **Context Helpers** - Type-safe user extraction from request context
 - ✅ **User Management** - Complete CRUD with validation
 - ✅ **PostgreSQL + GORM** - Robust database with ORM
 - ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback)
@@ -133,6 +131,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 - ✅ **Security Best Practices** - Bcrypt hashing, input validation
 - ✅ **CORS Support** - Configurable cross-origin requests
 - ✅ **Request Logging** - Configurable structured JSON logging with request tracking
+- ✅ **Rate Limiting** - Smart token-bucket protection against abuse
 
 ## 📑 Table of Contents
 
@@ -191,7 +190,7 @@ make lint
 # Fix linting issues
 make lint-fix
 
-# Generate/update Swagger docs
+# Generate/update Swagger docs (if running locally)
 make swag
 
 # Database migrations
@@ -227,7 +226,7 @@ make run-binary        # Build and run binary directly (requires Go on host)
 
 ### Without Docker (Native Development)
 
-**Want to run without Docker?** You'll need Go 1.23+ installed on your machine.
+**Want to run without Docker?** You'll need Go 1.24 installed on your machine.
 
 See the **[Manual Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** for detailed instructions on:
 - Installing Go and development tools
@@ -268,8 +267,8 @@ make install-tools
 cp .env.example .env
 nano .env  # Edit with production values (database, JWT secret, etc.)
 
-# Generate API documentation
-make swag
+# Note: Swagger docs are automatically generated during Docker build
+# Only run 'make swag' if you're running the binary directly (not in Docker)
 
 # Start production containers
 make docker-up-prod
@@ -635,6 +634,47 @@ The **[Development Guide](https://vahiiiid.github.io/go-rest-api-docs/developmen
 - [ ] Regular dependency updates
 
 ---
+
+## Configuration
+
+This project uses a centralized configuration system (Viper). Configuration sources, in precedence order:
+1. Environment variables (e.g. DB_HOST, JWT_SECRET, etc.)
+2. Environment-specific config file: configs/config.<env>.yaml (when APP_ENVIRONMENT is set)
+3. Default config file: configs/config.yaml
+4. Built-in defaults defined in code
+
+Key files and helpers:
+- Loader: [`config.LoadConfig`](internal/config/config.go)
+- Example config file: [configs/config.yaml](configs/config.yaml)
+- Example env file: [.env.example](.env.example)
+
+Common environment variables
+- APP_ENVIRONMENT — selects environment-specific config (development | staging | production)
+- APP_NAME, APP_DEBUG
+- DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SSLMODE
+- JWT_SECRET, JWT_TTL_HOURS
+- SERVER_PORT, SERVER_READTIMEOUT, SERVER_WRITETIMEOUT
+Note: env var names use underscores and map to nested YAML keys (DB_HOST -> database.host).
+
+Quick usage
+- Use example env: Copy .env.example to .env and edit values:
+  - PowerShell: Copy-Item .env.example .env
+  - Bash: cp .env.example .env
+- Run with default config file:
+  go run ./cmd/server
+- Run with APP_ENVIRONMENT (loads configs/config.<env>.yaml if present):
+  APP_ENVIRONMENT=production go run ./cmd/server
+- Load config programmatically:
+  cfg, err := config.LoadConfig("")  // see internal/config/config.go
+
+Testing & CI
+- Ensure viper dependency is installed:
+  go get github.com/spf13/viper
+  go mod tidy
+- Run tests:
+  make test
+  or
+  go test ./... -v
 
 ## 🤝 Contributing
 

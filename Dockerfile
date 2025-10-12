@@ -1,6 +1,6 @@
 # Development stage with hot-reload
 # Using Debian-based image for better CGO/SQLite compatibility
-FROM golang:1.23-bookworm AS development
+FROM golang:1.24-bookworm AS development
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -25,17 +25,20 @@ RUN go install github.com/air-verse/air@v1.52.3 && \
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest && \
     go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
-# Copy source code (in docker-compose, we'll mount a volume over this)
+# Copy source code (in docker compose, we'll mount a volume over this)
 COPY . .
 
 # Expose port
 EXPOSE 8080
 
-# Run with air for hot-reload
-CMD ["air", "-c", ".air.toml"]
+# Set executable permission for app_entrypoint.sh
+RUN chmod +x scripts/app_entrypoint.sh
 
-# Production builder stage
-FROM golang:1.23-alpine AS builder
+# Use entrypoint
+ENTRYPOINT ["./scripts/app_entrypoint.sh"]
+
+# Production build stage
+FROM golang:1.24-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git

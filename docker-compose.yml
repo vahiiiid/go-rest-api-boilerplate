@@ -1,44 +1,35 @@
-# Development docker-compose with hot-reload
+# Development docker compose with hot-reload
 services:
   db:
     image: postgres:15-alpine
-    container_name: go_api_db
+    container_name: ${DB_CONTAINER_NAME:-go_api_db}
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: go_api
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-go_api}
     # No ports exposed to host - only accessible within Docker network
     expose:
-      - "5432"
+      - "${DB_PORT:-5432}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - go_api_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: ${HEALTH_CHECK_INTERVAL:-10s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-5s}
+      retries: ${HEALTH_CHECK_RETRIES:-5}
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
       target: development  # Use development stage
-    container_name: go_api_app
-    environment:
-      PORT: 8080
-      DB_HOST: db  # Use Docker service name
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: go_api
-      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-change-in-production}
-      JWT_TTL_HOURS: 24
-      ENV: development
-      LOG_LEVEL: ${LOG_LEVEL:-info}  # debug, info, warn, error
+    container_name: ${APP_CONTAINER_NAME:-go_api_app}
+    env_file:
+      - .env
     ports:
-      - "8080:8080"
+      - "${PORT:-8080}:${PORT:-8080}"
     volumes:
       # Mount source code for hot-reload in development
       - ./:/app
@@ -48,6 +39,11 @@ services:
         condition: service_healthy
     networks:
       - go_api_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${PORT:-8080}/health || exit 1"]
+      interval: ${HEALTH_CHECK_INTERVAL:-10s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-5s}
+      retries: ${HEALTH_CHECK_RETRIES:-5}
     restart: unless-stopped
 
 networks:

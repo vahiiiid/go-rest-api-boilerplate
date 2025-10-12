@@ -16,13 +16,18 @@ import (
 
 // SetupRouter creates and configures the Gin router
 func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *config.Config) *gin.Engine {
-	// Set Gin mode based on environment
-	gin.SetMode(gin.ReleaseMode)
-
 	router := gin.New()
 
+	// Set Gin mode
+	if cfg.App.Environment == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	} else {
+		gin.SetMode(gin.DebugMode)
+	}
+
+	// Global middleware
 	// Middleware - use configurable logging with environment-based skip paths
-	skipPaths := config.GetSkipPaths(cfg.Server.Env)
+	skipPaths := config.GetSkipPaths(cfg.App.Environment)
 	loggerConfig := middleware.NewLoggerConfig(
 		cfg.Logging.GetLogLevel(),
 		skipPaths,
@@ -46,6 +51,32 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 
 	// Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Global rate-limit middleware (per client IP)
+	rlCfg := cfg.Ratelimit
+	if rlCfg.Enabled {
+		router.Use(
+			middleware.NewRateLimitMiddleware(
+				rlCfg.Window,
+				rlCfg.Requests,
+				func(c *gin.Context) string {
+					ip := c.ClientIP()
+					if ip == "" {
+						// Fallback for test environments or when ClientIP is empty
+						ip = c.GetHeader("X-Forwarded-For")
+						if ip == "" {
+							ip = c.GetHeader("X-Real-IP")
+						}
+						if ip == "" {
+							ip = "unknown"
+						}
+					}
+					return ip
+				},
+				nil, // default in-memory LRU
+			),
+		)
+	}
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")

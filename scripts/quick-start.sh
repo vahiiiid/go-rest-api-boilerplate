@@ -26,7 +26,7 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check Docker Compose
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null 2>&1; then
+if ! docker compose version &> /dev/null 2>&1; then
     echo -e "${RED}❌ Docker Compose is not installed${NC}"
     echo ""
     echo "Please install Docker Compose:"
@@ -49,30 +49,39 @@ else
 fi
 
 echo ""
+echo "Reading .env file..."
+echo ""
+# Load environment variables from .env file
+if [ -f .env ]; then
+    export $(cat .env | grep -v '^#' | grep -v '^$' | xargs)
+fi
+
+echo -e "${GREEN}✅ .env file read${NC}"
+
+# Fallback for env variable(s)
+PORT=${PORT:-8080}
+
+echo ""
 echo "🐳 Starting Docker containers..."
 echo ""
 
 # Stop existing containers if running
-if docker-compose ps | grep -q "Up"; then
+if docker compose ps | grep -q "Up"; then
     echo "Stopping existing containers..."
-    docker-compose down
+    docker compose down
 fi
 
 # Start containers
-if docker-compose up -d --build; then
+if docker compose up -d --build --wait; then
     echo ""
     echo -e "${GREEN}✅ Containers started successfully${NC}"
 else
     echo ""
     echo -e "${RED}❌ Failed to start containers${NC}"
     echo ""
-    echo "Check logs with: docker-compose logs"
+    echo "Check logs with: docker compose logs"
     exit 1
 fi
-
-echo ""
-echo "Waiting for services to be ready..."
-sleep 5
 
 echo ""
 echo "================================================"
@@ -80,14 +89,14 @@ echo -e "${GREEN}🎉 Success! Your API is ready!${NC}"
 echo "================================================"
 echo ""
 echo "📍 Your API is running at:"
-echo "   • API Base:    http://localhost:8080/api/v1"
-echo "   • Swagger UI:  http://localhost:8080/swagger/index.html"
-echo "   • Health:      http://localhost:8080/health"
+echo "   • API Base:    http://localhost:${PORT}/api/v1"
+echo "   • Swagger UI:  http://localhost:${PORT}/swagger/index.html"
+echo "   • Health:      http://localhost:${PORT}/health"
 echo ""
 echo "🐳 Docker Commands:"
-echo "   • View logs:   docker-compose logs -f app"
-echo "   • Stop:        docker-compose down"
-echo "   • Restart:     docker-compose restart"
+echo "   • View logs:   docker compose logs -f app"
+echo "   • Stop:        docker compose down"
+echo "   • Restart:     docker compose restart"
 echo ""
 echo "🛠️  Development Commands:"
 echo "   • Run tests:   make test"

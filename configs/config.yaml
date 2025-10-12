@@ -1,21 +1,32 @@
 # Example configuration file
 # Note: Environment variables take precedence over this file
 
-server:
-  port: 8080
-  env: development
+app:
+  name: "GRAB API"
+  environment: "development"
+  debug: true
 
 database:
-  host: localhost
+  host: "db"
   port: 5432
-  user: postgres
-  password: postgres
-  name: go_api
+  user: "postgres"
+  password: "postgres"
+  name: "grab"
+  sslmode: "disable"
 
 jwt:
-  secret: your-secret-key-change-in-production
-  ttl_hours: 24
+  secret: "your-secret-key-change-this"
+  ttlhours: 24
+
+server:
+  port: "8080"
+  readtimeout: 10
+  writetimeout: 10
 
 logging:
   level: info  # debug, info, warn, error
 
+ratelimit:
+  rate_limit_enabled: true 
+  rate_limit_requests: 50
+  rate_limit_window: 1m 
