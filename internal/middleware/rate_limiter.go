@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -58,7 +59,9 @@ func RateLimitByEmail(limit int, window time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Read and restore body
 		bodyBytes, _ := io.ReadAll(c.Request.Body)
-		c.Request.Body.Close()
+		if err := c.Request.Body.Close(); err != nil {
+			log.Printf("error closing request body: %v", err)
+		}
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 		var payload struct {
