@@ -59,6 +59,35 @@ func setupRateLimitTestRouter(t *testing.T) *gin.Engine {
 
 	// Create in-memory SQLite database for testing
 	database, err := db.NewSQLiteDB(":memory:")
+	assert.NoError(t, err)
+
+	// Run migrations
+	err = database.AutoMigrate(&user.User{})
+	assert.NoError(t, err)
+
+	// Initialize services with the test config
+	authService := auth.NewService(&testCfg.JWT)
+	userRepo := user.NewRepository(database)
+	userService := user.NewService(userRepo)
+	userHandler := user.NewHandler(userService, authService)
+
+	// Setup router
+	return server.SetupRouter(userHandler, authService, testCfg)
+}
+
+func setupRateLimitTestRouter(t *testing.T) *gin.Engine {
+	// Set Gin to test mode
+	gin.SetMode(gin.TestMode)
+
+	// Use the test config helper to get a valid base configuration
+	testCfg := config.NewTestConfig()
+	// Override rate limit settings specifically for this test
+	testCfg.Ratelimit.Enabled = true
+	testCfg.Ratelimit.Requests = 10
+	testCfg.Ratelimit.Window = time.Minute
+
+	// Create in-memory SQLite database for testing
+	database, err := db.NewSQLiteDB(":memory:")
 	if err != nil {
 		t.Fatalf("Failed to create test database: %v", err)
 	}
