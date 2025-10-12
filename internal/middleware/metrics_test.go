@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -200,12 +199,7 @@ func TestMetricsInProgress(t *testing.T) {
 	config := DefaultMetricsConfig()
 	router.Use(Metrics(config))
 
-	// Handler that allows us to check the gauge during execution
-	var inProgressValue float64
 	router.GET("/test", func(c *gin.Context) {
-		// Get the current value while request is being processed
-		metric := prometheus.NewGauge(prometheus.GaugeOpts{Name: "temp"})
-		_ = metric
 		c.JSON(http.StatusOK, gin.H{"message": "ok"})
 	})
 
@@ -221,8 +215,6 @@ http_requests_in_progress 0
 `
 	err := testutil.CollectAndCompare(httpRequestsInProgress, strings.NewReader(expected))
 	assert.NoError(t, err, "In-progress gauge should be 0 after request completes")
-
-	_ = inProgressValue
 }
 
 func TestMetricsStatusCodes(t *testing.T) {
