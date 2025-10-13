@@ -1,5 +1,4 @@
 #!/bin/bash
-# Entrypoint script for the application
 
 # Set the github environment to safe to avoid vcs error from GO
 git config --global --add safe.directory /app

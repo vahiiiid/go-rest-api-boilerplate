@@ -31,9 +31,8 @@ COPY . .
 # Expose port
 EXPOSE 8080
 
-# Set executable permission for app_entrypoint.sh and fix line endings
-RUN chmod +x scripts/app_entrypoint.sh && \
-    sed -i 's/\r$//' scripts/app_entrypoint.sh
+# Set executable permission for app_entrypoint.sh
+RUN chmod +x scripts/app_entrypoint.sh
 
 # Use entrypoint
 ENTRYPOINT ["./scripts/app_entrypoint.sh"]
