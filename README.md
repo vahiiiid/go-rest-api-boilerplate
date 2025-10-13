@@ -474,84 +474,20 @@ For contributing to the codebase, see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ```
 go-rest-api-boilerplate/
-├── api/
-│   ├── docs/                      # Swagger documentation (auto-generated)
-│   │   ├── docs.go                # Swagger Go package
-│   │   ├── swagger.json           # OpenAPI JSON spec
-│   │   └── swagger.yaml           # OpenAPI YAML spec
-│   └── postman_collection.json    # Postman API tests with examples
-├── bin/                           # Compiled binaries (gitignored)
-│   └── server                     # Built Go binary (from make build-binary)
-├── cmd/
-│   └── server/
-│       └── main.go                # Application entry point
-├── configs/
-│   └── config.yaml                # Configuration file example
-├── docs/                          # Documentation site (MkDocs)
-│   ├── docs/                      # Documentation source files
-│   │   ├── DEVELOPMENT_GUIDE.md   # Development tutorial
-│   │   ├── DOCKER.md              # Docker setup guide
-│   │   ├── LOGGING.md             # Logging configuration
-│   │   ├── MIGRATIONS_GUIDE.md    # Database migration guide
-│   │   ├── SETUP.md               # Manual setup instructions
-│   │   ├── SWAGGER.md             # API documentation guide
-│   │   ├── TESTING.md             # Testing guide
-│   │   ├── TODO_EXAMPLE.md        # Complete feature implementation example
-│   │   └── images/                # Documentation images and assets
-│   ├── site/                      # Generated documentation site
-│   ├── mkdocs.yml                 # MkDocs configuration
-│   └── requirements.txt           # Python dependencies for docs
-├── internal/                      # Private application code
-│   ├── auth/                      # Authentication & authorization
-│   │   ├── dto.go                 # JWT claims & auth DTOs
-│   │   ├── middleware.go          # JWT middleware
-│   │   └── service.go             # Token generation & validation
-│   ├── config/                    # Configuration management
-│   │   ├── config.go              # Config structs and loading logic
-│   │   └── config_test.go         # Configuration tests
-│   ├── db/
-│   │   └── db.go                  # Database connection setup (GORM)
-│   ├── middleware/                # HTTP middleware
-│   │   ├── logger.go              # Request logging middleware
-│   │   ├── logger_test.go         # Logger middleware tests
-│   │   └── README.md              # Middleware documentation
-│   ├── server/
-│   │   └── router.go              # Route definitions & middleware
-│   └── user/                      # User domain (example feature)
-│       ├── dto.go                 # Request/Response DTOs
-│       ├── handler.go             # HTTP handlers with Swagger annotations
-│       ├── model.go               # GORM database model
-│       ├── repository.go          # Data access layer (CRUD)
-│       └── service.go             # Business logic layer
-├── migrations/                    # Database migration files (SQL)
-│   ├── 000001_create_users_table.up.sql
-│   └── 000001_create_users_table.down.sql
-├── scripts/                       # Helper automation scripts
-│   └── quick-start.sh             # One-command Docker setup
-├── tests/
-│   ├── handler_test.go            # Integration tests (httptest + SQLite)
-│   └── README.md                  # Testing guide
-├── tmp/                           # Air hot-reload temp files (gitignored)
-├── .air.toml                      # Hot-reload configuration (Air)
-├── .gitignore                     # Git ignore rules
-├── .golangci.yml                  # Linter configuration
-├── .github/
-│   └── workflows/
-│       └── ci.yml                 # GitHub Actions CI/CD pipeline
-├── CHANGELOG.md                   # Version history (SemVer)
-├── CONTRIBUTING.md                # Contribution guidelines
-├── docker-compose.yml             # Development with hot-reload & volumes
-├── docker-compose.prod.yml        # Production optimized (no volumes)
-├── Dockerfile                     # Multi-stage build (dev + prod)
-│                                  # Dev: All tools pre-installed
-│                                  # Prod: Minimal Alpine image
-├── go.mod                         # Go module dependencies
-├── go.sum                         # Dependency checksums
-├── LICENSE                        # MIT License
-├── Makefile                       # Build automation & shortcuts
-│                                  # Auto-detects Docker/host environment
-├── README.md                      # This file
-└── server.log                     # Application logs (gitignored)
+├── cmd/server/           # Application entry point
+├── internal/             # Private application code
+│   ├── auth/             # Authentication & JWT
+│   ├── user/             # User domain (example)
+│   ├── config/           # Configuration
+│   ├── db/               # Database connection
+│   ├── middleware/       # HTTP middleware
+│   └── server/           # Route definitions
+├── migrations/           # Database migrations
+├── tests/                # Test files
+├── api/                  # API documentation & Postman
+├── docker-compose.yml    # Development setup
+├── Dockerfile            # Container configuration
+└── Makefile              # Build automation
 ```
 
 ### Key Highlights
