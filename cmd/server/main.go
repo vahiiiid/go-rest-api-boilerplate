@@ -3,13 +3,16 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/vahiiiid/go-rest-api-boilerplate/api/docs" // swagger docs
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/db"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/logger"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/server"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
+	"go.uber.org/zap"
 )
 
 // @title Go REST API Boilerplate
@@ -33,26 +36,45 @@ import (
 // @description Type "Bearer" followed by a space and JWT token.
 
 func main() {
-	log.Println("Starting Go REST API Boilerplate...")
+	// Initialize logger
+	env := os.Getenv("ENV")
+	version := os.Getenv("VERSION")
+	if env == "" {
+		env = "development"
+	}
+
+	if err := logger.Init(env); err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer logger.Sync() // Flush buffered logs on shutdown
+
+	logger.Info("Starting Go REST API Boilerplate",
+		zap.String("environment", env),
+		zap.String("version", version),
+	)
 
 	// Load configuration (viper-based)
 	cfg, err := config.LoadConfig("")
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		logger.Fatal("Failed to load configuration: ", zap.Error(err))
 	}
 
 	// Connect to database using typed config
 	database, err := db.NewPostgresDBFromDatabaseConfig(cfg.Database)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		logger.Fatal("Failed to connect to database: ", zap.Error(err))
 	}
 
 	// Run migrations
-	log.Println("Running database migrations...")
+	// logger.Info("Database connection established")
+	logger.Info("Connected to database",
+		zap.String("host", dbConfig.Host),
+		zap.String("port", dbConfig.Port),
+	)
 	if err := database.AutoMigrate(&user.User{}); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		logger.Fatal("Failed to run migrations: ", zap.Error(err))
 	}
-	log.Println("Migrations completed successfully")
+	logger.Info("Migrations completed successfully")
 
 	// Initialize services
 	authService := auth.NewService(&cfg.JWT)
@@ -71,11 +93,14 @@ func main() {
 
 	// Start server
 	addr := fmt.Sprintf(":%s", port)
-	log.Printf("Server starting on %s", addr)
-	log.Printf("Swagger UI available at http://localhost:%s/swagger/index.html", port)
-	log.Printf("Health check available at http://localhost:%s/health", port)
+
+	logger.Info("Server starting", zap.String("server", fmt.Sprintf("http://localhost:%s", port)))
+
+	logger.Info("Swagger UI available at", zap.String("swagger", fmt.Sprintf("http://localhost:%s/swagger/index.html", port)))
+
+	logger.Info("Health check available at", zap.String("health", fmt.Sprintf("http://localhost:%s/health", port)))
 
 	if err := router.Run(addr); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		logger.Fatal("Failed to start server: ", zap.Error(err))
 	}
 }
