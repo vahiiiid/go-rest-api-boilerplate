@@ -71,19 +71,51 @@ jwt:
 		assert.Equal(t, "env-secret-for-validation", cfg.JWT.Secret) // Assert override
 	})
 
-	t.Run("uses default values when no file or env var is set", func(t *testing.T) {
+	t.Run("uses config file defaults when no env var is set", func(t *testing.T) {
 		viper.Reset()
-		// Ensure no config file is found
-		viper.AddConfigPath(t.TempDir())
-		// Ensure a required value is set to pass validation
-		t.Setenv("JWT_SECRET", "some-secret")
+		// Clear environment variables that might interfere
+		t.Setenv("JWT_SECRET", "")
+		t.Setenv("APP_ENVIRONMENT", "")
+		t.Setenv("DATABASE_HOST", "")
+		t.Setenv("DATABASE_PASSWORD", "")
 
-		cfg, err := LoadConfig("")
+		// Create a complete config file with all required fields
+		tempDir := t.TempDir()
+		path := createTempConfigFile(t, tempDir, "config.yaml", `
+app:
+  name: "GRAB API (development)"
+  environment: "development"
+  debug: true
+database:
+  host: "testhost"
+  port: 5432
+  user: "testuser"
+  password: "testpass"
+  name: "testdb"
+  sslmode: "disable"
+jwt:
+  secret: "file-secret-for-validation"
+  ttlhours: 24
+server:
+  port: "8080"
+  readtimeout: 10
+  writetimeout: 10
+logging:
+  level: "info"
+ratelimit:
+  enabled: false
+  requests: 100
+  window: "1m"
+`)
+
+		cfg, err := LoadConfig(path)
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
-		// This value is not in any file or env var, so it should be the default
+		// These values should come from config file defaults
 		assert.Equal(t, 10, cfg.Server.ReadTimeout)
 		assert.Equal(t, "development", cfg.App.Environment)
+		assert.Equal(t, "GRAB API (development)", cfg.App.Name)
+		assert.Equal(t, "file-secret-for-validation", cfg.JWT.Secret)
 	})
 
 	t.Run("fails validation if required JWT_SECRET is missing", func(t *testing.T) {
@@ -100,11 +132,26 @@ jwt:
 
 	t.Run("fails validation if DB_PASSWORD is missing in production", func(t *testing.T) {
 		viper.Reset()
-		viper.AddConfigPath(t.TempDir()) // No config file
+		// Create a minimal config with production environment but no database password
+		tempDir := t.TempDir()
+		path := createTempConfigFile(t, tempDir, "config.yaml", `
+app:
+  environment: "production"
+database:
+  host: "testhost"
+  port: 5432
+  user: "testuser"
+  password: ""  # Empty password should fail validation in production
+  name: "testdb"
+  sslmode: "require"
+jwt:
+  secret: "this-is-a-very-strong-production-secret-for-testing"
+  ttlhours: 24
+`)
 		t.Setenv("APP_ENVIRONMENT", "production")
-		t.Setenv("JWT_SECRET", "this-is-a-very-strong-production-secret-for-testing") // Satisfy JWT validation
+		t.Setenv("DATABASE_PASSWORD", "") // Explicitly empty
 
-		_, err := LoadConfig("")
+		_, err := LoadConfig(path)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "database.password is required in production")
 	})
@@ -120,10 +167,16 @@ jwt:
 		path := createTempConfigFile(t, tempDir, "config.yaml", `
 app:
   environment: "production"
+database:
+  host: "testhost"
+  port: 5432
+  user: "testuser"
+  password: "prod-password"
+  name: "testdb"
+  sslmode: "require"
 jwt:
   secret: "short"
-database:
-  password: "prod-password"
+  ttlhours: 24
 `)
 		_, err := LoadConfig(path)
 		assert.Error(t, err)
@@ -146,15 +199,28 @@ database:
 		assert.NoError(t, err)
 
 		// Create a default and a production config file inside the temp configs dir
-		createTempConfigFile(t, configsDir, "config.yaml", `app: {name: "Default API"}`)
+		createTempConfigFile(t, configsDir, "config.yaml", `
+app:
+  name: "Default API"
+database:
+  host: "testhost"
+jwt:
+  secret: "default-secret"
+`)
 		createTempConfigFile(t, configsDir, "config.production.yaml", `
 app:
   name: "Production API"
+  environment: "production"
+database:
+  host: "testhost"
+  port: 5432
+  user: "testuser"
+  password: "prod-password"
+  name: "testdb"
+  sslmode: "require"
 jwt:
   secret: "this-is-a-very-strong-production-secret-for-testing-purposes-only"
-database:
-  password: "prod-password"
-  sslmode: "require"
+  ttlhours: 24
 `)
 		// Temporarily change working directory so LoadConfig can find the "configs" folder
 		oldWd, err := os.Getwd()

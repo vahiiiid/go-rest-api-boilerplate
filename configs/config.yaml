@@ -27,7 +27,7 @@ database:
   sslmode: "disable"                # Override with DATABASE_SSLMODE
 
 jwt:
-  secret: "jwt-secret"              # Override with JWT_SECRET (required for production)
+  secret: "change-me"              # Override with JWT_SECRET (required for production)
   ttlhours: 24                      # Override with JWT_TTLHOURS
 
 server:

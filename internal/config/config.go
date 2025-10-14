@@ -91,9 +91,6 @@ func LoadConfig(configPath string) (*Config, error) {
 		v.AddConfigPath("./configs")
 	}
 
-	// Defaults
-	setViperDefaults(v)
-
 	// Read config file if present
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
@@ -124,38 +121,6 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 
 	return &cfg, nil
-}
-
-func setViperDefaults(v *viper.Viper) {
-	// App
-	v.SetDefault("app.name", "GRAB API")
-	v.SetDefault("app.environment", "development")
-	v.SetDefault("app.debug", false)
-
-	// Database
-	v.SetDefault("database.host", "db")
-	v.SetDefault("database.port", 5432)
-	v.SetDefault("database.sslmode", "disable")
-	v.SetDefault("database.user", "postgres")
-	v.SetDefault("database.name", "grab")
-	// Do not set a default for password, so validation can catch it.
-
-	// JWT
-	v.SetDefault("jwt.ttlhours", 24)
-	v.SetDefault("jwt.secret", "")
-
-	// Server
-	v.SetDefault("server.port", "8080")
-	v.SetDefault("server.readtimeout", 10)
-	v.SetDefault("server.writetimeout", 10)
-
-	// Logging
-	v.SetDefault("logging.level", "info")
-
-	// Ratelimit
-	v.SetDefault("ratelimit.enabled", false)
-	v.SetDefault("ratelimit.requests", 100)
-	v.SetDefault("ratelimit.window", "1m")
 }
 
 // GetLogLevel converts string log level to slog.Level

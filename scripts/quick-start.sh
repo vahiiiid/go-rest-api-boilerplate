@@ -53,7 +53,8 @@ echo "Reading .env file..."
 echo ""
 # Load environment variables from .env file
 if [ -f .env ]; then
-    export $(cat .env | grep -v '^#' | grep -v '^$' | xargs)
+    # parsing: exclude comments, empty lines, and invalid variable names
+    export $(cat .env | grep -E '^[A-Za-z_][A-Za-z0-9_]*=' | grep -v '#' | xargs)
 fi
 
 echo -e "${GREEN}✅ .env file read${NC}"

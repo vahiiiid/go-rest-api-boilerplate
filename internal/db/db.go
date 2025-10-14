@@ -17,16 +17,17 @@ import (
 // Config holds database configuration
 type Config struct {
 	Host     string
-	Port     string
+	Port     int
 	User     string
 	Password string
 	Name     string
+	SSLMode  string
 }
 
 // NewPostgresDB creates a new PostgreSQL database connection
 func NewPostgresDB(cfg Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-		cfg.Host, cfg.User, cfg.Password, cfg.Name, cfg.Port, viper.GetString("database.sslmode"))
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s",
+		cfg.Host, cfg.User, cfg.Password, cfg.Name, cfg.Port, cfg.SSLMode)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
@@ -93,9 +94,10 @@ func NewSQLiteDB(dbPath string) (*gorm.DB, error) {
 func LoadConfigFromEnv() Config {
 	return Config{
 		Host:     viper.GetString("database.host"),
-		Port:     viper.GetString("database.port"),
+		Port:     viper.GetInt("database.port"),
 		User:     viper.GetString("database.user"),
 		Password: viper.GetString("database.password"),
 		Name:     viper.GetString("database.name"),
+		SSLMode:  viper.GetString("database.sslmode"),
 	}
 }
