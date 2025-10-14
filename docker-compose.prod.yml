@@ -30,7 +30,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${PORT:-8080}:${PORT:-8080}"
+      - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
     # No volumes in production - code is baked into the image
     depends_on:
       db:
