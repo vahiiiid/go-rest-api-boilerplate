@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,9 @@ func Middleware() gin.HandlerFunc {
 		}
 		c.Set(RequestIDKey, requestID)
 		c.Writer.Header().Set("X-Request-ID", requestID)
+
+		ctx := context.WithValue(c.Request.Context(), RequestIDKey, requestID)
+		c.Request = c.Request.WithContext(ctx)
 
 		// Process request
 		c.Next()
