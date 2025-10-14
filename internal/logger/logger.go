@@ -59,12 +59,26 @@ func InitWithWriter(env string, writer io.Writer) error {
 		)
 		logger = zap.New(core)
 	} else {
-		core := zapcore.NewCore(
-			encoder,
-			zapcore.AddSync(os.Stdout),
-			level,
-		)
-		logger = zap.New(core)
+		// Writing logs in "server.log" only for production
+
+		if env == "production" {
+			file, err := os.OpenFile("server.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				return err
+			}
+			core := zapcore.NewTee(
+				zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), level),
+				zapcore.NewCore(encoder, zapcore.AddSync(file), level),
+			)
+			logger = zap.New(core)
+		} else {
+			core := zapcore.NewCore(
+				encoder,
+				zapcore.AddSync(os.Stdout),
+				level,
+			)
+			logger = zap.New(core)
+		}
 	}
 
 	Log = logger
@@ -98,4 +112,3 @@ func Debug(msg string, fields ...zap.Field) {
 func Fatal(msg string, fields ...zap.Field) {
 	Log.Fatal(msg, fields...)
 }
-
