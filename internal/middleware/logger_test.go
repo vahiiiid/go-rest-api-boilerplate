@@ -3,13 +3,13 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/logger"
 )
 
 func init() {
@@ -21,18 +21,18 @@ func init() {
 func TestLogger(t *testing.T) {
 	// Create a buffer to capture logs
 	var buf bytes.Buffer
-	logger := slog.New(slog.NewJSONHandler(&buf, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
 
-	config := &LoggerConfig{
-		SkipPaths: []string{},
-		Logger:    logger,
+	// Initialize logger with the buffer
+	if err := logger.InitWithWriter("test", &buf); err != nil {
+		t.Fatalf("Failed to initialize logger: %v", err)
 	}
 
 	// Setup router
 	router := gin.New()
-	router.Use(Logger(config))
+
+	router.Use(logger.Middleware())
+	router.Use(gin.Recovery())
+
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "test"})
 	})
@@ -49,8 +49,8 @@ func TestLogger(t *testing.T) {
 
 	// Verify log output
 	logOutput := buf.String()
-	if !strings.Contains(logOutput, "HTTP Request") {
-		t.Error("Expected log to contain 'HTTP Request'")
+	if !strings.Contains(logOutput, "Request") {
+		t.Error("Expected log to contain 'Request'")
 	}
 	if !strings.Contains(logOutput, "GET") {
 		t.Error("Expected log to contain request method 'GET'")
@@ -58,22 +58,27 @@ func TestLogger(t *testing.T) {
 	if !strings.Contains(logOutput, "/test") {
 		t.Error("Expected log to contain request path '/test'")
 	}
+	if !strings.Contains(logOutput, "INFO") {
+		t.Error("Expected log to contain request log 'INFO'")
+	}
 }
 
 // TestLoggerSkipPaths tests that specified paths are skipped
 func TestLoggerSkipPaths(t *testing.T) {
+	// Create a buffer to capture logs
 	var buf bytes.Buffer
-	logger := slog.New(slog.NewJSONHandler(&buf, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
 
-	config := &LoggerConfig{
-		SkipPaths: []string{"/health"},
-		Logger:    logger,
+	// Initialize logger with the buffer
+	if err := logger.InitWithWriter("test", &buf); err != nil {
+		t.Fatalf("Failed to initialize logger: %v", err)
 	}
 
+	// Setup router
 	router := gin.New()
-	router.Use(Logger(config))
+
+	router.Use(logger.Middleware())
+	router.Use(gin.Recovery())
+
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
@@ -97,18 +102,20 @@ func TestLoggerSkipPaths(t *testing.T) {
 
 // TestLoggerRequestID tests request ID generation and propagation
 func TestLoggerRequestID(t *testing.T) {
+	// Create a buffer to capture logs
 	var buf bytes.Buffer
-	logger := slog.New(slog.NewJSONHandler(&buf, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
 
-	config := &LoggerConfig{
-		SkipPaths: []string{},
-		Logger:    logger,
+	// Initialize logger with the buffer
+	if err := logger.InitWithWriter("test", &buf); err != nil {
+		t.Fatalf("Failed to initialize logger: %v", err)
 	}
 
+	// Setup router
 	router := gin.New()
-	router.Use(Logger(config))
+
+	router.Use(logger.Middleware())
+	router.Use(gin.Recovery())
+
 	router.GET("/test", func(c *gin.Context) {
 		// Verify request ID is set in context
 		requestID, exists := c.Get("request_id")
@@ -141,18 +148,20 @@ func TestLoggerRequestID(t *testing.T) {
 
 // TestLoggerWithProvidedRequestID tests that provided request ID is used
 func TestLoggerWithProvidedRequestID(t *testing.T) {
+	// Create a buffer to capture logs
 	var buf bytes.Buffer
-	logger := slog.New(slog.NewJSONHandler(&buf, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
 
-	config := &LoggerConfig{
-		SkipPaths: []string{},
-		Logger:    logger,
+	// Initialize logger with the buffer
+	if err := logger.InitWithWriter("test", &buf); err != nil {
+		t.Fatalf("Failed to initialize logger: %v", err)
 	}
 
+	// Setup router
 	router := gin.New()
-	router.Use(Logger(config))
+
+	router.Use(logger.Middleware())
+	router.Use(gin.Recovery())
+
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
@@ -171,33 +180,36 @@ func TestLoggerWithProvidedRequestID(t *testing.T) {
 	}
 }
 
-// TestLoggerStatusCodes tests logging of different status codes
+// // TestLoggerStatusCodes tests logging of different status codes
 func TestLoggerStatusCodes(t *testing.T) {
 	testCases := []struct {
 		name          string
 		statusCode    int
 		expectedLevel string
 	}{
-		{"Success", http.StatusOK, "INFO"},
-		{"Client Error", http.StatusBadRequest, "WARN"},
-		{"Not Found", http.StatusNotFound, "WARN"},
-		{"Server Error", http.StatusInternalServerError, "ERROR"},
+		{"Success", http.StatusOK, "info"},
+		{"Client Error", http.StatusBadRequest, "warn"},
+		{"Not Found", http.StatusNotFound, "warn"},
+		{"Server Error", http.StatusInternalServerError, "error"},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// Create a buffer to capture logs
 			var buf bytes.Buffer
-			logger := slog.New(slog.NewJSONHandler(&buf, &slog.HandlerOptions{
-				Level: slog.LevelInfo,
-			}))
 
-			config := &LoggerConfig{
-				SkipPaths: []string{},
-				Logger:    logger,
+			// Initialize logger with the buffer
+			// Using production log in this test because we are parsing json
+			if err := logger.InitWithWriter("production", &buf); err != nil {
+				t.Fatalf("Failed to initialize logger: %v", err)
 			}
 
+			// Setup router
 			router := gin.New()
-			router.Use(Logger(config))
+
+			router.Use(logger.Middleware())
+			router.Use(gin.Recovery())
+
 			router.GET("/test", func(c *gin.Context) {
 				c.JSON(tc.statusCode, gin.H{"status": "test"})
 			})
@@ -239,65 +251,22 @@ func TestLoggerStatusCodes(t *testing.T) {
 	}
 }
 
-// TestLoggerWithConfig tests LoggerWithConfig function
-func TestLoggerWithConfig(t *testing.T) {
-	var buf bytes.Buffer
-
-	// Redirect log output to buffer for testing
-	oldDefault := slog.Default()
-	defer slog.SetDefault(oldDefault)
-
-	logger := slog.New(slog.NewJSONHandler(&buf, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}))
-	slog.SetDefault(logger)
-
-	router := gin.New()
-	router.Use(LoggerWithConfig([]string{"/health"}, slog.LevelDebug))
-	router.GET("/test", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "test"})
-	})
-
-	req := httptest.NewRequest("GET", "/test", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status 200, got %d", w.Code)
-	}
-}
-
-// TestDefaultLoggerConfig tests the default configuration
-func TestDefaultLoggerConfig(t *testing.T) {
-	config := DefaultLoggerConfig()
-
-	if config == nil {
-		t.Fatal("Expected non-nil config")
-	}
-
-	if config.Logger == nil {
-		t.Error("Expected logger to be initialized")
-	}
-
-	if len(config.SkipPaths) != 1 || config.SkipPaths[0] != "/health" {
-		t.Errorf("Expected default skip paths to contain '/health', got %v", config.SkipPaths)
-	}
-}
-
 // TestLoggerQueryParameters tests logging with query parameters
 func TestLoggerQueryParameters(t *testing.T) {
+	// Create a buffer to capture logs
 	var buf bytes.Buffer
-	logger := slog.New(slog.NewJSONHandler(&buf, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
 
-	config := &LoggerConfig{
-		SkipPaths: []string{},
-		Logger:    logger,
+	// Initialize logger with the buffer
+	if err := logger.InitWithWriter("test", &buf); err != nil {
+		t.Fatalf("Failed to initialize logger: %v", err)
 	}
 
+	// Setup router
 	router := gin.New()
-	router.Use(Logger(config))
+
+	router.Use(logger.Middleware())
+	router.Use(gin.Recovery())
+
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "test"})
 	})
