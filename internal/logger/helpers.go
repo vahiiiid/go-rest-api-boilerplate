@@ -29,7 +29,7 @@ func InvalidUserID(requestID string, err error, id string) {
 	Error("Invalid user ID",
 		zap.String("request_id", requestID),
 		zap.Error(err),
-		zap.String("id", id),
+		zap.String("user_id", id),
 	)
 }
 
@@ -38,7 +38,7 @@ func ForbiddenID(requestID string, err error, id uint) {
 	Error("Forbidden ID",
 		zap.String("request_id", requestID),
 		zap.Error(err),
-		zap.Uint("id", id),
+		zap.Uint("user_id", id),
 	)
 }
 
@@ -47,7 +47,7 @@ func UserNotFound(requestID string, err error, id uint) {
 	Error("User not found",
 		zap.String("request_id", requestID),
 		zap.Error(err),
-		zap.Uint("id", id),
+		zap.Uint("user_id", id),
 	)
 }
 
@@ -102,7 +102,7 @@ func FailedToGetUser(requestID string, err error, id uint) {
 	Error("Failed to get user",
 		zap.String("request_id", requestID),
 		zap.Error(err),
-		zap.Uint("id", id),
+		zap.Uint("user_id", id),
 	)
 }
 
@@ -125,6 +125,6 @@ func FailedToDeleteUser(requestID string, err error, id uint) {
 	Error("Failed to delete user",
 		zap.String("request_id", requestID),
 		zap.Error(err),
-		zap.Uint("id", id),
+		zap.Uint("user_id", id),
 	)
 }
