@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 )
 

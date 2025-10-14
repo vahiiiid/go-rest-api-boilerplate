@@ -101,7 +101,7 @@ jwt:
 		assert.Contains(t, err.Error(), "database.password is required in production")
 	})
 
-	t.Run("loads environment-specific config file", func(t *testing.T) {
+	t.Run("loads environment-specific config file when no path is given", func(t *testing.T) {
 		viper.Reset()
 		tempDir := t.TempDir()
 		configsDir := filepath.Join(tempDir, "configs")
@@ -119,10 +119,14 @@ database:
   password: "prod-password"
 `)
 		// Temporarily change working directory so LoadConfig can find the "configs" folder
-		oldWd, _ := os.Getwd()
+		oldWd, err := os.Getwd()
+		assert.NoError(t, err)
 		err = os.Chdir(tempDir)
 		assert.NoError(t, err)
-		defer os.Chdir(oldWd)
+		defer func() {
+			err := os.Chdir(oldWd)
+			assert.NoError(t, err)
+		}()
 
 		t.Setenv("APP_ENVIRONMENT", "production")
 

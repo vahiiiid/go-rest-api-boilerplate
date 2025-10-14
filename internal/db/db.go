@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 )
 
 // Config holds database configuration

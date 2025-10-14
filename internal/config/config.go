@@ -13,12 +13,12 @@ import (
 
 // Config represents the application configuration
 type Config struct {
-  App       AppConfig       `mapstructure:"app" yaml:"app"`
-  Database  DatabaseConfig  `mapstructure:"database" yaml:"database"`
-  JWT       JWTConfig       `mapstructure:"jwt" yaml:"jwt"`
-  Server    ServerConfig    `mapstructure:"server" yaml:"server"`
-  Logging   LoggingConfig   `mapstructure:"logging" yaml:"logging"`
-  Ratelimit RateLimitConfig `mapstructure:"ratelimit" yaml:"ratelimit"`
+	App       AppConfig       `mapstructure:"app" yaml:"app"`
+	Database  DatabaseConfig  `mapstructure:"database" yaml:"database"`
+	JWT       JWTConfig       `mapstructure:"jwt" yaml:"jwt"`
+	Server    ServerConfig    `mapstructure:"server" yaml:"server"`
+	Logging   LoggingConfig   `mapstructure:"logging" yaml:"logging"`
+	Ratelimit RateLimitConfig `mapstructure:"ratelimit" yaml:"ratelimit"`
 }
 
 // AppConfig holds application-related configuration.
@@ -58,9 +58,9 @@ type LoggingConfig struct {
 
 // RateLimitConfig holds rate-limit configuration
 type RateLimitConfig struct {
-  Enabled  bool          `mapstructure:"enabled" yaml:"enabled"`
-  Requests int           `mapstructure:"requests" yaml:"requests"`
-  Window   time.Duration `mapstructure:"window" yaml:"window"`
+	Enabled  bool          `mapstructure:"enabled" yaml:"enabled"`
+	Requests int           `mapstructure:"requests" yaml:"requests"`
+	Window   time.Duration `mapstructure:"window" yaml:"window"`
 }
 
 // LoadConfig loads configuration using Viper. If configPath is non-empty it
@@ -149,11 +149,11 @@ func setDefaults() {
 
 	// Logging
 	viper.SetDefault("logging.level", "info")
-  
-  // Ratelimit
-  viper.SetDefault("ratelimit.enabled", false)
-  viper.SetDefault("ratelimit.requests", 100)
-  viper.SetDefault("ratelimit.window", "1m")
+
+	// Ratelimit
+	viper.SetDefault("ratelimit.enabled", false)
+	viper.SetDefault("ratelimit.requests", 100)
+	viper.SetDefault("ratelimit.window", "1m")
 }
 
 // GetLogLevel converts string log level to slog.Level
