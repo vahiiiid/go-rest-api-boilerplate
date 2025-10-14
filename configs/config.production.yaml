@@ -1,18 +1,28 @@
+# ===========================================
+# Go REST API Boilerplate - Production Configuration
+# ===========================================
+# 
+# This file contains production-specific overrides
+# 📋 For ALL configuration options see: config.yaml (base configuration)
+# 🔧 Environment variables (.env) have highest priority and will override these values
+#
+# ===========================================
+
 app:
   name: "GRAB API"
   environment: "production"
-  debug: false
+  debug: false                      # Disable debug mode in production
 
 database:
-  host: "db.production.example"
+  host: "db"
   port: 5432
   user: "postgres"
-  password: "CHANGE_ME"   # REQUIRED: set a strong DB password in production
+  password: ""                      # REQUIRED: set via DATABASE_PASSWORD environment variable
   name: "grab"
-  sslmode: "require"
+  sslmode: "require"                # SSL required in production
 
 jwt:
-  secret: "CHANGE_ME"     # REQUIRED: set a strong JWT secret in production
+  secret: ""                        # REQUIRED: set via JWT_SECRET environment variable
   ttlhours: 24
 
 server:

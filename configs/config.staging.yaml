@@ -1,18 +1,28 @@
+# ===========================================
+# Go REST API Boilerplate - Staging Configuration
+# ===========================================
+#
+# This file contains staging-specific overrides
+# 📋 For ALL configuration options see: config.yaml (base configuration)  
+# 🔧 Environment variables (.env) have highest priority and will override these values
+#
+# ===========================================
+
 app:
   name: "GRAB API (staging)"
   environment: "staging"
-  debug: false
+  debug: false                      # Debug disabled in staging
 
 database:
-  host: "db.staging.example"
+  host: "db"
   port: 5432
   user: "postgres"
-  password: "staging-password-placeholder"
-  name: "grab_staging"
-  sslmode: "require"
+  password: "postgres"              # Default for staging (override with DATABASE_PASSWORD)
+  name: "grab"
+  sslmode: "disable"                # SSL can be disabled for staging
 
 jwt:
-  secret: "staging-secret-placeholder"
+  secret: "change-me"               # Default for staging (override with JWT_SECRET)
   ttlhours: 24
 
 server:

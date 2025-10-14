@@ -66,8 +66,11 @@ type RateLimitConfig struct {
 // LoadConfig loads configuration using Viper. If configPath is non-empty it
 // will be used as the exact config file path, otherwise Viper searches common locations.
 func LoadConfig(configPath string) (*Config, error) {
+	// Create a new viper instance to avoid conflicts with global state
+	v := viper.New()
+
 	if configPath != "" {
-		viper.SetConfigFile(configPath)
+		v.SetConfigFile(configPath)
 	} else {
 		// choose config.<env>.yaml if APP_ENVIRONMENT is set; otherwise use config.yaml
 		env := os.Getenv("APP_ENVIRONMENT")
@@ -78,22 +81,22 @@ func LoadConfig(configPath string) (*Config, error) {
 		}
 
 		// Try env-specific file first
-		viper.SetConfigName(fmt.Sprintf("config.%s", env))
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath("configs")
-		viper.AddConfigPath(".")
-		viper.AddConfigPath("./configs")
+		v.SetConfigName(fmt.Sprintf("config.%s", env))
+		v.SetConfigType("yaml")
+		v.AddConfigPath("configs")
+		v.AddConfigPath(".")
+		v.AddConfigPath("./configs")
 	}
 
 	// Environment variable mapping
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.AutomaticEnv()
 
 	// Defaults
-	setDefaults()
+	setViperDefaults(v)
 
 	// Read config file if present
-	if err := viper.ReadInConfig(); err != nil {
+	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return nil, fmt.Errorf("failed to read config file: %w", err)
 		}
@@ -102,16 +105,16 @@ func LoadConfig(configPath string) (*Config, error) {
 
 	// Unmarshal into struct
 	var cfg Config
-	if err := viper.Unmarshal(&cfg); err != nil {
+	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
 	// Backwards compatibility: if Server.Env not set, prefer APP_ENVIRONMENT/ENV
 	if cfg.App.Environment == "" {
 		// prefer viper (env vars are already bound via AutomaticEnv and key replacer)
-		if e := viper.GetString("app.environment"); e != "" {
+		if e := v.GetString("app.environment"); e != "" {
 			cfg.App.Environment = e
-		} else if e := viper.GetString("ENV"); e != "" {
+		} else if e := v.GetString("ENV"); e != "" {
 			cfg.App.Environment = e
 		}
 	}
@@ -124,36 +127,36 @@ func LoadConfig(configPath string) (*Config, error) {
 	return &cfg, nil
 }
 
-func setDefaults() {
+func setViperDefaults(v *viper.Viper) {
 	// App
-	viper.SetDefault("app.name", "GRAB API")
-	viper.SetDefault("app.environment", "development")
-	viper.SetDefault("app.debug", false)
+	v.SetDefault("app.name", "GRAB API")
+	v.SetDefault("app.environment", "development")
+	v.SetDefault("app.debug", false)
 
 	// Database
-	viper.SetDefault("database.host", "localhost")
-	viper.SetDefault("database.port", 5432)
-	viper.SetDefault("database.sslmode", "disable")
-	viper.SetDefault("database.user", "postgres")
-	viper.SetDefault("database.name", "grab")
+	v.SetDefault("database.host", "localhost")
+	v.SetDefault("database.port", 5432)
+	v.SetDefault("database.sslmode", "disable")
+	v.SetDefault("database.user", "postgres")
+	v.SetDefault("database.name", "grab")
 	// Do not set a default for password, so validation can catch it.
 
 	// JWT
-	viper.SetDefault("jwt.ttlhours", 24)
-	viper.SetDefault("jwt.secret", "")
+	v.SetDefault("jwt.ttlhours", 24)
+	v.SetDefault("jwt.secret", "")
 
 	// Server
-	viper.SetDefault("server.port", "8080")
-	viper.SetDefault("server.readtimeout", 10)
-	viper.SetDefault("server.writetimeout", 10)
+	v.SetDefault("server.port", "8080")
+	v.SetDefault("server.readtimeout", 10)
+	v.SetDefault("server.writetimeout", 10)
 
 	// Logging
-	viper.SetDefault("logging.level", "info")
+	v.SetDefault("logging.level", "info")
 
 	// Ratelimit
-	viper.SetDefault("ratelimit.enabled", false)
-	viper.SetDefault("ratelimit.requests", 100)
-	viper.SetDefault("ratelimit.window", "1m")
+	v.SetDefault("ratelimit.enabled", false)
+	v.SetDefault("ratelimit.requests", 100)
+	v.SetDefault("ratelimit.window", "1m")
 }
 
 // GetLogLevel converts string log level to slog.Level

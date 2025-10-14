@@ -1,32 +1,44 @@
-# Example configuration file
-# Note: Environment variables take precedence over this file
+# ===========================================
+# Go REST API Boilerplate - Base Configuration
+# ===========================================
+# 
+# CONFIGURATION PRIORITY (highest to lowest):
+# 1. Environment variables (.env file)
+# 2. Environment-specific config (config.production.yaml, config.staging.yaml, etc.)
+# 3. This base configuration file (config.yaml) - YOU ARE HERE
+#
+# 🔧 Environment variables can override any setting below
+# 📝 See .env.example for common overrides
+# 🌍 See config.{environment}.yaml for environment-specific defaults
+#
+# ===========================================
 
 app:
-  name: "GRAB API"
-  environment: "development"
-  debug: true
+  name: "GRAB API"                  # Override with APP_NAME
+  environment: "development"        # Override with APP_ENVIRONMENT
+  debug: true                       # Override with APP_DEBUG
 
 database:
-  host: "db"
-  port: 5432
-  user: "postgres"
-  password: "postgres"
-  name: "grab"
-  sslmode: "disable"
+  host: "db"                        # Override with DATABASE_HOST
+  port: 5432                        # Override with DATABASE_PORT  
+  user: "postgres"                  # Override with DATABASE_USER
+  password: ""                      # Override with DATABASE_PASSWORD (recommended)
+  name: "grab"                      # Override with DATABASE_NAME
+  sslmode: "disable"                # Override with DATABASE_SSLMODE
 
 jwt:
-  secret: "your-secret-key-change-this"
-  ttlhours: 24
+  secret: "jwt-secret"              # Override with JWT_SECRET (required for production)
+  ttlhours: 24                      # Override with JWT_TTLHOURS
 
 server:
-  port: "8080"
-  readtimeout: 10
-  writetimeout: 10
+  port: "8080"                      # Override with SERVER_PORT
+  readtimeout: 10                   # Override with SERVER_READTIMEOUT (seconds)
+  writetimeout: 10                  # Override with SERVER_WRITETIMEOUT (seconds)
 
 logging:
-  level: info  # debug, info, warn, error
+  level: "info"                     # Override with LOGGING_LEVEL (debug|info|warn|error)
 
 ratelimit:
-  rate_limit_enabled: true 
-  rate_limit_requests: 50
-  rate_limit_window: 1m 
+  enabled: false                    # Override with RATELIMIT_ENABLED
+  requests: 100                     # Override with RATELIMIT_REQUESTS
+  window: "1m"                      # Override with RATELIMIT_WINDOW 

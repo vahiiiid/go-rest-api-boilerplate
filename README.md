@@ -132,6 +132,7 @@ Import the pre-configured collection from `api/postman_collection.json` with exa
 - ✅ **CORS Support** - Configurable cross-origin requests
 - ✅ **Request Logging** - Configurable structured JSON logging with request tracking
 - ✅ **Rate Limiting** - Smart token-bucket protection against abuse
+- ✅ **Centralized Configuration** - Viper-powered config with environment precedence and structured YAML
 
 ## 📑 Table of Contents
 
@@ -635,47 +636,6 @@ The **[Development Guide](https://vahiiiid.github.io/go-rest-api-docs/developmen
 
 ---
 
-## Configuration
-
-This project uses a centralized configuration system (Viper). Configuration sources, in precedence order:
-1. Environment variables (e.g. DB_HOST, JWT_SECRET, etc.)
-2. Environment-specific config file: configs/config.<env>.yaml (when APP_ENVIRONMENT is set)
-3. Default config file: configs/config.yaml
-4. Built-in defaults defined in code
-
-Key files and helpers:
-- Loader: [`config.LoadConfig`](internal/config/config.go)
-- Example config file: [configs/config.yaml](configs/config.yaml)
-- Example env file: [.env.example](.env.example)
-
-Common environment variables
-- APP_ENVIRONMENT — selects environment-specific config (development | staging | production)
-- APP_NAME, APP_DEBUG
-- DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SSLMODE
-- JWT_SECRET, JWT_TTL_HOURS
-- SERVER_PORT, SERVER_READTIMEOUT, SERVER_WRITETIMEOUT
-Note: env var names use underscores and map to nested YAML keys (DB_HOST -> database.host).
-
-Quick usage
-- Use example env: Copy .env.example to .env and edit values:
-  - PowerShell: Copy-Item .env.example .env
-  - Bash: cp .env.example .env
-- Run with default config file:
-  go run ./cmd/server
-- Run with APP_ENVIRONMENT (loads configs/config.<env>.yaml if present):
-  APP_ENVIRONMENT=production go run ./cmd/server
-- Load config programmatically:
-  cfg, err := config.LoadConfig("")  // see internal/config/config.go
-
-Testing & CI
-- Ensure viper dependency is installed:
-  go get github.com/spf13/viper
-  go mod tidy
-- Run tests:
-  make test
-  or
-  go test ./... -v
-
 ## 🤝 Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
@@ -716,6 +676,7 @@ Built with these amazing tools:
 
 - [Gin](https://github.com/gin-gonic/gin) - HTTP web framework
 - [GORM](https://gorm.io/) - ORM library
+- [Viper](https://github.com/spf13/viper) - Configuration management with environment precedence
 - [golang-jwt](https://github.com/golang-jwt/jwt) - JWT implementation
 - [swaggo](https://github.com/swaggo/swag) - Swagger documentation
 - [Air](https://github.com/air-verse/air) - Hot-reload for development

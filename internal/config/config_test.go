@@ -27,21 +27,26 @@ func TestLoadConfig_Comprehensive(t *testing.T) {
 
 	t.Run("loads from default config file", func(t *testing.T) {
 		viper.Reset()
+		// Clear environment variables that might interfere
+		t.Setenv("APP_NAME", "")
+		t.Setenv("DATABASE_HOST", "")
+		t.Setenv("JWT_SECRET", "")
+
 		tempDir := t.TempDir()
 		path := createTempConfigFile(t, tempDir, "config.yaml", `
 app:
-  name: "File API"
+  name: "Test API"
 database:
-  host: "filehost"
+  host: "testhost"
 jwt:
-  secret: "file-secret"
+  secret: "test-secret-for-validation"
 `)
 		cfg, err := LoadConfig(path) // Pass the explicit path
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
-		assert.Equal(t, "File API", cfg.App.Name)
-		assert.Equal(t, "filehost", cfg.Database.Host)
-		assert.Equal(t, "file-secret", cfg.JWT.Secret)
+		assert.Equal(t, "Test API", cfg.App.Name)
+		assert.Equal(t, "testhost", cfg.Database.Host)
+		assert.Equal(t, "test-secret-for-validation", cfg.JWT.Secret)
 	})
 
 	t.Run("environment variables override file values", func(t *testing.T) {
@@ -52,18 +57,18 @@ database:
   host: "filehost"
   port: 5432
 jwt:
-  secret: "file-secret"
+  secret: "file-secret-for-validation"
 `)
 		// Set env vars that should override the file
 		t.Setenv("DATABASE_HOST", "envhost")
-		t.Setenv("JWT_SECRET", "env-secret")
+		t.Setenv("JWT_SECRET", "env-secret-for-validation")
 
 		cfg, err := LoadConfig(path) // Pass the explicit path
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
-		assert.Equal(t, "envhost", cfg.Database.Host) // Assert override
-		assert.Equal(t, 5432, cfg.Database.Port)      // Assert value from file is still present
-		assert.Equal(t, "env-secret", cfg.JWT.Secret) // Assert override
+		assert.Equal(t, "envhost", cfg.Database.Host)                // Assert override
+		assert.Equal(t, 5432, cfg.Database.Port)                     // Assert value from file is still present
+		assert.Equal(t, "env-secret-for-validation", cfg.JWT.Secret) // Assert override
 	})
 
 	t.Run("uses default values when no file or env var is set", func(t *testing.T) {
@@ -85,6 +90,9 @@ jwt:
 		viper.Reset()
 		viper.AddConfigPath(t.TempDir()) // No config file
 
+		// Ensure JWT_SECRET is not set in environment
+		t.Setenv("JWT_SECRET", "")
+
 		_, err := LoadConfig("")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "JWT secret is required")
@@ -94,15 +102,44 @@ jwt:
 		viper.Reset()
 		viper.AddConfigPath(t.TempDir()) // No config file
 		t.Setenv("APP_ENVIRONMENT", "production")
-		t.Setenv("JWT_SECRET", "prod-secret") // Satisfy JWT validation
+		t.Setenv("JWT_SECRET", "this-is-a-very-strong-production-secret-for-testing") // Satisfy JWT validation
 
 		_, err := LoadConfig("")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "database.password is required in production")
 	})
 
+	t.Run("fails validation for short JWT secret in production", func(t *testing.T) {
+		viper.Reset()
+		// Clear environment variables that might interfere
+		t.Setenv("JWT_SECRET", "")
+		t.Setenv("APP_ENVIRONMENT", "")
+		t.Setenv("DATABASE_PASSWORD", "")
+
+		tempDir := t.TempDir()
+		path := createTempConfigFile(t, tempDir, "config.yaml", `
+app:
+  environment: "production"
+jwt:
+  secret: "short"
+database:
+  password: "prod-password"
+`)
+		_, err := LoadConfig(path)
+		assert.Error(t, err)
+		if err != nil {
+			assert.Contains(t, err.Error(), "JWT secret must be at least 32 characters long in production")
+		}
+	})
+
 	t.Run("loads environment-specific config file when no path is given", func(t *testing.T) {
 		viper.Reset()
+		// Clear environment variables that might interfere
+		t.Setenv("APP_NAME", "")
+		t.Setenv("DATABASE_SSLMODE", "")
+		t.Setenv("DATABASE_PASSWORD", "")
+		t.Setenv("JWT_SECRET", "")
+
 		tempDir := t.TempDir()
 		configsDir := filepath.Join(tempDir, "configs")
 		err := os.Mkdir(configsDir, 0755)
@@ -114,9 +151,10 @@ jwt:
 app:
   name: "Production API"
 jwt:
-  secret: "prod-secret"
+  secret: "this-is-a-very-strong-production-secret-for-testing-purposes-only"
 database:
   password: "prod-password"
+  sslmode: "require"
 `)
 		// Temporarily change working directory so LoadConfig can find the "configs" folder
 		oldWd, err := os.Getwd()
@@ -125,16 +163,19 @@ database:
 		assert.NoError(t, err)
 		defer func() {
 			err := os.Chdir(oldWd)
-			assert.NoError(t, err)
+			if err != nil {
+				t.Logf("Failed to restore working directory: %v", err)
+			}
 		}()
 
 		t.Setenv("APP_ENVIRONMENT", "production")
 
 		cfg, err := LoadConfig("")
 		assert.NoError(t, err)
-		assert.NotNil(t, cfg)
-		// Assert it loaded the production file, not the default one
-		assert.Equal(t, "Production API", cfg.App.Name)
+		if cfg != nil {
+			// Assert it loaded the production file, not the default one
+			assert.Equal(t, "Production API", cfg.App.Name)
+		}
 	})
 }
 
