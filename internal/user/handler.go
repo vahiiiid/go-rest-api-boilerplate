@@ -40,7 +40,7 @@ func NewHandler(userService Service, authService auth.Service) *Handler {
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
-	// Generate a unique requestID
+	// Get unique requestID
 	requestID := logger.GetRequestID(c)
 
 	var req RegisterRequest
@@ -95,7 +95,7 @@ func (h *Handler) Register(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
-	// Generate a unique requestID
+	// Get unique requestID
 	requestID := logger.GetRequestID(c)
 
 	var req LoginRequest
@@ -154,7 +154,7 @@ func (h *Handler) Login(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/users/{id} [get]
 func (h *Handler) GetUser(c *gin.Context) {
-	// Generate a unique requestID
+	// Get unique requestID
 	requestID := logger.GetRequestID(c)
 
 	// Get user attempt log
@@ -210,7 +210,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/users/{id} [put]
 func (h *Handler) UpdateUser(c *gin.Context) {
-	// Generate a unique requestID
+	// Get unique requestID
 	requestID := logger.GetRequestID(c)
 
 	var req UpdateUserRequest
@@ -280,7 +280,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/users/{id} [delete]
 func (h *Handler) DeleteUser(c *gin.Context) {
-	// Generate a unique requestID
+	// Get unique requestID
 	requestID := logger.GetRequestID(c)
 
 	// Delete user attempt log
