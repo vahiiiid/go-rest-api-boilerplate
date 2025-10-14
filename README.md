@@ -469,8 +469,6 @@ To contribute to the documentation:
 For contributing to the codebase, see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
-
-
 ## 🏗️ Project Structure
 
 ```
@@ -484,10 +482,14 @@ go-rest-api-boilerplate/
 │   ├── middleware/       # HTTP middleware
 │   └── server/           # Route definitions
 ├── migrations/           # Database migrations
+├── configs/              # Environment-specific configuration files
 ├── tests/                # Test files
 ├── api/                  # API documentation & Postman
+├── scripts/              # Utility scripts for development/CI
 ├── docker-compose.yml    # Development setup
 ├── Dockerfile            # Container configuration
+├── go.mod                # Go module definition
+├── LICENSE               # Project license
 └── Makefile              # Build automation
 ```
 
