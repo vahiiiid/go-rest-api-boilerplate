@@ -69,14 +69,17 @@ func LoadConfig(configPath string) (*Config, error) {
 	// Create a new viper instance to avoid conflicts with global state
 	v := viper.New()
 
+	// Configure environment variable handling first
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.AutomaticEnv()
+
 	if configPath != "" {
 		v.SetConfigFile(configPath)
 	} else {
 		// choose config.<env>.yaml if APP_ENVIRONMENT is set; otherwise use config.yaml
-		env := os.Getenv("APP_ENVIRONMENT")
+		env := v.GetString("APP_ENVIRONMENT")
 		if env == "" {
-			// allow viper to pick up APP_ENVIRONMENT from env after AutomaticEnv,
-			// but AutomaticEnv is already called below so fallback to "development".
+			// fallback to "development" when APP_ENVIRONMENT is not set
 			env = "development"
 		}
 
@@ -87,10 +90,6 @@ func LoadConfig(configPath string) (*Config, error) {
 		v.AddConfigPath(".")
 		v.AddConfigPath("./configs")
 	}
-
-	// Environment variable mapping
-	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	v.AutomaticEnv()
 
 	// Defaults
 	setViperDefaults(v)
@@ -134,7 +133,7 @@ func setViperDefaults(v *viper.Viper) {
 	v.SetDefault("app.debug", false)
 
 	// Database
-	v.SetDefault("database.host", "localhost")
+	v.SetDefault("database.host", "db")
 	v.SetDefault("database.port", 5432)
 	v.SetDefault("database.sslmode", "disable")
 	v.SetDefault("database.user", "postgres")
