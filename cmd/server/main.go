@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"go.uber.org/zap"
+
 	_ "github.com/vahiiiid/go-rest-api-boilerplate/api/docs" // swagger docs
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
@@ -12,7 +14,6 @@ import (
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/logger"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/server"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
-	"go.uber.org/zap"
 )
 
 // @title Go REST API Boilerplate
