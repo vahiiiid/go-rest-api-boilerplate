@@ -65,7 +65,7 @@ require (
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	go.uber.org/zap v1.27.0 // indirect
+	go.uber.org/zap v1.27.0
 	golang.org/x/arch v0.5.0 // indirect
 	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
