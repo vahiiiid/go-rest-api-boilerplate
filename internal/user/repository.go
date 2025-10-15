@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/vahiiiid/go-rest-api-boilerplate/internal/logger"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/logger"
 )
 
 // Repository defines user repository interface

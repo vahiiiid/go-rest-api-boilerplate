@@ -11,6 +11,10 @@ import (
 
 const RequestIDKey = "request_id"
 
+type contextKey string
+
+const RequestIDContextKey contextKey = "request_id"
+
 // Middleware logs HTTP requests with structured fields
 func Middleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -25,7 +29,7 @@ func Middleware() gin.HandlerFunc {
 		c.Set(RequestIDKey, requestID)
 		c.Writer.Header().Set("X-Request-ID", requestID)
 
-		ctx := context.WithValue(c.Request.Context(), RequestIDKey, requestID)
+		ctx := context.WithValue(c.Request.Context(), RequestIDContextKey, requestID)
 		c.Request = c.Request.WithContext(ctx)
 
 		// Process request

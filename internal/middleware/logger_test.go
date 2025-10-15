@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/logger"
 )
 
