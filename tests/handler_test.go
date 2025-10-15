@@ -3,6 +3,7 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -15,9 +16,20 @@ import (
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/db"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/logger"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/server"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 )
+
+// Initialize logger before the test
+func TestMain(m *testing.M) {
+	if err := logger.InitWithWriter("test", io.Discard); err != nil {
+		panic(err)
+	}
+
+	code := m.Run()
+	os.Exit(code)
+}
 
 func setupTestRouter(t *testing.T) *gin.Engine {
 	// Set Gin to test mode
