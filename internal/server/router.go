@@ -10,6 +10,7 @@ import (
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/logger"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 )
@@ -20,14 +21,7 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.New()
-
-	// Middleware - use configurable logging with environment-based skip paths
-	skipPaths := config.GetSkipPaths(cfg.Server.Env)
-	loggerConfig := middleware.NewLoggerConfig(
-		cfg.Logging.GetLogLevel(),
-		skipPaths,
-	)
-	router.Use(middleware.Logger(loggerConfig))
+	router.Use(logger.Middleware())
 	router.Use(gin.Recovery())
 
 	// CORS configuration - permissive for development

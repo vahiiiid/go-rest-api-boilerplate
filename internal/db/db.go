@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -48,7 +47,6 @@ func NewPostgresDB(cfg Config) (*gorm.DB, error) {
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	log.Println("Database connection established")
 	return db, nil
 }
 
