@@ -132,6 +132,7 @@ Import the pre-configured collection from `api/postman_collection.json` with exa
 - ✅ **CORS Support** - Configurable cross-origin requests
 - ✅ **Request Logging** - Configurable structured JSON logging with request tracking
 - ✅ **Rate Limiting** - Smart token-bucket protection against abuse
+- ✅ **Prometheus Metrics** - Real-time monitoring with Prometheus and Grafana
 
 ## 📑 Table of Contents
 
@@ -431,7 +432,7 @@ See `.github/workflows/ci.yml` for CI configuration.
 
 ---
 
-## 📖 Documentation
+##  Documentation
 
 Full API documentation, usage guides, and tutorials are maintained in a separate repository:
 

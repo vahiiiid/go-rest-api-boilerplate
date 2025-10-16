@@ -18,6 +18,7 @@ type Config struct {
 	JWT       JWTConfig       `yaml:"jwt"`
 	Logging   LoggingConfig   `yaml:"logging"`
 	Ratelimit RateLimitConfig `yaml:"ratelimit"`
+	Metrics   MetricsConfig   `yaml:"metrics"`
 }
 
 // ServerConfig holds server-related configuration
@@ -51,6 +52,12 @@ type RateLimitConfig struct {
 	Enabled  bool          `yaml:"rate_limit_enabled"`
 	Requests int           `yaml:"rate_limit_requests"`
 	Window   time.Duration `yaml:"rate_limit_window"`
+}
+
+// MetricsConfig holds metrics-related configuration
+type MetricsConfig struct {
+	Enabled bool   `yaml:"enabled"`
+	Path    string `yaml:"path"`
 }
 
 // LoadConfig loads configuration from YAML file and environment variables
@@ -137,6 +144,16 @@ func (c *Config) loadFromEnv() {
 			c.Ratelimit.Window = windowDur
 		}
 	}
+
+	// Metrics config
+	if enabled := os.Getenv("METRICS_ENABLED"); enabled != "" {
+		if enabledBool, err := strconv.ParseBool(enabled); err == nil {
+			c.Metrics.Enabled = enabledBool
+		}
+	}
+	if path := os.Getenv("METRICS_PATH"); path != "" {
+		c.Metrics.Path = path
+	}
 }
 
 // GetLogLevel converts string log level to slog.Level
@@ -161,11 +178,11 @@ func GetSkipPaths(env string) []string {
 	case "production":
 		return []string{"/health", "/metrics", "/debug", "/pprof"}
 	case "development":
-		return []string{"/health"}
+		return []string{"/health", "/metrics"}
 	case "test":
-		return []string{"/health"}
+		return []string{"/health", "/metrics"}
 	default:
-		return []string{"/health"}
+		return []string{"/health", "/metrics"}
 	}
 }
 
