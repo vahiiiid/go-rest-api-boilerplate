@@ -357,26 +357,4 @@ func TestRateLimit_BlocksThenAllows(t *testing.T) {
 
 	// If we get here, rate limiting didn't work
 	t.Fatalf("expected rate limiting to trigger, but completed %d requests without 429", successCount)
-	retryAfterStr := rr.Header().Get("Retry-After")
-	if retryAfterStr == "" {
-		t.Fatalf("expected Retry-After header on 429")
-	}
-	retryAfterSec, err := strconv.Atoi(retryAfterStr)
-	if err != nil || retryAfterSec <= 0 {
-		t.Fatalf("Retry-After should be positive integer seconds, got %q (err=%v)", retryAfterStr, err)
-	}
-
-	// Arrange/Act: wait for the advised cooldown, then retry once
-	time.Sleep(time.Duration(retryAfterSec)*time.Second + 10*time.Millisecond)
-
-	req, _ = http.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewBuffer(loginBody))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Forwarded-For", "192.168.1.100") // Use consistent IP for testing
-	rr = httptest.NewRecorder()
-	r.ServeHTTP(rr, req)
-
-	// Assert: request should pass after cooldown
-	if rr.Code != http.StatusOK {
-		t.Fatalf("expected 200 after waiting Retry-After=%ds, got %d", retryAfterSec, rr.Code)
-	}
 }

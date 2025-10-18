@@ -2,7 +2,6 @@ package user
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -15,48 +14,6 @@ import (
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 )
-
-// MockService is a mock implementation of the user service
-type MockService struct {
-	mock.Mock
-}
-
-func (m *MockService) RegisterUser(ctx context.Context, req RegisterRequest) (*User, error) {
-	args := m.Called(ctx, req)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*User), args.Error(1)
-}
-
-func (m *MockService) AuthenticateUser(ctx context.Context, req LoginRequest) (*User, error) {
-	args := m.Called(ctx, req)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*User), args.Error(1)
-}
-
-func (m *MockService) GetUserByID(ctx context.Context, id uint) (*User, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*User), args.Error(1)
-}
-
-func (m *MockService) UpdateUser(ctx context.Context, id uint, req UpdateUserRequest) (*User, error) {
-	args := m.Called(ctx, id, req)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*User), args.Error(1)
-}
-
-func (m *MockService) DeleteUser(ctx context.Context, id uint) error {
-	args := m.Called(ctx, id)
-	return args.Error(0)
-}
 
 // MockAuthService is a mock implementation of the auth service
 type MockAuthService struct {
