@@ -85,6 +85,22 @@ else
 fi
 
 echo ""
+echo "🔄 Running database migrations..."
+echo ""
+
+# Run migrations
+if docker compose exec -T app go run cmd/migrate/main.go -action=up; then
+    echo ""
+    echo -e "${GREEN}✅ Migrations completed successfully${NC}"
+else
+    echo ""
+    echo -e "${RED}❌ Failed to run migrations${NC}"
+    echo ""
+    echo "Check database logs with: docker compose logs db"
+    exit 1
+fi
+
+echo ""
 echo "================================================"
 echo -e "${GREEN}🎉 Success! Your API is ready!${NC}"
 echo "================================================"
@@ -103,6 +119,11 @@ echo "🛠️  Development Commands:"
 echo "   • Run tests:   make test"
 echo "   • Run linter:  make lint"
 echo "   • Update docs: make swag"
+echo ""
+echo "🗄️  Database Commands:"
+echo "   • Run migrations:     make migrate-up"
+echo "   • Rollback migration: make migrate-down"
+echo "   • Migration status:   make migrate-version"
 echo ""
 echo "📚 Documentation:"
 echo "   https://vahiiiid.github.io/go-rest-api-docs/"
