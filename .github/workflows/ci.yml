@@ -57,11 +57,13 @@ jobs:
       run: go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.out
         flags: unittests
         name: codecov-umbrella
+        fail_ci_if_error: true
 
   lint:
     name: Lint
