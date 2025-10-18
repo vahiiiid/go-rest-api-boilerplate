@@ -10,7 +10,7 @@ import (
 func TestUser_TableName(t *testing.T) {
 	user := User{}
 	tableName := user.TableName()
-	
+
 	assert.Equal(t, "users", tableName)
 }
 
@@ -23,9 +23,9 @@ func TestToUserResponse_WithDates(t *testing.T) {
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
-	
+
 	response := ToUserResponse(user)
-	
+
 	assert.Equal(t, uint(1), response.ID)
 	assert.Equal(t, "John Doe", response.Name)
 	assert.Equal(t, "john@example.com", response.Email)

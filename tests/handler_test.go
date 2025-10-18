@@ -297,7 +297,7 @@ func TestRateLimit_BlocksThenAllows(t *testing.T) {
 	// Use a unique IP per test to avoid interference
 	testIP := fmt.Sprintf("192.168.1.%d", time.Now().UnixNano()%255)
 
-	// Arrange: register a user 
+	// Arrange: register a user
 	registerBody, _ := json.Marshal(map[string]string{
 		"name":     "Rate Test",
 		"email":    fmt.Sprintf("rate%d@example.com", time.Now().UnixNano()),
@@ -314,7 +314,9 @@ func TestRateLimit_BlocksThenAllows(t *testing.T) {
 
 	// Extract email for login
 	var registerResp map[string]interface{}
-	json.Unmarshal(rr.Body.Bytes(), &registerResp)
+	if err := json.Unmarshal(rr.Body.Bytes(), &registerResp); err != nil {
+		t.Fatalf("Failed to unmarshal register response: %v", err)
+	}
 	userResp := registerResp["user"].(map[string]interface{})
 	email := userResp["email"].(string)
 
@@ -332,7 +334,7 @@ func TestRateLimit_BlocksThenAllows(t *testing.T) {
 		req.Header.Set("X-Forwarded-For", testIP)
 		rr := httptest.NewRecorder()
 		r.ServeHTTP(rr, req)
-		
+
 		if rr.Code == http.StatusOK {
 			successCount++
 		} else if rr.Code == http.StatusTooManyRequests {
