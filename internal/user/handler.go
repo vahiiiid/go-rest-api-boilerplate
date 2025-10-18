@@ -54,7 +54,6 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	// Generate token
 	token, err := h.authService.GenerateToken(user.ID, user.Email, user.Name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
@@ -96,7 +95,6 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	// Generate token
 	token, err := h.authService.GenerateToken(user.ID, user.Email, user.Name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
@@ -125,14 +123,12 @@ func (h *Handler) Login(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/users/{id} [get]
 func (h *Handler) GetUser(c *gin.Context) {
-	// Parse ID from URL
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
-	// Authorization check
 	if !ctx.CanAccessUser(c, uint(id)) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
 		return
