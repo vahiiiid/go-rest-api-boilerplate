@@ -115,24 +115,45 @@ Import the pre-configured collection from `api/postman_collection.json` with exa
 
 ## ✨ Features
 
-- ✅ **JWT Authentication** - Secure token-based auth (HS256)
-- ✅ **Context Helpers** - Type-safe user extraction from request context
-- ✅ **User Management** - Complete CRUD with validation
-- ✅ **PostgreSQL + GORM** - Robust database with ORM
-- ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback)
-- ✅ **Docker Production** - Optimized multi-stage builds
-- ✅ **Swagger/OpenAPI** - Interactive API documentation
-- ✅ **Database Migrations** - Version-controlled schema changes with CLI tools
-- ✅ **Automated Testing** - Unit & integration tests
-- ✅ **GitHub Actions CI** - Automated linting and testing
-- ✅ **Make Commands** - Simplified workflow automation
-- ✅ **Postman Collection** - Pre-configured API tests
-- ✅ **Clean Architecture** - Layered, maintainable structure
-- ✅ **Security Best Practices** - Bcrypt hashing, input validation
-- ✅ **CORS Support** - Configurable cross-origin requests
-- ✅ **Request Logging** - Configurable structured JSON logging with request tracking
-- ✅ **Rate Limiting** - Smart token-bucket protection against abuse
-- ✅ **Centralized Configuration** - Viper-powered config with environment precedence and structured YAML
+### 🔐 Authentication & Security
+
+- ✅ **JWT Authentication** - Secure token-based auth (HS256) → [Context Helpers Guide](https://vahiiiid.github.io/go-rest-api-docs/CONTEXT_HELPERS/)
+- ✅ **Context Helpers** - Type-safe user extraction from request context → [Context Helpers Guide](https://vahiiiid.github.io/go-rest-api-docs/CONTEXT_HELPERS/)
+- ✅ **Rate Limiting** - Smart token-bucket protection against abuse → [Rate Limiting Guide](https://vahiiiid.github.io/go-rest-api-docs/RATE_LIMITING/)
+- ✅ **Security Best Practices** - Bcrypt hashing, input validation → [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)
+- ✅ **CORS Support** - Configurable cross-origin requests → [Configuration Guide](https://vahiiiid.github.io/go-rest-api-docs/CONFIGURATION/)
+
+### 🗄️ Database & Data Management
+
+- ✅ **PostgreSQL + GORM** - Robust database with ORM → [Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)
+- ✅ **Database Migrations** - Version-controlled schema changes with CLI tools → [Migrations Guide](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/)
+- ✅ **User Management** - Complete CRUD with validation → [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)
+
+### 🐳 Docker & Development
+
+- ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback) → [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/)
+- ✅ **Docker Production** - Optimized multi-stage builds → [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/)
+- ✅ **Make Commands** - Simplified workflow automation → [Quick Reference](https://vahiiiid.github.io/go-rest-api-docs/QUICK_REFERENCE/)
+- ✅ **Centralized Configuration** - Viper-powered config with environment precedence → [Configuration Guide](https://vahiiiid.github.io/go-rest-api-docs/CONFIGURATION/)
+
+### 📚 Documentation & API
+
+- ✅ **Swagger/OpenAPI** - Interactive API documentation → [Swagger Guide](https://vahiiiid.github.io/go-rest-api-docs/SWAGGER/)
+- ✅ **Postman Collection** - Pre-configured API tests → [Quick Reference](https://vahiiiid.github.io/go-rest-api-docs/QUICK_REFERENCE/)
+- ✅ **Request Logging** - Configurable structured JSON logging → [Logging Guide](https://vahiiiid.github.io/go-rest-api-docs/LOGGING/)
+
+### 🧪 Testing & Quality
+
+- ✅ **Automated Testing** - Unit & integration tests → [Testing Guide](https://vahiiiid.github.io/go-rest-api-docs/TESTING/)
+- ✅ **GitHub Actions CI** - Automated linting and testing → [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)
+- ✅ **Clean Architecture** - Layered, maintainable structure → [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)
+
+### 🚀 Getting Started
+
+- 📖 **[Complete Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** - Manual installation and configuration
+- 🏗️ **[Development Tutorial](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** - Build your first feature
+- 📝 **[TODO Example](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/)** - Step-by-step implementation guide
+- ⚡ **[Quick Reference](https://vahiiiid.github.io/go-rest-api-docs/QUICK_REFERENCE/)** - Commands and API examples
 
 ## 📑 Table of Contents
 
@@ -474,20 +495,23 @@ For contributing to the codebase, see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ```
 go-rest-api-boilerplate/
+├── api/                  # API documentation & Postman collections
 ├── cmd/server/           # Application entry point
+├── configs/              # Environment-specific configuration files
 ├── internal/             # Private application code
 │   ├── auth/             # Authentication & JWT
-│   ├── user/             # User domain (example)
-│   ├── config/           # Configuration
+│   ├── config/           # Configuration management
+│   ├── ctx/              # Context helpers
 │   ├── db/               # Database connection
 │   ├── middleware/       # HTTP middleware
-│   └── server/           # Route definitions
+│   ├── server/           # Route definitions
+│   └── user/             # User domain (example)
 ├── migrations/           # Database migrations
-├── configs/              # Environment-specific configuration files
-├── tests/                # Test files
-├── api/                  # API documentation & Postman
 ├── scripts/              # Utility scripts for development/CI
+├── tests/                # Test files
+├── .github/              # GitHub configuration & workflows
 ├── docker-compose.yml    # Development setup
+├── docker-compose.prod.yml # Production setup
 ├── Dockerfile            # Container configuration
 ├── go.mod                # Go module definition
 ├── LICENSE               # Project license
