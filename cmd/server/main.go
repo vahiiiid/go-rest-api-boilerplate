@@ -1,3 +1,4 @@
+```go
 package main
 
 import (
@@ -33,26 +34,30 @@ import (
 // @description Type "Bearer" followed by a space and JWT token.
 
 func main() {
-	log.Println("Starting Go REST API Boilerplate...")
+	logger := log.Default() // Get the default logger instance
+	logger.Println("Starting Go REST API Boilerplate...")
 
 	// Load configuration (viper-based)
 	cfg, err := config.LoadConfig("")
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		logger.Fatalf("Failed to load configuration: %v", err)
 	}
+
+	// Log configuration values (excluding sensitive data)
+	cfg.LogSafeConfig(logger)
 
 	// Connect to database using typed config
 	database, err := db.NewPostgresDBFromDatabaseConfig(cfg.Database)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		logger.Fatalf("Failed to connect to database: %v", err)
 	}
 
 	// Run migrations
-	log.Println("Running database migrations...")
+	logger.Println("Running database migrations...")
 	if err := database.AutoMigrate(&user.User{}); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		logger.Fatalf("Failed to run migrations: %v", err)
 	}
-	log.Println("Migrations completed successfully")
+	logger.Println("Migrations completed successfully")
 
 	// Initialize services
 	authService := auth.NewService(&cfg.JWT)
@@ -71,11 +76,12 @@ func main() {
 
 	// Start server
 	addr := fmt.Sprintf(":%s", port)
-	log.Printf("Server starting on %s", addr)
-	log.Printf("Swagger UI available at http://localhost:%s/swagger/index.html", port)
-	log.Printf("Health check available at http://localhost:%s/health", port)
+	logger.Printf("Server starting on %s", addr)
+	logger.Printf("Swagger UI available at http://localhost:%s/swagger/index.html", port)
+	logger.Printf("Health check available at http://localhost:%s/health", port)
 
 	if err := router.Run(addr); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		logger.Fatalf("Failed to start server: %v", err)
 	}
 }
+```
