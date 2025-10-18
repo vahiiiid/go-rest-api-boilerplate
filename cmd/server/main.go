@@ -62,13 +62,6 @@ func run() error {
 		return err
 	}
 
-	logger.Info("Running database migrations...")
-	if err := database.AutoMigrate(&user.User{}); err != nil {
-		logger.Error("Failed to run migrations", "error", err)
-		return err
-	}
-	logger.Info("Migrations completed successfully")
-
 	authService := auth.NewService(&cfg.JWT)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)

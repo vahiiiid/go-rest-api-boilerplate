@@ -41,7 +41,7 @@ help:
 	@echo "  make migrate-create NAME=<name>  - Create new migration"
 	@echo "  make migrate-up                  - Run migrations"
 	@echo "  make migrate-down                - Rollback last migration"
-	@echo "  make migrate-version             - Show current migration version"
+	@echo "  make migrate-version             - Show migration status"
 	@echo ""
 	@echo "⚙️  Native Build (requires Go on host):"
 	@echo "  make build-binary   - Build Go binary directly (no Docker)"
@@ -207,18 +207,14 @@ endif
 migrate-up:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) migrate -path migrations -database "postgresql://postgres:postgres@db:5432/go_api?sslmode=disable" up
-	@echo "✅ Migrations applied"
+	@$(EXEC_CMD) go run cmd/migrate/main.go -action=up
 else
-	@if command -v migrate >/dev/null 2>&1; then \
+	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
-		echo "⚠️  Using localhost database (ensure PostgreSQL is running on host)"; \
-		migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/go_api?sslmode=disable" up; \
-		echo "✅ Migrations applied"; \
+		go run cmd/migrate/main.go -action=up; \
 	else \
-		echo "❌ Error: Docker container not running and migrate not installed"; \
+		echo "❌ Error: Docker container not running and Go not installed"; \
 		echo "Please run: make up"; \
-		echo "Or install: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest"; \
 		exit 1; \
 	fi
 endif
@@ -227,18 +223,14 @@ endif
 migrate-down:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) migrate -path migrations -database "postgresql://postgres:postgres@db:5432/go_api?sslmode=disable" down 1
-	@echo "✅ Migration rolled back"
+	@$(EXEC_CMD) go run cmd/migrate/main.go -action=down
 else
-	@if command -v migrate >/dev/null 2>&1; then \
+	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
-		echo "⚠️  Using localhost database (ensure PostgreSQL is running on host)"; \
-		migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/go_api?sslmode=disable" down 1; \
-		echo "✅ Migration rolled back"; \
+		go run cmd/migrate/main.go -action=down; \
 	else \
-		echo "❌ Error: Docker container not running and migrate not installed"; \
+		echo "❌ Error: Docker container not running and Go not installed"; \
 		echo "Please run: make up"; \
-		echo "Or install: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest"; \
 		exit 1; \
 	fi
 endif
@@ -247,16 +239,14 @@ endif
 migrate-version:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) migrate -path migrations -database "postgresql://postgres:postgres@db:5432/go_api?sslmode=disable" version
+	@$(EXEC_CMD) go run cmd/migrate/main.go -action=status
 else
-	@if command -v migrate >/dev/null 2>&1; then \
+	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
-		echo "⚠️  Using localhost database (ensure PostgreSQL is running on host)"; \
-		migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/go_api?sslmode=disable" version; \
+		go run cmd/migrate/main.go -action=status; \
 	else \
-		echo "❌ Error: Docker container not running and migrate not installed"; \
+		echo "❌ Error: Docker container not running and Go not installed"; \
 		echo "Please run: make up"; \
-		echo "Or install: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest"; \
 		exit 1; \
 	fi
 endif
