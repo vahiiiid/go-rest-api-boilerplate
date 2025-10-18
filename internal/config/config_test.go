@@ -287,3 +287,36 @@ func TestGetSkipPaths(t *testing.T) {
 		})
 	}
 }
+
+func TestGetConfigPath(t *testing.T) {
+	result := GetConfigPath()
+
+	// Verify it returns a valid path (should be the default or actual config path)
+	assert.NotEmpty(t, result)
+	assert.Contains(t, result, "config.yaml")
+}
+
+func TestNewTestConfig(t *testing.T) {
+	config := NewTestConfig()
+
+	// Verify the test config is properly initialized
+	assert.NotNil(t, config)
+	assert.Equal(t, "test", config.App.Environment)
+	assert.Equal(t, "test_db", config.Database.Name)
+	assert.Equal(t, "test-secret", config.JWT.Secret)
+	assert.Equal(t, 1, config.JWT.TTLHours)
+	assert.Equal(t, "8081", config.Server.Port)
+}
+
+func TestNewTestConfig_Isolation(t *testing.T) {
+	// Test that multiple calls return independent configs
+	config1 := NewTestConfig()
+	config2 := NewTestConfig()
+
+	// Modify one config
+	config1.App.Name = "modified"
+
+	// Verify the other is not affected
+	assert.NotEqual(t, config1.App.Name, config2.App.Name)
+	assert.Equal(t, "Test API", config2.App.Name)
+}

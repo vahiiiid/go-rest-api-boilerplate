@@ -54,14 +54,21 @@ jobs:
       run: go vet ./...
 
     - name: Run tests
-      run: go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
+      run: |
+        # Run all tests together (unit and integration)
+        go test ./internal/... ./tests -v -race -coverprofile=coverage.out -covermode=atomic
+        
+        # Show coverage summary
+        echo ""
+        echo "=== Test Coverage Summary ==="
+        go tool cover -func=coverage.out | tail -n 1
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.out
-        flags: unittests
+        flags: tests
         name: codecov-umbrella
 
   lint:
