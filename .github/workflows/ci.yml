@@ -55,8 +55,8 @@ jobs:
 
     - name: Run tests
       run: |
-        # Run all tests together (unit and integration)
-        go test ./internal/... ./tests -v -race -coverprofile=coverage.out -covermode=atomic
+        # Run all tests (unit, integration, e2e - anywhere in the project)
+        go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
         
         # Show coverage summary
         echo ""
