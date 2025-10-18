@@ -136,6 +136,7 @@ Import the pre-configured collection from `api/postman_collection.json` with exa
 - ✅ **Docker Production** - Optimized multi-stage builds → [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/)
 - ✅ **Make Commands** - Simplified workflow automation → [Quick Reference](https://vahiiiid.github.io/go-rest-api-docs/QUICK_REFERENCE/)
 - ✅ **Centralized Configuration** - Viper-powered config with environment precedence → [Configuration Guide](https://vahiiiid.github.io/go-rest-api-docs/CONFIGURATION/)
+- ✅ **Optimized Health Checks** - Environment-specific database health monitoring → [Health Check Configuration](#-health-check-configuration)
 
 ### 📚 Documentation & API
 
@@ -334,6 +335,67 @@ GRAB is ready to deploy to:
 - **Any VPS** - Using Docker Compose
 
 For detailed deployment guides, database migrations, and Docker production setup, see the [Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/) and [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/).
+
+---
+
+## 🏥 Health Check Configuration
+
+GRAB includes optimized database health check configurations tailored for different environments to ensure reliable container orchestration and faster development cycles.
+
+### Environment-Specific Settings
+
+#### Development Environment (`docker-compose.yml`)
+```yaml
+healthcheck:
+  test: ["CMD-SHELL", "pg_isready -U postgres -h localhost"]
+  interval: 10s      # More frequent checks for faster feedback
+  timeout: 5s
+  retries: 5         # More retries to handle temporary issues
+  start_period: 15s  # Shorter startup period for faster development
+```
+
+#### Production Environment (`docker-compose.prod.yml`)
+```yaml
+healthcheck:
+  test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres} -h localhost"]
+  interval: 15s      # Conservative intervals to reduce overhead
+  timeout: 5s
+  retries: 3         # Fail fast on persistent issues
+  start_period: 30s  # Longer grace period for production initialization
+```
+
+### Key Benefits
+
+- **🚀 Faster Development**: 10-second intervals provide quick feedback during development
+- **⚡ Production Efficiency**: 15-second intervals reduce resource overhead in production
+- **🛡️ Reliability**: `start_period` prevents false negatives during container initialization
+- **🔄 Dependency Management**: App services wait for database health before starting
+- **⚙️ Configurable**: All settings can be overridden via environment variables
+
+### Environment Variables
+
+You can customize health check behavior using these environment variables:
+
+```env
+# Health Check Configuration
+HEALTH_CHECK_INTERVAL=10s        # Check interval (default: 10s dev, 15s prod)
+HEALTH_CHECK_TIMEOUT=5s          # Check timeout (default: 5s)
+HEALTH_CHECK_RETRIES=5           # Retry count (default: 5 dev, 3 prod)
+HEALTH_CHECK_START_PERIOD=15s    # Startup grace period (default: 15s dev, 30s prod)
+```
+
+### Verification Commands
+
+```bash
+# Check database health status
+docker inspect go_api_db --format='{{.State.Health.Status}}'
+
+# Monitor health check logs
+docker inspect go_api_db --format='{{json .State.Health}}' | jq
+
+# Verify app waits for database
+docker compose logs app | grep -E "(waiting|ready|started|healthy)"
+```
 
 ---
 
