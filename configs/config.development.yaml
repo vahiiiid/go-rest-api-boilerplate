@@ -1,0 +1,34 @@
+# ===========================================
+# Go REST API Boilerplate - Development Configuration  
+# ===========================================
+#
+# This file contains development-specific overrides
+# 📋 For ALL configuration options see: config.yaml (base configuration)
+# 🔧 Environment variables (.env) have highest priority and will override these values
+#
+# ===========================================
+
+app:
+  name: "GRAB API (development)"
+  environment: "development"
+  debug: true                       # Enable debug mode in development
+
+database:
+  host: "db"
+  port: 5432
+  user: "postgres"
+  password: "postgres"              # Default password for development
+  name: "grab"
+  sslmode: "disable"                # SSL disabled for development convenience
+
+jwt:
+  secret: "change-me"               # Default for development (override with JWT_SECRET)
+  ttlhours: 24
+
+server:
+  port: "8080"
+  readtimeout: 10
+  writetimeout: 10
+
+logging:
+  level: "debug"

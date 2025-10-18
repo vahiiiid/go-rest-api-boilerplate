@@ -53,13 +53,14 @@ echo "Reading .env file..."
 echo ""
 # Load environment variables from .env file
 if [ -f .env ]; then
-    export $(cat .env | grep -v '^#' | grep -v '^$' | xargs)
+    # parsing: exclude comments, empty lines, and invalid variable names
+    export $(cat .env | grep -E '^[A-Za-z_][A-Za-z0-9_]*=' | grep -v '#' | xargs)
 fi
 
 echo -e "${GREEN}✅ .env file read${NC}"
 
 # Fallback for env variable(s)
-PORT=${PORT:-8080}
+SERVER_PORT=${SERVER_PORT:-8080}
 
 echo ""
 echo "🐳 Starting Docker containers..."
@@ -89,9 +90,9 @@ echo -e "${GREEN}🎉 Success! Your API is ready!${NC}"
 echo "================================================"
 echo ""
 echo "📍 Your API is running at:"
-echo "   • API Base:    http://localhost:${PORT}/api/v1"
-echo "   • Swagger UI:  http://localhost:${PORT}/swagger/index.html"
-echo "   • Health:      http://localhost:${PORT}/health"
+echo "   • API Base:    http://localhost:${SERVER_PORT}/api/v1"
+echo "   • Swagger UI:  http://localhost:${SERVER_PORT}/swagger/index.html"
+echo "   • Health:      http://localhost:${SERVER_PORT}/health"
 echo ""
 echo "🐳 Docker Commands:"
 echo "   • View logs:   docker compose logs -f app"

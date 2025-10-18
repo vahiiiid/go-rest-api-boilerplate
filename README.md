@@ -132,6 +132,7 @@ Import the pre-configured collection from `api/postman_collection.json` with exa
 - ✅ **CORS Support** - Configurable cross-origin requests
 - ✅ **Request Logging** - Configurable structured JSON logging with request tracking
 - ✅ **Rate Limiting** - Smart token-bucket protection against abuse
+- ✅ **Centralized Configuration** - Viper-powered config with environment precedence and structured YAML
 
 ## 📑 Table of Contents
 
@@ -614,6 +615,7 @@ Built with these amazing tools:
 
 - [Gin](https://github.com/gin-gonic/gin) - HTTP web framework
 - [GORM](https://gorm.io/) - ORM library
+- [Viper](https://github.com/spf13/viper) - Configuration management with environment precedence
 - [golang-jwt](https://github.com/golang-jwt/jwt) - JWT implementation
 - [swaggo](https://github.com/swaggo/swag) - Swagger documentation
 - [Air](https://github.com/air-verse/air) - Hot-reload for development

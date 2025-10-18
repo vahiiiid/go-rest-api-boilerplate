@@ -5,143 +5,127 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"strconv"
+	"strings"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	"github.com/spf13/viper"
 )
 
 // Config represents the application configuration
 type Config struct {
-	Server    ServerConfig    `yaml:"server"`
-	Database  DatabaseConfig  `yaml:"database"`
-	JWT       JWTConfig       `yaml:"jwt"`
-	Logging   LoggingConfig   `yaml:"logging"`
-	Ratelimit RateLimitConfig `yaml:"ratelimit"`
+	App       AppConfig       `mapstructure:"app" yaml:"app"`
+	Database  DatabaseConfig  `mapstructure:"database" yaml:"database"`
+	JWT       JWTConfig       `mapstructure:"jwt" yaml:"jwt"`
+	Server    ServerConfig    `mapstructure:"server" yaml:"server"`
+	Logging   LoggingConfig   `mapstructure:"logging" yaml:"logging"`
+	Ratelimit RateLimitConfig `mapstructure:"ratelimit" yaml:"ratelimit"`
 }
 
-// ServerConfig holds server-related configuration
-type ServerConfig struct {
-	Port string `yaml:"port"`
-	Env  string `yaml:"env"`
+// AppConfig holds application-related configuration.
+type AppConfig struct {
+	Name        string `mapstructure:"name" yaml:"name"`
+	Environment string `mapstructure:"environment" yaml:"environment"`
+	Debug       bool   `mapstructure:"debug" yaml:"debug"`
 }
 
 // DatabaseConfig holds database-related configuration
 type DatabaseConfig struct {
-	Host     string `yaml:"host"`
-	Port     string `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	Name     string `yaml:"name"`
+	Host     string `mapstructure:"host" yaml:"host"`
+	Port     int    `mapstructure:"port" yaml:"port"`
+	User     string `mapstructure:"user" yaml:"user"`
+	Password string `mapstructure:"password" yaml:"password"`
+	Name     string `mapstructure:"name" yaml:"name"`
+	SSLMode  string `mapstructure:"sslmode" yaml:"sslmode"`
 }
 
 // JWTConfig holds JWT-related configuration
 type JWTConfig struct {
-	Secret   string `yaml:"secret"`
-	TTLHours int    `yaml:"ttl_hours"`
+	Secret   string `mapstructure:"secret" yaml:"secret"`
+	TTLHours int    `mapstructure:"ttlhours" yaml:"ttlhours"`
+}
+
+// ServerConfig holds server-related configuration
+type ServerConfig struct {
+	Port         string `mapstructure:"port" yaml:"port"`
+	ReadTimeout  int    `mapstructure:"readtimeout" yaml:"readtimeout"`
+	WriteTimeout int    `mapstructure:"writetimeout" yaml:"writetimeout"`
 }
 
 // LoggingConfig holds logging-related configuration
 type LoggingConfig struct {
-	Level string `yaml:"level"`
+	Level string `mapstructure:"level" yaml:"level"`
 }
 
 // RateLimitConfig holds rate-limit configuration
 type RateLimitConfig struct {
-	Enabled  bool          `yaml:"rate_limit_enabled"`
-	Requests int           `yaml:"rate_limit_requests"`
-	Window   time.Duration `yaml:"rate_limit_window"`
+	Enabled  bool          `mapstructure:"enabled" yaml:"enabled"`
+	Requests int           `mapstructure:"requests" yaml:"requests"`
+	Window   time.Duration `mapstructure:"window" yaml:"window"`
 }
 
-// LoadConfig loads configuration from YAML file and environment variables
+// LoadConfig loads configuration using Viper. If configPath is non-empty it
+// will be used as the exact config file path, otherwise Viper searches common locations.
 func LoadConfig(configPath string) (*Config, error) {
-	// Default config path if not provided
-	if configPath == "" {
-		configPath = "configs/config.yaml"
+	// Create a new viper instance to avoid conflicts with global state
+	v := viper.New()
+
+	// Configure environment variable handling first
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.AutomaticEnv()
+
+	if configPath != "" {
+		v.SetConfigFile(configPath)
+	} else {
+		// choose config.<env>.yaml if APP_ENVIRONMENT is set; otherwise use config.yaml
+		env := v.GetString("APP_ENVIRONMENT")
+		if env == "" {
+			// fallback to "development" when APP_ENVIRONMENT is not set
+			env = "development"
+		}
+
+		// Try env-specific file first
+		v.SetConfigName(fmt.Sprintf("config.%s", env))
+		v.SetConfigType("yaml")
+		v.AddConfigPath("configs")
+		v.AddConfigPath(".")
+		v.AddConfigPath("./configs")
 	}
 
-	// Read YAML file
-	data, err := os.ReadFile(configPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read config file %s: %w", configPath, err)
+	// Read config file if present
+	if err := v.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return nil, fmt.Errorf("failed to read config file: %w", err)
+		}
+		// no config file is ok; env vars and defaults will be used
 	}
 
-	// Parse YAML
-	var config Config
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %w", err)
+	// Unmarshal into struct
+	var cfg Config
+	if err := v.Unmarshal(&cfg); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
-	// Override with environment variables if present
-	config.loadFromEnv()
-
-	return &config, nil
-}
-
-// loadFromEnv overrides configuration values with environment variables
-func (c *Config) loadFromEnv() {
-	// Server config
-	if port := os.Getenv("PORT"); port != "" {
-		c.Server.Port = port
-	}
-	if env := os.Getenv("ENV"); env != "" {
-		c.Server.Env = env
-	}
-
-	// Database config
-	if host := os.Getenv("DB_HOST"); host != "" {
-		c.Database.Host = host
-	}
-	if port := os.Getenv("DB_PORT"); port != "" {
-		c.Database.Port = port
-	}
-	if user := os.Getenv("DB_USER"); user != "" {
-		c.Database.User = user
-	}
-	if password := os.Getenv("DB_PASSWORD"); password != "" {
-		c.Database.Password = password
-	}
-	if name := os.Getenv("DB_NAME"); name != "" {
-		c.Database.Name = name
-	}
-
-	// JWT config
-	if secret := os.Getenv("JWT_SECRET"); secret != "" {
-		c.JWT.Secret = secret
-	}
-	if ttlHours := os.Getenv("JWT_TTL_HOURS"); ttlHours != "" {
-		// Parse TTL hours from environment variable
-		// Note: This would need proper parsing in a real implementation
-		// For now, we'll keep the YAML value if env var is not set
-		_ = ttlHours // Acknowledge the variable to avoid unused variable warning
-	}
-
-	// Logging config
-	if level := os.Getenv("LOG_LEVEL"); level != "" {
-		c.Logging.Level = level
-	}
-
-	// Ratelimit config
-	if enabled := os.Getenv("RATE_LIMIT_ENABLED"); enabled != "" {
-		if enabledBool, err := strconv.ParseBool(enabled); err == nil {
-			c.Ratelimit.Enabled = enabledBool
+	// Backwards compatibility: if Server.Env not set, prefer APP_ENVIRONMENT/ENV
+	if cfg.App.Environment == "" {
+		// prefer viper (env vars are already bound via AutomaticEnv and key replacer)
+		if e := v.GetString("app.environment"); e != "" {
+			cfg.App.Environment = e
+		} else if e := v.GetString("ENV"); e != "" {
+			cfg.App.Environment = e
 		}
 	}
-	if requests := os.Getenv("RATE_LIMIT_REQUESTS"); requests != "" {
-		if requestsNum, err := strconv.Atoi(requests); err == nil && requestsNum > 0 {
-			c.Ratelimit.Requests = requestsNum
-		}
+
+	// Validate
+	if err := cfg.Validate(); err != nil {
+		return nil, err
 	}
-	if window := os.Getenv("RATE_LIMIT_WINDOW"); window != "" {
-		if windowDur, err := time.ParseDuration(window); err == nil && windowDur > 0 {
-			c.Ratelimit.Window = windowDur
-		}
-	}
+
+	return &cfg, nil
 }
 
 // GetLogLevel converts string log level to slog.Level
 func (l *LoggingConfig) GetLogLevel() slog.Level {
-	switch l.Level {
+	switch strings.ToLower(l.Level) {
 	case "debug":
 		return slog.LevelDebug
 	case "info":
@@ -169,7 +153,7 @@ func GetSkipPaths(env string) []string {
 	}
 }
 
-// GetConfigPath returns the default config path
+// GetConfigPath returns the default config path (kept for compatibility)
 func GetConfigPath() string {
 	// Try to find config.yaml in common locations
 	paths := []string{
@@ -185,6 +169,5 @@ func GetConfigPath() string {
 		}
 	}
 
-	// Return default path if none found
 	return "configs/config.yaml"
 }

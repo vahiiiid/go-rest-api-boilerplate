@@ -3,11 +3,12 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 )
 
 var (
@@ -28,18 +29,16 @@ type service struct {
 	jwtTTL    time.Duration
 }
 
-// NewService creates a new authentication service
-func NewService() Service {
-	jwtSecret := os.Getenv("JWT_SECRET")
+// NewService creates a new authentication service using typed config
+func NewService(cfg *config.JWTConfig) Service {
+	jwtSecret := cfg.Secret
 	if jwtSecret == "" {
 		jwtSecret = "default-secret-change-in-production"
 	}
 
-	ttlHours := 24
-	if ttlStr := os.Getenv("JWT_TTL_HOURS"); ttlStr != "" {
-		if hours, err := strconv.Atoi(ttlStr); err == nil {
-			ttlHours = hours
-		}
+	ttlHours := cfg.TTLHours
+	if ttlHours == 0 {
+		ttlHours = 24
 	}
 
 	return &service{

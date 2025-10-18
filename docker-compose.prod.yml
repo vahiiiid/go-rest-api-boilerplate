@@ -2,20 +2,20 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: ${DB_CONTAINER_NAME_PROD:-go_api_db_prod}
+    container_name: ${DATABASE_CONTAINER_NAME_PROD:-go_api_db_prod}
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-go_api}
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      POSTGRES_DB: ${DATABASE_NAME:-grab}
     # No ports exposed to host - only accessible within Docker network
     expose:
-      - "${DB_PORT:-5432}"
+      - "${DATABASE_PORT:-5432}"
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
     networks:
       - go_api_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres}"]
       interval: ${HEALTH_CHECK_INTERVAL:-10s}
       timeout: ${HEALTH_CHECK_TIMEOUT:-5s}
       retries: ${HEALTH_CHECK_RETRIES:-5}
@@ -30,7 +30,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${PORT:-8080}:${PORT:-8080}"
+      - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
     # No volumes in production - code is baked into the image
     depends_on:
       db:
@@ -38,7 +38,7 @@ services:
     networks:
       - go_api_network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:${PORT:-8080}/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:${SERVER_PORT:-8080}/health || exit 1"]
       interval: ${HEALTH_CHECK_INTERVAL:-10s}
       timeout: ${HEALTH_CHECK_TIMEOUT:-5s}
       retries: ${HEALTH_CHECK_RETRIES:-5}
