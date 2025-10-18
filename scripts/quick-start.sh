@@ -85,6 +85,41 @@ else
 fi
 
 echo ""
+echo "🔄 Running database migrations..."
+echo ""
+
+# Run migrations with retry mechanism (database might need a moment after health check)
+MAX_RETRIES=3
+RETRY_DELAY=3
+RETRY_COUNT=0
+MIGRATION_SUCCESS=false
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    if docker compose exec -T app go run cmd/migrate/main.go -action=up; then
+        MIGRATION_SUCCESS=true
+        break
+    else
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo ""
+            echo -e "${YELLOW}⚠️  Migration attempt $RETRY_COUNT failed, retrying in ${RETRY_DELAY} seconds...${NC}"
+            sleep $RETRY_DELAY
+        fi
+    fi
+done
+
+if [ "$MIGRATION_SUCCESS" = true ]; then
+    echo ""
+    echo -e "${GREEN}✅ Migrations completed successfully${NC}"
+else
+    echo ""
+    echo -e "${RED}❌ Failed to run migrations after $MAX_RETRIES attempts${NC}"
+    echo ""
+    echo "Check database logs with: docker compose logs db"
+    exit 1
+fi
+
+echo ""
 echo "================================================"
 echo -e "${GREEN}🎉 Success! Your API is ready!${NC}"
 echo "================================================"
@@ -103,6 +138,11 @@ echo "🛠️  Development Commands:"
 echo "   • Run tests:   make test"
 echo "   • Run linter:  make lint"
 echo "   • Update docs: make swag"
+echo ""
+echo "🗄️  Database Commands:"
+echo "   • Run migrations:     make migrate-up"
+echo "   • Rollback migration: make migrate-down"
+echo "   • Migration status:   make migrate-version"
 echo ""
 echo "📚 Documentation:"
 echo "   https://vahiiiid.github.io/go-rest-api-docs/"

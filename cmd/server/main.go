@@ -47,13 +47,6 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Run migrations
-	log.Println("Running database migrations...")
-	if err := database.AutoMigrate(&user.User{}); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
-	}
-	log.Println("Migrations completed successfully")
-
 	// Initialize services
 	authService := auth.NewService(&cfg.JWT)
 	userRepo := user.NewRepository(database)
