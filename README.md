@@ -2,62 +2,62 @@
 
 ![GRAB Logo](https://vahiiiid.github.io/go-rest-api-docs/images/logo.png)
 
-**G**o **R**EST **A**PI **B**oilerplate
+# Go REST API Boilerplate
 
-*Grab it and Go — a best-practice layered structure REST API starter kit in Go with JWT, PostgreSQL, Docker, and Swagger.*
+Production-ready in 90 seconds. No headaches, just clean code.
 
-**🚀 Start building in under 2 minutes** • **📚 Fully documented** • **🧪 100% tested** • **🐳 Docker ready**
+*GRAB is a Go boilerplate that doesn't waste your time — highly tested, Docker-ready, fully documented, with everything you need.*
 
-**[Explore the docs »](https://vahiiiid.github.io/go-rest-api-docs/)**
-
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/vahiiiid/go-rest-api-boilerplate/releases/tag/v1.0.0)
-[![CI](https://github.com/vahiiiid/go-rest-api-boilerplate/workflows/CI/badge.svg)](https://github.com/vahiiiid/go-rest-api-boilerplate/actions)
+[![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![codecov](https://codecov.io/gh/vahiiiid/go-rest-api-boilerplate/graph/badge.svg?branch=main)](https://codecov.io/gh/vahiiiid/go-rest-api-boilerplate)
+[![CI](https://github.com/vahiiiid/go-rest-api-boilerplate/workflows/CI/badge.svg)](https://github.com/vahiiiid/go-rest-api-boilerplate/actions)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vahiiiid/go-rest-api-boilerplate)](https://goreportcard.com/report/github.com/vahiiiid/go-rest-api-boilerplate)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go)](https://go.dev/)
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://vahiiiid.github.io/go-rest-api-docs/)
+[![Documentation](https://img.shields.io/badge/docs-read%20the%20docs-brightgreen?logo=readthedocs&logoColor=white)](https://vahiiiid.github.io/go-rest-api-docs/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![GitHub Stars](https://img.shields.io/github/stars/vahiiiid/go-rest-api-boilerplate?style=social)](https://github.com/vahiiiid/go-rest-api-boilerplate/stargazers)
 
-[Quick Start](#-quick-start) • [Features](#-features) • [Documentation](https://vahiiiid.github.io/go-rest-api-docs/) • [Examples](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/)
+**[📖 Full Documentation](https://vahiiiid.github.io/go-rest-api-docs/)** • **[🚀 Quick Start](#-quick-start)** • **[✨ Live Demo](#-see-it-in-action)**
 
 </div>
 
 ---
 
-## 🎃 Hacktoberfest 2025
+## � Why Waste Days on Setup?
 
-<div align="center">
+You know the pain: Starting a new Go project means days of configuring Docker, wiring up authentication, setting up migrations, writing boilerplate code, and praying your hot-reload actually works.
 
-![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2025-orange?style=for-the-badge&logo=digitalocean&logoColor=white)
+**GRAB changes that.**
 
-**We're participating in Hacktoberfest 2025! 🚀**
+```bash
+make quick-start  # ← One command. 90 seconds. You're building features.
+```
 
-</div>
+**This is the real deal.** The production-grade boilerplate you wish you had from day one:
 
-We welcome contributions from developers of all skill levels! Pick up any [open issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) labeled `hacktoberfest` or `good first issue`, fork the repository, make your changes, and submit a pull request. Whether it's bug fixes, new features, documentation improvements, or test enhancements - every contribution counts! 🎉
+✅ **Clean Architecture** — Handler → Service → Repository (GO industry standard)  
+✅ **Security & JWT Auth** — Rate limiting, CORS, input validation built-in  
+✅ **Database Migrations** — PostgreSQL with version control & rollback  
+✅ **Comprehensive Tests** — Unit + integration with CI/CD pipeline  
+✅ **Interactive Docs** — Auto-generated Swagger + Postman collection  
+✅ **Structured Logging** — JSON logs with request IDs and tracing  
+✅ **Production Docker** — Multi-stage builds, health checks, optimized images  
+✅ **Environment-Aware** — Dev/staging/prod configs + Make automation & more  
+✅ **Hot-Reload (2 seconds!)** — Powered by Air, not magic  
 
----
-## 🎯 Looking to Build a REST API in Go?
+**And that's just scratching the surface.** Check the [full documentation](https://vahiiiid.github.io/go-rest-api-docs/) to see everything GRAB offers.
 
-**You need a REST API project with Go** and you're looking for:
-- ✨ **Best-practice clean architecture** that scales with your team
-- 🛠️ **CLI tools ready to go** - migrations, linting, testing, all configured
-- 🚀 **Production-ready structure** - not a toy project, but battle-tested patterns
-- 📚 **Real documentation** - not just comments, but guides and examples
-- 🐳 **Docker-first development** - consistent environments, zero "works on my machine"
-- ⚡ **Hot-reload that actually works** - see changes in 2 seconds, not 20
+### 🏆 Built Following Go Standards
 
-**Stop spending days setting up.** This boilerplate gives you everything you need to start building features in minutes, not hours. Real authentication, real database migrations, real tests - all wired up and ready to extend.
+Not some random structure — follows **[official Go project layout](https://go.dev/doc/modules/layout)** + battle-tested community patterns from **[golang-standards/project-layout](https://github.com/golang-standards/project-layout)**. The same architecture used by Gin, GORM, and production Go services.
 
-**Perfect for:**
-- 🚀 Starting new Go projects without the setup headache
-- 📖 Learning Go web development with production-quality examples
-- 🏗️ Building APIs that need to scale and be maintained
-- 👥 Team projects where consistency and standards matter
+### 🎯 Perfect For
+
+- 🚀 **Shipping Fast** — Launch MVPs and production APIs in days, not weeks  
+- 👥 **Team Projects** — Consistent standards everyone understands  
+- 🏗️ **Scaling Up** — Architecture that grows with your business
+- 📖 **Learning Go** — See how pros structure real-world applications
 
 ---
 
@@ -66,6 +66,7 @@ We welcome contributions from developers of all skill levels! Pick up any [open 
 Get your API running in **under 2 minutes**:
 
 ### Prerequisites
+
 - [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
 - [Git](https://git-scm.com/downloads)
 
@@ -84,13 +85,16 @@ make quick-start
 </div>
 
 **🎉 Done!** Your API is now running at:
-- **API Base URL:** http://localhost:8080/api/v1
-- **Swagger UI:** http://localhost:8080/swagger/index.html
-- **Health Check:** http://localhost:8080/health
 
-### Explore Your API 🧪
+- **API Base URL:** <http://localhost:8080/api/v1>
+- **Swagger UI:** <http://localhost:8080/swagger/index.html>
+- **Health Check:** <http://localhost:8080/health>
 
-**Interactive Swagger Documentation:**
+---
+
+## ✨ See It In Action
+
+### Interactive Swagger Documentation
 
 <div align="center">
   <img src="https://vahiiiid.github.io/go-rest-api-docs/images/swagger-ui.png" alt="Swagger UI" width="700">
@@ -98,7 +102,7 @@ make quick-start
 
 Open [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) to explore and test all endpoints interactively.
 
-**Or Use Postman:**
+### Or Use Postman
 
 <div align="center">
   <img src="https://vahiiiid.github.io/go-rest-api-docs/images/postman-collection.png" alt="Postman Collection" width="700">
@@ -106,525 +110,224 @@ Open [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/in
 
 Import the pre-configured collection from `api/postman_collection.json` with example requests and tests.
 
-### 🚀 Ready to Build Your Own Features?
+**🚀 Ready to Build?**
 
-**📖 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** - Learn how to add models, routes, and handlers
-
-**💡 [TODO List Example](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/)** - Complete step-by-step tutorial implementing a feature from scratch
-
----
-
-## ✨ Features
-
-### 🔐 Authentication & Security
-
-- ✅ **JWT Authentication** - Secure token-based auth (HS256) → [Context Helpers Guide](https://vahiiiid.github.io/go-rest-api-docs/CONTEXT_HELPERS/)
-- ✅ **Context Helpers** - Type-safe user extraction from request context → [Context Helpers Guide](https://vahiiiid.github.io/go-rest-api-docs/CONTEXT_HELPERS/)
-- ✅ **Rate Limiting** - Smart token-bucket protection against abuse → [Rate Limiting Guide](https://vahiiiid.github.io/go-rest-api-docs/RATE_LIMITING/)
-- ✅ **Security Best Practices** - Bcrypt hashing, input validation → [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)
-- ✅ **CORS Support** - Configurable cross-origin requests → [Configuration Guide](https://vahiiiid.github.io/go-rest-api-docs/CONFIGURATION/)
-
-### 🗄️ Database & Data Management
-
-- ✅ **PostgreSQL + GORM** - Robust database with ORM → [Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)
-- ✅ **Database Migrations** - Version-controlled schema changes with CLI tools → [Migrations Guide](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/)
-- ✅ **User Management** - Complete CRUD with validation → [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)
-
-### 🐳 Docker & Development
-
-- ✅ **Docker Development** - Hot-reload with Air (~2 sec feedback) → [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/)
-- ✅ **Docker Production** - Optimized multi-stage builds → [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/)
-- ✅ **Make Commands** - Simplified workflow automation → [Quick Reference](https://vahiiiid.github.io/go-rest-api-docs/QUICK_REFERENCE/)
-- ✅ **Centralized Configuration** - Viper-powered config with environment precedence → [Configuration Guide](https://vahiiiid.github.io/go-rest-api-docs/CONFIGURATION/)
-
-### 📚 Documentation & API
-
-- ✅ **Swagger/OpenAPI** - Interactive API documentation → [Swagger Guide](https://vahiiiid.github.io/go-rest-api-docs/SWAGGER/)
-- ✅ **Postman Collection** - Pre-configured API tests → [Quick Reference](https://vahiiiid.github.io/go-rest-api-docs/QUICK_REFERENCE/)
-- ✅ **Request Logging** - Configurable structured JSON logging → [Logging Guide](https://vahiiiid.github.io/go-rest-api-docs/LOGGING/)
-
-### 🧪 Testing & Quality
-
-- ✅ **Automated Testing** - Unit & integration tests → [Testing Guide](https://vahiiiid.github.io/go-rest-api-docs/TESTING/)
-- ✅ **GitHub Actions CI** - Automated linting and testing → [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)
-- ✅ **Clean Architecture** - Layered, maintainable structure → [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)
-
-### 🚀 Getting Started
-
-- 📖 **[Complete Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** - Manual installation and configuration
-- 🏗️ **[Development Tutorial](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** - Build your first feature
-- 📝 **[TODO Example](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/)** - Step-by-step implementation guide
-- ⚡ **[Quick Reference](https://vahiiiid.github.io/go-rest-api-docs/QUICK_REFERENCE/)** - Commands and API examples
-
-## 📑 Table of Contents
-
-- [Development](#-development)
-- [Production](#-production)
-- [API Documentation](#-api-documentation)
-- [Testing](#-testing)
-- [Documentation](#-documentation)
-- [Project Structure](#️-project-structure)
-- [Contributing](#-contributing)
-
+- 📖 **[Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** — Learn how to add models, routes, and handlers
+- 💡 **[TODO List Tutorial](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/)** — Complete step-by-step feature implementation from scratch
 
 ---
 
-## 💻 Development
+## 💎 What Makes GRAB Different?
 
-### With Docker (Recommended) 🐳
+### Not Just Features — A Complete Development Experience
+
+Most boilerplates give you code. **GRAB gives you a professional development workflow.**
+
+#### 🔐 Authentication That Actually Works
+
+- **JWT-based auth** (HS256) — Secure, stateless, ready for production
+- **Context helpers** — Type-safe user extraction (no more casting nightmares)
+- **Password security** — Bcrypt hashing with best-practice cost factor
+- **Rate limiting** — Token-bucket protection against abuse built-in
+
+👉 [Context Helpers Guide](https://vahiiiid.github.io/go-rest-api-docs/CONTEXT_HELPERS/)
+
+#### 🗄️ Database Setup That Doesn't Fight You
+
+- **PostgreSQL + GORM** — Production-grade ORM with relationship support
+- **Migration CLI** — Version control for your schema (`make migrate-create`, `make migrate-up`)
+- **Auto-migrations** — Schema updates on startup in development
+- **Connection pooling** — Configured for performance out of the box
+
+👉 [Migrations Guide](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/)
+
+#### 🐳 Docker That Saves Your Sanity
+
+- **2-second hot-reload** — Powered by Air, actually works in Docker
+- **One command to rule them all** — `make quick-start` handles everything
+- **Development & production** — Separate optimized configs
+- **Multi-stage builds** — Tiny production images (~20MB)
+
+👉 [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/)
+
+#### 📚 Documentation That Exists (And Helps!)
+
+- **Auto-generated Swagger** — Interactive API explorer at `/swagger/index.html`
+- **Full documentation site** — Not just README, real guides at [vahiiiid.github.io/go-rest-api-docs](https://vahiiiid.github.io/go-rest-api-docs/)
+- **Step-by-step tutorials** — Build a TODO app from scratch
+- **Postman collection** — Import and test immediately
+
+👉 [Full Documentation](https://vahiiiid.github.io/go-rest-api-docs/)
+
+#### 🧪 Tests That Give You Confidence
+
+- **Comprehensive coverage** — Handlers, services, and repositories all tested
+- **In-memory SQLite** — No external dependencies for tests
+- **Table-driven tests** — Go idiomatic testing patterns
+- **CI/CD ready** — GitHub Actions configured and working
+
+👉 [Testing Guide](https://vahiiiid.github.io/go-rest-api-docs/TESTING/)
+
+#### 🏗️ Architecture That Scales
+
+- **Clean layers** — Handler → Service → Repository (no shortcuts)
+- **Dependency injection** — Proper DI, easy to mock and test
+- **Domain-driven** — Organize by feature, not by layer
+- **Official Go layout** — Follows [golang-standards/project-layout](https://github.com/golang-standards/project-layout)
+
+👉 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)
+
+---
+
+## 🛠️ Development
+
+### With Docker (Recommended)
 
 The easiest way to develop with hot-reload and zero setup:
 
 ```bash
-# Start everything
-make quick-start
-
-# Or manually
-make up
-
-# Edit code in your IDE
-# Changes auto-reload in ~2 seconds! ✨
-
-# View logs
-make logs
-
-# Stop containers
-make down
+make up        # Start containers with hot-reload
+make logs      # View logs
+make test      # Run all tests
+make lint      # Check code quality
+make lint-fix  # Auto-fix linting issues
+make down      # Stop containers
 ```
 
-**Features:**
-- 🔥 **Hot-reload** - Code changes reflect in ~2 seconds (powered by Air)
-- 📦 **Volume mounts** - Edit code in your IDE, runs in container
-- 🗄️ **PostgreSQL** - Database on internal Docker network
-- 📚 **All tools pre-installed** - No Go installation needed on host
+**What you get:**
 
-### Development Workflow
+- 🔥 **Hot-reload** — Code changes reflect in ~2 seconds (powered by Air)
+- 📦 **Volume mounts** — Edit code in your IDE, runs in container
+- 🗄️ **PostgreSQL** — Database on internal Docker network
+- 📚 **All tools pre-installed** — No Go installation needed on host
+
+### Database Migrations
 
 ```bash
-# Start containers
-make up
-
-# Run tests
-make test
-
-# Check code quality
-make lint
-
-# Fix linting issues
-make lint-fix
-
-# Generate/update Swagger docs (if running locally)
-make swag
-
-# Database migrations
-make migrate-create NAME=add_new_table
-make migrate-up
-make migrate-down
-make migrate-version
-
-# View logs
-make logs
-
-# Stop containers
-make down
+make migrate-create NAME=add_todos_table  # Create new migration
+make migrate-up                            # Apply migrations
+make migrate-down                          # Rollback last migration
+make migrate-version                       # Check current version
 ```
 
-### Available Make Commands
+### Without Docker
 
-Run `make help` to see all commands. Key commands:
+Want to run natively? You'll need Go 1.24+ installed.
 
-```bash
-make quick-start       # Complete automated setup
-make up                # Start development containers
-make down              # Stop containers
-make test              # Run tests (auto-detects environment)
-make lint              # Run linter (auto-detects environment)
-make swag              # Generate Swagger docs (auto-detects environment)
-make migrate-up        # Run migrations (auto-detects environment)
-make build-binary      # Build Go binary directly (requires Go on host)
-make run-binary        # Build and run binary directly (requires Go on host)
-```
-
-> 💡 **Most commands auto-detect** whether to run in Docker or on your host machine!
-
-### Without Docker (Native Development)
-
-**Want to run without Docker?** You'll need Go 1.24 installed on your machine.
-
-See the **[Manual Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** for detailed instructions on:
-- Installing Go and development tools
-- Setting up PostgreSQL locally
-- Building and running the binary directly
-- Manual migration commands
-
-**Quick native build:**
 ```bash
 make build-binary    # Build binary to bin/server
 make run-binary      # Build and run (requires PostgreSQL on localhost)
 ```
 
+👉 **[Full Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** for native development
+
 ---
 
-## 🏭 Production
+## 🚢 Deployment
 
-### Overview
+### Production-Ready From Day One
 
-GRAB provides optimized production builds with:
+GRAB includes optimized production builds:
+
+```bash
+make docker-up-prod  # Start production containers
+```
+
+**What's included:**
+
 - ✅ Multi-stage Docker builds (minimal image size)
+- ✅ Health check endpoints
+- ✅ Environment-based configuration
 - ✅ No development dependencies
-- ✅ No mounted volumes
-- ✅ Production-ready configuration
-- ✅ Health checks
+- ✅ Production logging
 
-### Simple Deployment (VPS/Server)
+### Deploy Anywhere
 
-```bash
-# Clone repository on your server
-git clone https://github.com/vahiiiid/go-rest-api-boilerplate.git
-cd go-rest-api-boilerplate
+Ready for:
 
-# Install development tools (needed for Swagger generation)
-make install-tools
+- **AWS ECS/Fargate** — Container orchestration
+- **Google Cloud Run** — Serverless containers
+- **DigitalOcean App Platform** — Platform-as-a-service
+- **Kubernetes** — Self-managed orchestration
+- **Any VPS** — Using Docker Compose
 
-# Create production environment file
-cp .env.example .env
-nano .env  # Edit with production values (database, JWT secret, etc.)
-
-# Note: Swagger docs are automatically generated during Docker build
-# Only run 'make swag' if you're running the binary directly (not in Docker)
-
-# Start production containers
-make docker-up-prod
-```
-
-### Production Configuration
-
-Update `.env` with production values:
-
-```env
-ENV=production
-PORT=8080
-DB_HOST=your-db-host
-DB_PORT=5432
-DB_USER=your-db-user
-DB_PASSWORD=your-strong-password
-DB_NAME=your-db-name
-JWT_SECRET=your-very-strong-random-secret
-JWT_TTL_HOURS=24
-```
-
-### Docker Production Build
-
-```bash
-# Build production image
-docker build -t grab-api:latest .
-
-# Run production container
-docker run -p 8080:8080 --env-file .env grab-api:latest
-```
-
-### Cloud Deployment
-
-GRAB is ready to deploy to:
-- **AWS ECS/Fargate** - Container orchestration
-- **Google Cloud Run** - Serverless containers
-- **Azure Container Instances** - Managed containers
-- **DigitalOcean App Platform** - Platform-as-a-service
-- **Kubernetes** - Self-managed orchestration
-- **Any VPS** - Using Docker Compose
-
-For detailed deployment guides, database migrations, and Docker production setup, see the [Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/) and [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/).
+👉 **[Deployment Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** for step-by-step instructions
 
 ---
 
-## 📚 API Documentation
+## 🎃 Hacktoberfest 2025
 
-### Swagger UI
+<div align="center">
 
-Interactive API documentation is available at:
+![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2025-orange?style=for-the-badge&logo=digitalocean&logoColor=white)
 
-```
-http://localhost:8080/swagger/index.html
-```
+**We're participating in Hacktoberfest 2025! 🚀**
 
-Try endpoints directly from your browser with the built-in "Try it out" feature.
+</div>
 
-### Postman Collection
-
-Import the pre-configured Postman collection with example requests and tests:
-
-```
-api/postman_collection.json
-```
-
-**Includes:**
-- Pre-configured requests for all endpoints
-- Environment variables
-- Automated tests
-- Example payloads
-
-### API Endpoints
-
-#### Authentication
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/auth/register` | Register new user |
-| POST | `/api/v1/auth/login` | Login user |
-
-#### Users (Protected)
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| GET | `/api/v1/users/:id` | Get user by ID | ✅ |
-| PUT | `/api/v1/users/:id` | Update user | ✅ |
-| DELETE | `/api/v1/users/:id` | Delete user | ✅ |
-
-#### Health
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Health check |
-
-### Example Requests
-
-**Register User:**
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "securepass123"
-  }'
-```
-
-**Login:**
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "john@example.com",
-    "password": "securepass123"
-  }'
-```
-
-For more examples, see the [Quick Reference Guide](https://vahiiiid.github.io/go-rest-api-docs/QUICK_REFERENCE/).
-
----
-
-## 🧪 Testing
-
-### Run Tests
-
-```bash
-# Run all tests
-make test
-
-# Run tests with coverage
-make test-coverage
-
-# Run tests in verbose mode
-go test ./... -v
-```
-
-### Test Coverage
-
-The project includes:
-- ✅ **Unit tests** - Handler, service, repository layers
-- ✅ **Integration tests** - Full request/response cycle
-- ✅ **In-memory SQLite** - No external dependencies for tests
-- ✅ **Test fixtures** - Reusable test data
-- ✅ **HTTP mocking** - Using `httptest` package
-
-**Test Suites:**
-- `TestRegisterHandler` - User registration flows
-- `TestLoginHandler` - Authentication flows
-- `TestHealthEndpoint` - Health check validation
-
-### Continuous Integration
-
-GitHub Actions automatically runs on every push:
-- ✅ Run all tests
-- ✅ Check code with `go vet`
-- ✅ Run `golangci-lint`
-- ✅ Generate coverage reports
-
-See `.github/workflows/ci.yml` for CI configuration.
+We welcome contributions from developers of all skill levels! Pick up any [open issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) labeled `hacktoberfest` or `good first issue`, fork the repository, make your changes, and submit a pull request. Whether it's bug fixes, new features, documentation improvements, or test enhancements - every contribution counts! 🎉
 
 ---
 
 ## 📖 Documentation
 
-Full API documentation, usage guides, and tutorials are maintained in a separate repository:
+### 🌐 Full Documentation Site
 
-### 📘 Documentation Site
+**[📚 Read the Docs →](https://vahiiiid.github.io/go-rest-api-docs/)**
 
-**🌐 [View Full Documentation](https://vahiiiid.github.io/go-rest-api-docs/)**
+Complete guides covering everything:
 
-Complete, searchable documentation site featuring:
-- 🚀 Getting Started guides
-- 💻 Development tutorials with examples
-- 🏗️ Architecture overview
-- 🐳 Docker deployment guides
-- 📚 API reference with Swagger
-- 🗄️ Database migration guides
-
-### 📦 Documentation Repository
-
-**👉 [go-rest-api-docs](https://github.com/vahiiiid/go-rest-api-docs)**
-
-The documentation repository includes:
-- Complete setup and deployment guides
-- Step-by-step development tutorials
-- TODO list implementation example
-- Best practices and patterns
-- Troubleshooting guides
-- Contributing guidelines
+- 🚀 [Getting Started](https://vahiiiid.github.io/go-rest-api-docs/SETUP/) — Installation and configuration
+- 💻 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/) — Building features
+- 💡 [TODO Tutorial](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/) — Step-by-step implementation
+- 🐳 [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/) — Container workflows
+- 🗄️ [Migrations](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/) — Database schema management
+- 🧪 [Testing](https://vahiiiid.github.io/go-rest-api-docs/TESTING/) — Writing and running tests
+- 📚 [Swagger](https://vahiiiid.github.io/go-rest-api-docs/SWAGGER/) — API documentation
+- ⚙️ [Configuration](https://vahiiiid.github.io/go-rest-api-docs/CONFIGURATION/) — Environment setup
 
 ### 🤝 Contributing to Documentation
 
-To contribute to the documentation:
-1. Visit the [docs repository](https://github.com/vahiiiid/go-rest-api-docs)
+Documentation lives in a [separate repository](https://github.com/vahiiiid/go-rest-api-docs). To contribute:
+
+1. Visit [github.com/vahiiiid/go-rest-api-docs](https://github.com/vahiiiid/go-rest-api-docs)
 2. Follow the contributing guidelines
 3. Submit pull requests for improvements
 
-For contributing to the codebase, see [CONTRIBUTING.md](CONTRIBUTING.md)
-
----
-## 🏗️ Project Structure
-
-```
-go-rest-api-boilerplate/
-├── api/                  # API documentation & Postman collections
-├── cmd/server/           # Application entry point
-├── configs/              # Environment-specific configuration files
-├── internal/             # Private application code
-│   ├── auth/             # Authentication & JWT
-│   ├── config/           # Configuration management
-│   ├── ctx/              # Context helpers
-│   ├── db/               # Database connection
-│   ├── middleware/       # HTTP middleware
-│   ├── server/           # Route definitions
-│   └── user/             # User domain (example)
-├── migrations/           # Database migrations
-├── scripts/              # Utility scripts for development/CI
-├── tests/                # Test files
-├── .github/              # GitHub configuration & workflows
-├── docker-compose.yml    # Development setup
-├── docker-compose.prod.yml # Production setup
-├── Dockerfile            # Container configuration
-├── go.mod                # Go module definition
-├── LICENSE               # Project license
-└── Makefile              # Build automation
-```
-
-### Key Highlights
-
-- **🐳 Docker-First**: All dev tools pre-installed in container (swag, golangci-lint, migrate, air)
-- **🔥 Hot-Reload**: Code changes reflect in ~2 seconds via Air + volume mounts
-- **🗄️ Migrations**: SQL-based migrations with golang-migrate
-- **📚 Clean Architecture**: Clear separation: Handler → Service → Repository
-- **🧪 Fully Tested**: Unit & integration tests with in-memory SQLite
-- **⚙️ Auto-Detection**: Make commands work in Docker or on host automatically
-
-**📚 Documentation**: All guides, tutorials, and API docs are in a [separate repository](https://github.com/vahiiiid/go-rest-api-docs) and published at [vahiiiid.github.io/go-rest-api-docs](https://vahiiiid.github.io/go-rest-api-docs/)
-
----
-
-## 🏛️ Architecture
-
-GRAB follows **clean architecture** principles with clear separation of concerns:
-
-### Layers
-
-```
-┌─────────────────────────────────────┐
-│         Handler Layer               │  ← HTTP handlers, request/response
-│   (internal/user/handler.go)        │     validation, error handling
-└─────────────────────────────────────┘
-              ↓
-┌─────────────────────────────────────┐
-│         Service Layer               │  ← Business logic, orchestration
-│   (internal/user/service.go)        │     transactions, domain rules
-└─────────────────────────────────────┘
-              ↓
-┌─────────────────────────────────────┐
-│       Repository Layer              │  ← Data access, CRUD operations
-│  (internal/user/repository.go)      │     database queries
-└─────────────────────────────────────┘
-              ↓
-┌─────────────────────────────────────┐
-│         Database (PostgreSQL)       │  ← Data persistence
-└─────────────────────────────────────┘
-```
-
-### Key Principles
-
-- ✅ **Separation of Concerns** - Each layer has a single responsibility
-- ✅ **Dependency Injection** - Loose coupling between layers
-- ✅ **Testability** - Easy to mock and test each layer
-- ✅ **Maintainability** - Clear structure, easy to navigate
-- ✅ **Scalability** - Easy to extend with new features
-
-### Want to Build Your Own Features?
-
-The **[Development Guide](https://vahiiiid.github.io/go-rest-api-docs/development-guide/)** provides a complete walkthrough of this architecture with a real **TODO list implementation** showing you exactly how to:
-- Add new models and database tables
-- Create repositories, services, and handlers
-- Register routes and add Swagger documentation
-- Follow the same patterns used in the user management system
-
-**[📖 View Full Documentation](https://vahiiiid.github.io/go-rest-api-docs/)**
-
----
-
-## 🔐 Security Features
-
-- **Password Hashing** - Bcrypt with configurable cost (default: 10)
-- **JWT Tokens** - Secure token generation and validation (HS256)
-- **Input Validation** - Request validation using Gin binding tags
-- **SQL Injection Protection** - GORM parameterized queries
-- **CORS** - Configurable cross-origin resource sharing
-- **Rate Limiting** - (Add via middleware - see docs)
-- **Environment Variables** - Sensitive data never hardcoded
-
-⚠️ **Production Checklist:**
-- [ ] Change `JWT_SECRET` to a strong, random value
-- [ ] Use strong database passwords
-- [ ] Enable HTTPS/TLS
-- [ ] Configure proper CORS origins
-- [ ] Set up rate limiting
-- [ ] Enable database connection encryption
-- [ ] Regular dependency updates
+For code contributions, see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+We ❤️ contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
 - Code style guidelines
 - Pull request process
 - Testing requirements
 - Commit conventions
 
-### Quick Guidelines
+### Quick Start
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Create a feature branch (`git checkout -b feat/amazing-feature`)
 3. Make your changes
-4. Run tests and linter (`make lint && make test`)
+4. Run tests and linter (`make lint-fix && make lint && make test`)
 5. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
+6. Push to the branch (`git push origin feat/amazing-feature`)
 7. Open a Pull Request
 
 ---
 
-## 📋 Changelog
+## 🙏 Built With Amazing Tools
 
-See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
-
-**Current Version**: [v1.0.0](https://github.com/vahiiiid/go-rest-api-boilerplate/releases/tag/v1.0.0) - Initial stable release
+- **[Gin](https://github.com/gin-gonic/gin)** — Fast HTTP web framework
+- **[GORM](https://gorm.io/)** — Developer-friendly ORM
+- **[Viper](https://github.com/spf13/viper)** — Configuration management
+- **[golang-jwt](https://github.com/golang-jwt/jwt)** — JWT implementation
+- **[swaggo](https://github.com/swaggo/swag)** — Swagger documentation generator
+- **[Air](https://github.com/air-verse/air)** — Hot-reload for development
+- **[golang-migrate](https://github.com/golang-migrate/migrate)** — Database migrations
 
 ---
 
@@ -634,25 +337,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🙏 Acknowledgments
+## 💬 Support & Community
 
-Built with these amazing tools:
-
-- [Gin](https://github.com/gin-gonic/gin) - HTTP web framework
-- [GORM](https://gorm.io/) - ORM library
-- [Viper](https://github.com/spf13/viper) - Configuration management with environment precedence
-- [golang-jwt](https://github.com/golang-jwt/jwt) - JWT implementation
-- [swaggo](https://github.com/swaggo/swag) - Swagger documentation
-- [Air](https://github.com/air-verse/air) - Hot-reload for development
-- [golang-migrate](https://github.com/golang-migrate/migrate) - Database migrations
-
----
-
-## 📧 Support
-
-- 📖 Check the [documentation](https://vahiiiid.github.io/go-rest-api-docs/)
-- 🐛 [Report bugs](https://github.com/vahiiiid/go-rest-api-boilerplate/issues)
-- 💬 [Ask questions](https://github.com/vahiiiid/go-rest-api-boilerplate/discussions)
+- 📖 [Read the Documentation](https://vahiiiid.github.io/go-rest-api-docs/)
+- 🐛 [Report Bugs](https://github.com/vahiiiid/go-rest-api-boilerplate/issues)
+- 💬 [Ask Questions](https://github.com/vahiiiid/go-rest-api-boilerplate/discussions)
 - ⭐ [Star this repo](https://github.com/vahiiiid/go-rest-api-boilerplate) if you find it helpful!
 
 ---
@@ -661,6 +350,6 @@ Built with these amazing tools:
 
 **Made with ❤️ for the Go community**
 
-**[⭐ Star this repo](https://github.com/vahiiiid/go-rest-api-boilerplate)** if you find it useful!
+[⭐ Star](https://github.com/vahiiiid/go-rest-api-boilerplate) • [📖 Docs](https://vahiiiid.github.io/go-rest-api-docs/) • [🐛 Issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) • [💬 Discussions](https://github.com/vahiiiid/go-rest-api-boilerplate/discussions)
 
 </div>
