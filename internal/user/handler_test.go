@@ -473,14 +473,14 @@ func TestHandler_Login(t *testing.T) {
 		},
 		{
 			name:           "invalid request body",
-			requestBody:    "invalid-json",
+			requestBody:    `{invalid-json}`,
 			setupMocks:     func(ms *MockService, mas *MockAuthService) {},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Contains(t, response["error"], "json")
+				assert.Contains(t, response["error"], "invalid character")
 			},
 		},
 	}
@@ -498,9 +498,15 @@ func TestHandler_Login(t *testing.T) {
 
 			var requestBody []byte
 			if tt.requestBody != nil {
-				var err error
-				requestBody, err = json.Marshal(tt.requestBody)
-				assert.NoError(t, err)
+				// If requestBody is already a string, use it as raw JSON (for invalid JSON tests)
+				if str, ok := tt.requestBody.(string); ok {
+					requestBody = []byte(str)
+				} else {
+					// Otherwise, marshal it to JSON
+					var err error
+					requestBody, err = json.Marshal(tt.requestBody)
+					assert.NoError(t, err)
+				}
 			}
 
 			req := httptest.NewRequest("POST", "/auth/login", bytes.NewBuffer(requestBody))
@@ -659,7 +665,7 @@ func TestHandler_UpdateUser(t *testing.T) {
 		{
 			name:        "invalid request body",
 			userID:      "1",
-			requestBody: "invalid-json",
+			requestBody: `{invalid-json}`,
 			setupMocks:  func(ms *MockService, mas *MockAuthService) {},
 			setupContext: func(c *gin.Context) {
 				claims := &auth.Claims{UserID: 1}
@@ -670,7 +676,7 @@ func TestHandler_UpdateUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Contains(t, response["error"], "json")
+				assert.Contains(t, response["error"], "invalid character")
 			},
 		},
 	}
@@ -688,9 +694,15 @@ func TestHandler_UpdateUser(t *testing.T) {
 
 			var requestBody []byte
 			if tt.requestBody != nil {
-				var err error
-				requestBody, err = json.Marshal(tt.requestBody)
-				assert.NoError(t, err)
+				// If requestBody is already a string, use it as raw JSON (for invalid JSON tests)
+				if str, ok := tt.requestBody.(string); ok {
+					requestBody = []byte(str)
+				} else {
+					// Otherwise, marshal it to JSON
+					var err error
+					requestBody, err = json.Marshal(tt.requestBody)
+					assert.NoError(t, err)
+				}
 			}
 
 			req := httptest.NewRequest("PUT", "/users/"+tt.userID, bytes.NewBuffer(requestBody))
