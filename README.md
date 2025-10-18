@@ -136,7 +136,7 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 
 - **PostgreSQL + GORM** — Production-grade ORM with relationship support
 - **Migration CLI** — Version control for your schema (`make migrate-create`, `make migrate-up`)
-- **Auto-migrations** — Schema updates on startup in development
+- **Separate migrations** — Independent from app startup, production-ready workflow
 - **Connection pooling** — Configured for performance out of the box
 
 👉 [Migrations Guide](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/)
