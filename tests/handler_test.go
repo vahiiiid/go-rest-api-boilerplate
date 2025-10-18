@@ -23,55 +23,43 @@ import (
 func setupTestRouter(t *testing.T) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
-	// Use the test config helper to get a valid configuration
 	testCfg := config.NewTestConfig()
 
-	// Setup in-memory SQLite database for testing
 	database, err := db.NewSQLiteDB(":memory:")
 	assert.NoError(t, err)
 
-	// Run migrations
 	err = database.AutoMigrate(&user.User{})
 	assert.NoError(t, err)
 
-	// Initialize services with the test config
 	authService := auth.NewService(&testCfg.JWT)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
-	// Setup router with all dependencies and the test config
 	router := server.SetupRouter(userHandler, authService, testCfg)
 
 	return router
 }
 
 func setupRateLimitTestRouter(t *testing.T) *gin.Engine {
-	// Set Gin to test mode
 	gin.SetMode(gin.TestMode)
 
-	// Use the test config helper to get a valid base configuration
 	testCfg := config.NewTestConfig()
-	// Override rate limit settings specifically for this test
 	testCfg.Ratelimit.Enabled = true
 	testCfg.Ratelimit.Requests = 10
 	testCfg.Ratelimit.Window = time.Minute
 
-	// Create in-memory SQLite database for testing
 	database, err := db.NewSQLiteDB(":memory:")
 	assert.NoError(t, err)
 
-	// Run migrations
 	err = database.AutoMigrate(&user.User{})
 	assert.NoError(t, err)
 
-	// Initialize services with the test config
 	authService := auth.NewService(&testCfg.JWT)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
-	// Setup router
 	return server.SetupRouter(userHandler, authService, testCfg)
 }
 
@@ -294,10 +282,8 @@ func TestHealthEndpoint(t *testing.T) {
 func TestRateLimit_BlocksThenAllows(t *testing.T) {
 	r := setupRateLimitTestRouter(t)
 
-	// Use a unique IP per test to avoid interference
 	testIP := fmt.Sprintf("192.168.1.%d", time.Now().UnixNano()%255)
 
-	// Arrange: register a user
 	registerBody, _ := json.Marshal(map[string]string{
 		"name":     "Rate Test",
 		"email":    fmt.Sprintf("rate%d@example.com", time.Now().UnixNano()),
@@ -312,7 +298,6 @@ func TestRateLimit_BlocksThenAllows(t *testing.T) {
 		t.Fatalf("register expected 200, got %d", rr.Code)
 	}
 
-	// Extract email for login
 	var registerResp map[string]interface{}
 	if err := json.Unmarshal(rr.Body.Bytes(), &registerResp); err != nil {
 		t.Fatalf("Failed to unmarshal register response: %v", err)
@@ -320,15 +305,13 @@ func TestRateLimit_BlocksThenAllows(t *testing.T) {
 	userResp := registerResp["user"].(map[string]interface{})
 	email := userResp["email"].(string)
 
-	// Arrange: login payload
 	loginBody, _ := json.Marshal(map[string]string{
 		"email":    email,
 		"password": "secret123",
 	})
 
-	// Act: make multiple requests up to the limit (10 requests total including register)
 	successCount := 0
-	for i := 0; i < 15; i++ { // Try more than the limit
+	for i := 0; i < 15; i++ {
 		req, _ := http.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewBuffer(loginBody))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Forwarded-For", testIP)
@@ -338,7 +321,6 @@ func TestRateLimit_BlocksThenAllows(t *testing.T) {
 		if rr.Code == http.StatusOK {
 			successCount++
 		} else if rr.Code == http.StatusTooManyRequests {
-			// Rate limit hit - this is expected after enough requests
 			retryAfterStr := rr.Header().Get("Retry-After")
 			if retryAfterStr == "" {
 				t.Fatalf("expected Retry-After header on 429")
@@ -347,7 +329,6 @@ func TestRateLimit_BlocksThenAllows(t *testing.T) {
 			if err != nil || retryAfterSec <= 0 {
 				t.Fatalf("Retry-After should be positive integer seconds, got %q (err=%v)", retryAfterStr, err)
 			}
-			// Test passed - we got rate limited as expected
 			t.Logf("Rate limit triggered after %d successful requests (including register)", successCount+1)
 			return
 		} else {

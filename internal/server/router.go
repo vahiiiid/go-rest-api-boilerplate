@@ -18,15 +18,12 @@ import (
 func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *config.Config) *gin.Engine {
 	router := gin.New()
 
-	// Set Gin mode
 	if cfg.App.Environment == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	} else {
 		gin.SetMode(gin.DebugMode)
 	}
 
-	// Global middleware
-	// Middleware - use configurable logging with environment-based skip paths
 	skipPaths := config.GetSkipPaths(cfg.App.Environment)
 	loggerConfig := middleware.NewLoggerConfig(
 		cfg.Logging.GetLogLevel(),
@@ -35,13 +32,11 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 	router.Use(middleware.Logger(loggerConfig))
 	router.Use(gin.Recovery())
 
-	// CORS configuration - permissive for development
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
 	corsConfig.AllowHeaders = append(corsConfig.AllowHeaders, "Authorization")
 	router.Use(cors.New(corsConfig))
 
-	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "ok",
@@ -49,10 +44,8 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 		})
 	})
 
-	// Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Global rate-limit middleware (per client IP)
 	rlCfg := cfg.Ratelimit
 	if rlCfg.Enabled {
 		router.Use(
@@ -62,7 +55,6 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 				func(c *gin.Context) string {
 					ip := c.ClientIP()
 					if ip == "" {
-						// Fallback for test environments or when ClientIP is empty
 						ip = c.GetHeader("X-Forwarded-For")
 						if ip == "" {
 							ip = c.GetHeader("X-Real-IP")
@@ -73,22 +65,19 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 					}
 					return ip
 				},
-				nil, // default in-memory LRU
+				nil,
 			),
 		)
 	}
 
-	// API v1 routes
 	v1 := router.Group("/api/v1")
 	{
-		// Public auth routes
 		authGroup := v1.Group("/auth")
 		{
 			authGroup.POST("/register", userHandler.Register)
 			authGroup.POST("/login", userHandler.Login)
 		}
 
-		// Protected user routes
 		usersGroup := v1.Group("/users")
 		usersGroup.Use(auth.AuthMiddleware(authService))
 		{

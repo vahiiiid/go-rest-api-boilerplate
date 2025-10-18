@@ -39,7 +39,6 @@ func NewService(repo Repository) Service {
 
 // RegisterUser registers a new user
 func (s *service) RegisterUser(ctx context.Context, req RegisterRequest) (*User, error) {
-	// Check if email already exists
 	existingUser, err := s.repo.FindByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check existing email: %w", err)
@@ -48,13 +47,11 @@ func (s *service) RegisterUser(ctx context.Context, req RegisterRequest) (*User,
 		return nil, ErrEmailExists
 	}
 
-	// Hash password
 	hashedPassword, err := hashPassword(req.Password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	// Create user
 	user := &User{
 		Name:         req.Name,
 		Email:        req.Email,
@@ -78,7 +75,6 @@ func (s *service) AuthenticateUser(ctx context.Context, req LoginRequest) (*User
 		return nil, ErrInvalidCredentials
 	}
 
-	// Verify password
 	if err := verifyPassword(user.PasswordHash, req.Password); err != nil {
 		return nil, ErrInvalidCredentials
 	}
@@ -108,12 +104,10 @@ func (s *service) UpdateUser(ctx context.Context, id uint, req UpdateUserRequest
 		return nil, ErrUserNotFound
 	}
 
-	// Update fields if provided
 	if req.Name != "" {
 		user.Name = req.Name
 	}
 	if req.Email != "" {
-		// Check if new email is already taken by another user
 		existingUser, err := s.repo.FindByEmail(ctx, req.Email)
 		if err != nil {
 			return nil, fmt.Errorf("failed to check existing email: %w", err)

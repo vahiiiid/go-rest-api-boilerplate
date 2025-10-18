@@ -72,7 +72,6 @@ func (s *service) GenerateToken(userID uint, email string, name string) (string,
 // ValidateToken validates a JWT token and returns the claims
 func (s *service) ValidateToken(tokenString string) (*Claims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Validate signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -95,7 +94,6 @@ func (s *service) ValidateToken(tokenString string) (*Claims, error) {
 		return nil, ErrInvalidToken
 	}
 
-	// Extract user ID from "sub" claim
 	subStr, ok := claims["sub"].(string)
 	if !ok {
 		return nil, ErrInvalidToken
@@ -106,11 +104,8 @@ func (s *service) ValidateToken(tokenString string) (*Claims, error) {
 		return nil, ErrInvalidToken
 	}
 
-	// Extract email from "email" claim
-	email, _ := claims["email"].(string) // email is optional
-
-	// Extract name from "name" claim
-	name, _ := claims["name"].(string) // name is optional
+	email, _ := claims["email"].(string)
+	name, _ := claims["name"].(string)
 
 	return &Claims{
 		UserID: uint(userID),

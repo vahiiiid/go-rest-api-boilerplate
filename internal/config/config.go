@@ -66,24 +66,19 @@ type RateLimitConfig struct {
 // LoadConfig loads configuration using Viper. If configPath is non-empty it
 // will be used as the exact config file path, otherwise Viper searches common locations.
 func LoadConfig(configPath string) (*Config, error) {
-	// Create a new viper instance to avoid conflicts with global state
 	v := viper.New()
 
-	// Configure environment variable handling first
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
 	if configPath != "" {
 		v.SetConfigFile(configPath)
 	} else {
-		// choose config.<env>.yaml if APP_ENVIRONMENT is set; otherwise use config.yaml
 		env := v.GetString("APP_ENVIRONMENT")
 		if env == "" {
-			// fallback to "development" when APP_ENVIRONMENT is not set
 			env = "development"
 		}
 
-		// Try env-specific file first
 		v.SetConfigName(fmt.Sprintf("config.%s", env))
 		v.SetConfigType("yaml")
 		v.AddConfigPath("configs")
@@ -91,23 +86,18 @@ func LoadConfig(configPath string) (*Config, error) {
 		v.AddConfigPath("./configs")
 	}
 
-	// Read config file if present
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return nil, fmt.Errorf("failed to read config file: %w", err)
 		}
-		// no config file is ok; env vars and defaults will be used
 	}
 
-	// Unmarshal into struct
 	var cfg Config
 	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
-	// Backwards compatibility: if Server.Env not set, prefer APP_ENVIRONMENT/ENV
 	if cfg.App.Environment == "" {
-		// prefer viper (env vars are already bound via AutomaticEnv and key replacer)
 		if e := v.GetString("app.environment"); e != "" {
 			cfg.App.Environment = e
 		} else if e := v.GetString("ENV"); e != "" {
@@ -115,7 +105,6 @@ func LoadConfig(configPath string) (*Config, error) {
 		}
 	}
 
-	// Validate
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
@@ -155,7 +144,6 @@ func GetSkipPaths(env string) []string {
 
 // GetConfigPath returns the default config path (kept for compatibility)
 func GetConfigPath() string {
-	// Try to find config.yaml in common locations
 	paths := []string{
 		"configs/config.yaml",
 		"./configs/config.yaml",
