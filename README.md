@@ -24,7 +24,7 @@ Production-ready in 90 seconds. No headaches, just clean code.
 
 ---
 
-## � Why Waste Days on Setup?
+## 🕒 Why Waste Days on Setup?
 
 You know the pain: Starting a new Go project means days of configuring Docker, wiring up authentication, setting up migrations, writing boilerplate code, and praying your hot-reload actually works.
 
