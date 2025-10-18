@@ -90,6 +90,7 @@ echo ""
 
 # Run migrations with retry mechanism (database might need a moment after health check)
 MAX_RETRIES=3
+RETRY_DELAY=3
 RETRY_COUNT=0
 MIGRATION_SUCCESS=false
 
@@ -101,8 +102,8 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         RETRY_COUNT=$((RETRY_COUNT + 1))
         if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
             echo ""
-            echo -e "${YELLOW}⚠️  Migration attempt $RETRY_COUNT failed, retrying in 3 seconds...${NC}"
-            sleep 3
+            echo -e "${YELLOW}⚠️  Migration attempt $RETRY_COUNT failed, retrying in ${RETRY_DELAY} seconds...${NC}"
+            sleep $RETRY_DELAY
         fi
     fi
 done
