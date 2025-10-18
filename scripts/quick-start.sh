@@ -88,13 +88,31 @@ echo ""
 echo "🔄 Running database migrations..."
 echo ""
 
-# Run migrations
-if docker compose exec -T app go run cmd/migrate/main.go -action=up; then
+# Run migrations with retry mechanism (database might need a moment after health check)
+MAX_RETRIES=3
+RETRY_COUNT=0
+MIGRATION_SUCCESS=false
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    if docker compose exec -T app go run cmd/migrate/main.go -action=up; then
+        MIGRATION_SUCCESS=true
+        break
+    else
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo ""
+            echo -e "${YELLOW}⚠️  Migration attempt $RETRY_COUNT failed, retrying in 3 seconds...${NC}"
+            sleep 3
+        fi
+    fi
+done
+
+if [ "$MIGRATION_SUCCESS" = true ]; then
     echo ""
     echo -e "${GREEN}✅ Migrations completed successfully${NC}"
 else
     echo ""
-    echo -e "${RED}❌ Failed to run migrations${NC}"
+    echo -e "${RED}❌ Failed to run migrations after $MAX_RETRIES attempts${NC}"
     echo ""
     echo "Check database logs with: docker compose logs db"
     exit 1
