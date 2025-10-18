@@ -16,9 +16,10 @@ services:
       - go_api_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres}"]
-      interval: ${HEALTH_CHECK_INTERVAL:-10s}
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
       timeout: ${HEALTH_CHECK_TIMEOUT:-5s}
-      retries: ${HEALTH_CHECK_RETRIES:-5}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+      start_period: ${HEALTH_CHECK_START_PERIOD:-30s}
     restart: always
 
   app:
