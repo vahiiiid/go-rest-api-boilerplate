@@ -160,39 +160,11 @@ func GetConfigPath() string {
 	return "configs/config.yaml"
 }
 
-
-// Validate validates the configuration
-func (c *Config) Validate() error {
-	if c.App.Name == "" {
-		return fmt.Errorf("app name is required")
-	}
-
-	if c.Database.Host == "" {
-		return fmt.Errorf("database host is required")
-	}
-
-	if c.Database.Port == 0 {
-		return fmt.Errorf("database port is required")
-	}
-
-	if c.JWT.Secret == "" {
-		return fmt.Errorf("jwt secret is required")
-	}
-
-	if c.Server.Port == "" {
-		return fmt.Errorf("server port is required")
-	}
-
-	return nil
-}
-
-// LogSafeConfig logs the configuration, redacting sensitive information.
+// LogSafeConfig logs the configuration while redacting sensitive information.
 func (c *Config) LogSafeConfig(logger *slog.Logger) {
 	logger.Info("Loaded Configuration:")
 	logger.Info("App", "Name", c.App.Name, "Environment", c.App.Environment, "Debug", c.App.Debug)
-	// Redact Database password
 	logger.Info("Database", "Host", c.Database.Host, "Port", c.Database.Port, "User", c.Database.User, "Password", "<redacted>", "Name", c.Database.Name, "SSLMode", c.Database.SSLMode)
-	// Redact JWT secret
 	logger.Info("JWT", "Secret", "<redacted>", "TTLHours", c.JWT.TTLHours)
 	logger.Info("Server", "Port", c.Server.Port, "ReadTimeout", c.Server.ReadTimeout, "WriteTimeout", c.Server.WriteTimeout)
 	logger.Info("Logging", "Level", c.Logging.Level)
