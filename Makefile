@@ -40,7 +40,7 @@ help:
 	@echo "🗄️  Database Commands:"
 	@echo "  make migrate-create NAME=<name>  - Create new migration"
 	@echo "  make migrate-up                  - Run migrations"
-	@echo "  make migrate-down                - Rollback last migration"
+	@echo "  make migrate-down                - Drop all migration tables"
 	@echo "  make migrate-version             - Show migration status"
 	@echo ""
 	@echo "⚙️  Native Build (requires Go on host):"
@@ -219,7 +219,7 @@ else
 	fi
 endif
 
-## migrate-down: Rollback last migration
+## migrate-down: Drop all migration tables
 migrate-down:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
