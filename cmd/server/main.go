@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log/slog"
+	"os"
 
 	_ "github.com/vahiiiid/go-rest-api-boilerplate/api/docs" // swagger docs
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
@@ -39,12 +40,12 @@ func main() {
 	cfg, err := config.LoadConfig("")
 	if err != nil {
 		logger.Error("Failed to load configuration", "error", err)
-		return
+		os.Exit(1)
 	}
 
 	if err := cfg.Validate(); err != nil {
 		logger.Error("Configuration validation failed", "error", err)
-		return
+		os.Exit(1)
 	}
 
 	cfg.LogSafeConfig(logger)
@@ -52,13 +53,13 @@ func main() {
 	database, err := db.NewPostgresDBFromDatabaseConfig(cfg.Database)
 	if err != nil {
 		logger.Error("Failed to connect to database", "error", err)
-		return
+		os.Exit(1)
 	}
 
 	logger.Info("Running database migrations...")
 	if err := database.AutoMigrate(&user.User{}); err != nil {
 		logger.Error("Failed to run migrations", "error", err)
-		return
+		os.Exit(1)
 	}
 	logger.Info("Migrations completed successfully")
 
@@ -81,6 +82,6 @@ func main() {
 
 	if err := router.Run(addr); err != nil {
 		logger.Error("Failed to start server", "error", err)
-		return
+		os.Exit(1)
 	}
 }
