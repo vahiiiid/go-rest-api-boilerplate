@@ -26,6 +26,7 @@ coverage:
 # Files and paths to ignore from coverage reports
 ignore:
   - "cmd/server/main.go"           # Application entry point
+  - "cmd/migrate/main.go"          # Migration CLI entry point
   - "api/docs/**"                  # Auto-generated Swagger docs
   - "**/*_test.go"                 # Test files
   - "**/*_mock.go"                 # Mock files
