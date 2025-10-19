@@ -1,0 +1,45 @@
+# CodeCov Configuration
+# Documentation: https://docs.codecov.com/docs/codecov-yaml
+
+# Coverage reporting settings
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+  
+  status:
+    project:
+      default:
+        # Set to informational so it won't fail CI
+        # This allows coverage visibility without blocking merges
+        informational: true
+        target: auto
+        threshold: 5%
+    
+    patch:
+      default:
+        # Informational mode for new code changes
+        informational: true
+        target: auto
+        threshold: 5%
+
+# Files and paths to ignore from coverage reports
+ignore:
+  - "cmd/server/main.go"           # Application entry point
+  - "api/docs/**"                   # Auto-generated Swagger docs
+  - "**/*_test.go"                  # Test files
+  - "**/mocks*.go"                  # Mock files
+  - "scripts/**"                    # Shell scripts
+  - "migrations/**"                 # SQL migrations
+
+# Comment settings for pull requests
+comment:
+  layout: "reach,diff,flags,tree,footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+# GitHub checks integration
+github_checks:
+  annotations: true
