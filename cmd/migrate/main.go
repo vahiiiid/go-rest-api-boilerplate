@@ -2,19 +2,12 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/db"
-	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
-
-	"gorm.io/gorm"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/migrate"
 )
-
-var models = []interface{}{
-	&user.User{},
-}
 
 func main() {
 	action := flag.String("action", "up", "Migration action: up, down, status")
@@ -43,59 +36,12 @@ func main() {
 
 	switch *action {
 	case "up":
-		runMigrations(database)
+		migrate.RunMigrations(database)
 	case "down":
-		rollbackMigrations(database)
+		migrate.RollbackMigrations(database)
 	case "status":
-		showMigrationStatus(database)
+		migrate.ShowMigrationStatus(database)
 	default:
 		log.Fatalf("Unknown action: %s. Use 'up', 'down', or 'status'", *action)
 	}
-}
-
-func runMigrations(db *gorm.DB) {
-	log.Println("Running database migrations...")
-
-	if err := db.AutoMigrate(models...); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
-	}
-
-	log.Println("✅ Migrations completed successfully")
-}
-
-func rollbackMigrations(db *gorm.DB) {
-	log.Println("Rolling back database migrations...")
-
-	for i := len(models) - 1; i >= 0; i-- {
-		if err := db.Migrator().DropTable(models[i]); err != nil {
-			log.Fatalf("Failed to rollback migrations: %v", err)
-		}
-	}
-
-	log.Println("✅ Migrations rolled back successfully")
-}
-
-func showMigrationStatus(db *gorm.DB) {
-	log.Println("Checking migration status...")
-
-	hasUsersTable := db.Migrator().HasTable(&user.User{})
-
-	fmt.Println("\nMigration Status:")
-	fmt.Println("================")
-	fmt.Printf("Users table: %s\n", tableStatus(hasUsersTable))
-
-	if hasUsersTable {
-		var count int64
-		db.Model(&user.User{}).Count(&count)
-		fmt.Printf("Users count: %d\n", count)
-	}
-
-	log.Println("\n✅ Status check completed")
-}
-
-func tableStatus(exists bool) string {
-	if exists {
-		return "✓ EXISTS"
-	}
-	return "✗ NOT FOUND"
 }
