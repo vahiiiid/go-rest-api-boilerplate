@@ -39,8 +39,13 @@ func ShowMigrationStatus(db *gorm.DB) {
 	fmt.Printf("Users table: %s\n", tableStatus(hasUsersTable))
 	if hasUsersTable {
 		var count int64
-		db.Model(&user.User{}).Count(&count)
-		fmt.Printf("Users count: %d\n", count)
+		result := db.Model(&user.User{}).Count(&count)
+		if result.Error != nil {
+			log.Printf("Error counting users: %v\n", result.Error)
+			fmt.Println("Users count: ERROR")
+		} else {
+			fmt.Printf("Users count: %d\n", count)
+		}
 	}
 	log.Println("\n✅ Status check completed")
 }

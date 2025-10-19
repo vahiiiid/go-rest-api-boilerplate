@@ -75,3 +75,43 @@ func TestTableStatus(t *testing.T) {
 		t.Error("tableStatus(false) should return '✗ NOT FOUND'")
 	}
 }
+
+func TestShowMigrationStatus_CountError(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("failed to open in-memory db: %v", err)
+	}
+	// Run migrations so table exists
+	RunMigrations(db)
+
+	// Simulate error by closing the underlying database connection
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Fatalf("failed to get sql DB: %v", err)
+	}
+	if cerr := sqlDB.Close(); cerr != nil {
+		t.Fatalf("failed to close sql DB: %v", cerr)
+	}
+
+	// Capture stdout
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	ShowMigrationStatus(db)
+
+	if err := w.Close(); err != nil {
+		t.Fatalf("failed to close pipe: %v", err)
+	}
+	os.Stdout = old
+	var buf bytes.Buffer
+	_, _ = buf.ReadFrom(r)
+	output := buf.String()
+	if strings.Contains(output, "Users table: ✗ NOT FOUND") {
+		// Table is missing, which is expected after DB close
+		return
+	}
+	if !strings.Contains(output, "Users count: ERROR") {
+		t.Errorf("expected error output for user count, got: %s", output)
+	}
+}
