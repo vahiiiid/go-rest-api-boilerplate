@@ -159,3 +159,14 @@ func GetConfigPath() string {
 
 	return "configs/config.yaml"
 }
+
+// LogSafeConfig logs the configuration while redacting sensitive information.
+func (c *Config) LogSafeConfig(logger *slog.Logger) {
+	logger.Info("Loaded Configuration:")
+	logger.Info("App", "Name", c.App.Name, "Environment", c.App.Environment, "Debug", c.App.Debug)
+	logger.Info("Database", "Host", c.Database.Host, "Port", c.Database.Port, "User", c.Database.User, "Password", "<redacted>", "Name", c.Database.Name, "SSLMode", c.Database.SSLMode)
+	logger.Info("JWT", "Secret", "<redacted>", "TTLHours", c.JWT.TTLHours)
+	logger.Info("Server", "Port", c.Server.Port, "ReadTimeout", c.Server.ReadTimeout, "WriteTimeout", c.Server.WriteTimeout)
+	logger.Info("Logging", "Level", c.Logging.Level)
+	logger.Info("RateLimit", "Enabled", c.Ratelimit.Enabled, "Requests", c.Ratelimit.Requests, "Window", c.Ratelimit.Window)
+}

@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
+	"os"
 
 	_ "github.com/vahiiiid/go-rest-api-boilerplate/api/docs" // swagger docs
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
@@ -33,49 +34,62 @@ import (
 // @description Type "Bearer" followed by a space and JWT token.
 
 func main() {
-	log.Println("Starting Go REST API Boilerplate...")
+	if err := run(); err != nil {
+		os.Exit(1)
+	}
+}
 
-	// Load configuration (viper-based)
+func run() error {
+	logger := slog.Default()
+	logger.Info("Starting Go REST API Boilerplate...")
+
 	cfg, err := config.LoadConfig("")
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		logger.Error("Failed to load configuration", "error", err)
+		return err
 	}
 
-	// Connect to database using typed config
+	if err := cfg.Validate(); err != nil {
+		logger.Error("Configuration validation failed", "error", err)
+		return err
+	}
+
+	cfg.LogSafeConfig(logger)
+
 	database, err := db.NewPostgresDBFromDatabaseConfig(cfg.Database)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		logger.Error("Failed to connect to database", "error", err)
+		return err
 	}
 
-	// Run migrations
-	log.Println("Running database migrations...")
+	logger.Info("Running database migrations...")
 	if err := database.AutoMigrate(&user.User{}); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		logger.Error("Failed to run migrations", "error", err)
+		return err
 	}
-	log.Println("Migrations completed successfully")
+	logger.Info("Migrations completed successfully")
 
-	// Initialize services
 	authService := auth.NewService(&cfg.JWT)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
-	// Setup router with configuration
 	router := server.SetupRouter(userHandler, authService, cfg)
 
-	// Get port from config
 	port := cfg.Server.Port
 	if port == "" {
 		port = "8080"
 	}
 
-	// Start server
 	addr := fmt.Sprintf(":%s", port)
-	log.Printf("Server starting on %s", addr)
-	log.Printf("Swagger UI available at http://localhost:%s/swagger/index.html", port)
-	log.Printf("Health check available at http://localhost:%s/health", port)
+	logger.Info("Server starting", "address", addr)
+	logger.Info("Swagger UI available", "url", fmt.Sprintf("http://localhost:%s/swagger/index.html", port))
+	logger.Info("Health check available", "url", fmt.Sprintf("http://localhost:%s/health", port))
 
 	if err := router.Run(addr); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		logger.Error("Failed to start server", "error", err)
+		return err
 	}
+
+	return nil
 }

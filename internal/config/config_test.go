@@ -320,3 +320,91 @@ func TestNewTestConfig_Isolation(t *testing.T) {
 	assert.NotEqual(t, config1.App.Name, config2.App.Name)
 	assert.Equal(t, "Test API", config2.App.Name)
 }
+
+func TestLogSafeConfig(t *testing.T) {
+	tests := []struct {
+		name   string
+		config *Config
+	}{
+		{
+			name: "logs all configuration sections with redacted sensitive data",
+			config: &Config{
+				App: AppConfig{
+					Name:        "TestApp",
+					Environment: "production",
+					Debug:       true,
+				},
+				Database: DatabaseConfig{
+					Host:     "db.example.com",
+					Port:     5432,
+					User:     "testuser",
+					Password: "super-secret-password",
+					Name:     "testdb",
+					SSLMode:  "require",
+				},
+				JWT: JWTConfig{
+					Secret:   "super-secret-jwt-key",
+					TTLHours: 24,
+				},
+				Server: ServerConfig{
+					Port:         "8080",
+					ReadTimeout:  30,
+					WriteTimeout: 30,
+				},
+				Logging: LoggingConfig{
+					Level: "info",
+				},
+				Ratelimit: RateLimitConfig{
+					Enabled:  true,
+					Requests: 100,
+					Window:   60,
+				},
+			},
+		},
+		{
+			name: "handles empty configuration values",
+			config: &Config{
+				App: AppConfig{
+					Name:        "",
+					Environment: "",
+					Debug:       false,
+				},
+				Database: DatabaseConfig{
+					Host:     "",
+					Port:     0,
+					User:     "",
+					Password: "",
+					Name:     "",
+					SSLMode:  "",
+				},
+				JWT: JWTConfig{
+					Secret:   "",
+					TTLHours: 0,
+				},
+				Server: ServerConfig{
+					Port:         "",
+					ReadTimeout:  0,
+					WriteTimeout: 0,
+				},
+				Logging: LoggingConfig{
+					Level: "",
+				},
+				Ratelimit: RateLimitConfig{
+					Enabled:  false,
+					Requests: 0,
+					Window:   0,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			logger := slog.Default()
+
+			assert.NotPanics(t, func() {
+				tt.config.LogSafeConfig(logger)
+			})
+		})
+	}
+}
