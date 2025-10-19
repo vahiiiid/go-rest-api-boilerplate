@@ -6,46 +6,48 @@ import (
 	"log"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/db"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+var models = []interface{}{
+	&user.User{},
+}
 
 func main() {
 	action := flag.String("action", "up", "Migration action: up, down, status")
 	flag.Parse()
 
-	// Load configuration
 	cfg, err := config.LoadConfig("")
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	// Connect to database
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s",
-		cfg.Database.Host, cfg.Database.User, cfg.Database.Password,
-		cfg.Database.Name, cfg.Database.Port, cfg.Database.SSLMode)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	database, err := db.NewPostgresDBFromDatabaseConfig(cfg.Database)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("Failed to connect to database %s@%s:%d: %v",
+			cfg.Database.Name, cfg.Database.Host, cfg.Database.Port, err)
 	}
 
-	sqlDB, err := db.DB()
+	sqlDB, err := database.DB()
 	if err != nil {
 		log.Fatalf("Failed to get database instance: %v", err)
 	}
-	defer sqlDB.Close()
+	defer func() {
+		if err := sqlDB.Close(); err != nil {
+			log.Printf("Warning: failed to close database connection: %v", err)
+		}
+	}()
 
-	// Execute migration action
 	switch *action {
 	case "up":
-		runMigrations(db)
+		runMigrations(database)
 	case "down":
-		rollbackMigrations(db)
+		rollbackMigrations(database)
 	case "status":
-		showMigrationStatus(db)
+		showMigrationStatus(database)
 	default:
 		log.Fatalf("Unknown action: %s. Use 'up', 'down', or 'status'", *action)
 	}
@@ -54,8 +56,7 @@ func main() {
 func runMigrations(db *gorm.DB) {
 	log.Println("Running database migrations...")
 
-	// AutoMigrate all models here
-	if err := db.AutoMigrate(&user.User{}); err != nil {
+	if err := db.AutoMigrate(models...); err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
@@ -65,9 +66,10 @@ func runMigrations(db *gorm.DB) {
 func rollbackMigrations(db *gorm.DB) {
 	log.Println("Rolling back database migrations...")
 
-	// Drop tables in reverse order (consider foreign key dependencies)
-	if err := db.Migrator().DropTable(&user.User{}); err != nil {
-		log.Fatalf("Failed to rollback migrations: %v", err)
+	for i := len(models) - 1; i >= 0; i-- {
+		if err := db.Migrator().DropTable(models[i]); err != nil {
+			log.Fatalf("Failed to rollback migrations: %v", err)
+		}
 	}
 
 	log.Println("✅ Migrations rolled back successfully")
@@ -76,14 +78,12 @@ func rollbackMigrations(db *gorm.DB) {
 func showMigrationStatus(db *gorm.DB) {
 	log.Println("Checking migration status...")
 
-	// Check if tables exist
 	hasUsersTable := db.Migrator().HasTable(&user.User{})
 
 	fmt.Println("\nMigration Status:")
 	fmt.Println("================")
 	fmt.Printf("Users table: %s\n", tableStatus(hasUsersTable))
 
-	// You can add more detailed status checks here
 	if hasUsersTable {
 		var count int64
 		db.Model(&user.User{}).Count(&count)
