@@ -26,11 +26,11 @@ coverage:
 # Files and paths to ignore from coverage reports
 ignore:
   - "cmd/server/main.go"           # Application entry point
-  - "api/docs/**"                   # Auto-generated Swagger docs
-  - "**/*_test.go"                  # Test files
-  - "**/mocks*.go"                  # Mock files
-  - "scripts/**"                    # Shell scripts
-  - "migrations/**"                 # SQL migrations
+  - "api/docs/**"                  # Auto-generated Swagger docs
+  - "**/*_test.go"                 # Test files
+  - "**/*_mock.go"                 # Mock files
+  - "scripts/**"                   # Shell scripts
+  - "migrations/**"                # SQL migrations
 
 # Comment settings for pull requests
 comment:
