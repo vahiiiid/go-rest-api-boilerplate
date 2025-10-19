@@ -2,7 +2,7 @@ package migrate
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 
 	"gorm.io/gorm"
 
@@ -13,26 +13,28 @@ var Models = []interface{}{
 	&user.User{},
 }
 
-func RunMigrations(db *gorm.DB) {
-	log.Println("Running database migrations...")
+func RunMigrations(db *gorm.DB) error {
+	slog.Info("Running database migrations...")
 	if err := db.AutoMigrate(Models...); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		return fmt.Errorf("failed to run migrations: %w", err)
 	}
-	log.Println("✅ Migrations completed successfully")
+	slog.Info("Migrations completed successfully", "status", "✅")
+	return nil
 }
 
-func RollbackMigrations(db *gorm.DB) {
-	log.Println("Rolling back database migrations...")
+func RollbackMigrations(db *gorm.DB) error {
+	slog.Info("Rolling back database migrations...")
 	for i := len(Models) - 1; i >= 0; i-- {
 		if err := db.Migrator().DropTable(Models[i]); err != nil {
-			log.Fatalf("Failed to rollback migrations: %v", err)
+			return fmt.Errorf("failed to rollback migrations: %w", err)
 		}
 	}
-	log.Println("✅ Migrations rolled back successfully")
+	slog.Info("Migrations rolled back successfully", "status", "✅")
+	return nil
 }
 
 func ShowMigrationStatus(db *gorm.DB) {
-	log.Println("Checking migration status...")
+	slog.Info("Checking migration status...")
 	hasUsersTable := db.Migrator().HasTable(&user.User{})
 	fmt.Println("\nMigration Status:")
 	fmt.Println("================")
@@ -41,13 +43,13 @@ func ShowMigrationStatus(db *gorm.DB) {
 		var count int64
 		result := db.Model(&user.User{}).Count(&count)
 		if result.Error != nil {
-			log.Printf("Error counting users: %v\n", result.Error)
+			slog.Error("Error counting users", "err", result.Error)
 			fmt.Println("Users count: ERROR")
 		} else {
 			fmt.Printf("Users count: %d\n", count)
 		}
 	}
-	log.Println("\n✅ Status check completed")
+	slog.Info("Status check completed", "status", "✅")
 }
 
 func tableStatus(exists bool) string {

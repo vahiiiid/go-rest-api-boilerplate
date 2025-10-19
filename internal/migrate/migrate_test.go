@@ -17,7 +17,9 @@ func TestRunMigrationsAndRollback(t *testing.T) {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
 
-	RunMigrations(db)
+	if err := RunMigrations(db); err != nil {
+		t.Fatalf("RunMigrations failed: %v", err)
+	}
 	for _, model := range Models {
 		typeName := getTypeName(model)
 		if !db.Migrator().HasTable(model) {
@@ -25,7 +27,9 @@ func TestRunMigrationsAndRollback(t *testing.T) {
 		}
 	}
 
-	RollbackMigrations(db)
+	if err := RollbackMigrations(db); err != nil {
+		t.Fatalf("RollbackMigrations failed: %v", err)
+	}
 	for _, model := range Models {
 		typeName := getTypeName(model)
 		if db.Migrator().HasTable(model) {
@@ -43,7 +47,9 @@ func TestShowMigrationStatus(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
-	RunMigrations(db)
+	if err := RunMigrations(db); err != nil {
+		t.Fatalf("RunMigrations failed: %v", err)
+	}
 
 	old := os.Stdout
 	r, w, _ := os.Pipe()
@@ -77,7 +83,9 @@ func TestShowMigrationStatus_CountError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
-	RunMigrations(db)
+	if err := RunMigrations(db); err != nil {
+		t.Fatalf("RunMigrations failed: %v", err)
+	}
 
 	sqlDB, err := db.DB()
 	if err != nil {

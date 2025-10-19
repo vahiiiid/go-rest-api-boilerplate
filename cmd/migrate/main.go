@@ -2,7 +2,8 @@ package main
 
 import (
 	"flag"
-	"log"
+	"log/slog"
+	"os"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/db"
@@ -15,33 +16,46 @@ func main() {
 
 	cfg, err := config.LoadConfig("")
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		slog.Error("Failed to load configuration", "err", err)
+		os.Exit(1)
 	}
 
 	database, err := db.NewPostgresDBFromDatabaseConfig(cfg.Database)
 	if err != nil {
-		log.Fatalf("Failed to connect to database %s@%s:%d: %v",
-			cfg.Database.Name, cfg.Database.Host, cfg.Database.Port, err)
+		slog.Error("Failed to connect to database",
+			"name", cfg.Database.Name,
+			"host", cfg.Database.Host,
+			"port", cfg.Database.Port,
+			"err", err)
+		os.Exit(1)
 	}
 
 	sqlDB, err := database.DB()
 	if err != nil {
-		log.Fatalf("Failed to get database instance: %v", err)
+		slog.Error("Failed to get database instance", "err", err)
+		os.Exit(1)
 	}
 	defer func() {
 		if err := sqlDB.Close(); err != nil {
-			log.Printf("Warning: failed to close database connection: %v", err)
+			slog.Warn("Failed to close database connection", "err", err)
 		}
 	}()
 
 	switch *action {
 	case "up":
-		migrate.RunMigrations(database)
+		if err := migrate.RunMigrations(database); err != nil {
+			slog.Error("Migration error", "err", err)
+			os.Exit(1)
+		}
 	case "down":
-		migrate.RollbackMigrations(database)
+		if err := migrate.RollbackMigrations(database); err != nil {
+			slog.Error("Migration error", "err", err)
+			os.Exit(1)
+		}
 	case "status":
 		migrate.ShowMigrationStatus(database)
 	default:
-		log.Fatalf("Unknown action: %s. Use 'up', 'down', or 'status'", *action)
+		slog.Error("Unknown action", "action", *action)
+		os.Exit(1)
 	}
 }
