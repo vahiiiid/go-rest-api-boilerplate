@@ -34,18 +34,24 @@ import (
 // @description Type "Bearer" followed by a space and JWT token.
 
 func main() {
+	if err := run(); err != nil {
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	logger := slog.Default()
 	logger.Info("Starting Go REST API Boilerplate...")
 
 	cfg, err := config.LoadConfig("")
 	if err != nil {
 		logger.Error("Failed to load configuration", "error", err)
-		os.Exit(1)
+		return err
 	}
 
 	if err := cfg.Validate(); err != nil {
 		logger.Error("Configuration validation failed", "error", err)
-		os.Exit(1)
+		return err
 	}
 
 	cfg.LogSafeConfig(logger)
@@ -53,13 +59,13 @@ func main() {
 	database, err := db.NewPostgresDBFromDatabaseConfig(cfg.Database)
 	if err != nil {
 		logger.Error("Failed to connect to database", "error", err)
-		os.Exit(1)
+		return err
 	}
 
 	logger.Info("Running database migrations...")
 	if err := database.AutoMigrate(&user.User{}); err != nil {
 		logger.Error("Failed to run migrations", "error", err)
-		os.Exit(1)
+		return err
 	}
 	logger.Info("Migrations completed successfully")
 
@@ -82,6 +88,8 @@ func main() {
 
 	if err := router.Run(addr); err != nil {
 		logger.Error("Failed to start server", "error", err)
-		os.Exit(1)
+		return err
 	}
+
+	return nil
 }
