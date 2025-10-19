@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +15,18 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/logger"
 )
+
+// Initialize logger before the test
+func TestMain(m *testing.M) {
+	if err := logger.InitWithWriter("test", io.Discard); err != nil {
+		panic(err)
+	}
+
+	code := m.Run()
+	os.Exit(code)
+}
 
 // MockAuthService is a mock implementation of the auth service
 type MockAuthService struct {
