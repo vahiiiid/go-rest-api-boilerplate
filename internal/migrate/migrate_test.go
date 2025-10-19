@@ -17,7 +17,6 @@ func TestRunMigrationsAndRollback(t *testing.T) {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
 
-	// Run migrations
 	RunMigrations(db)
 	for _, model := range Models {
 		typeName := getTypeName(model)
@@ -26,7 +25,6 @@ func TestRunMigrationsAndRollback(t *testing.T) {
 		}
 	}
 
-	// Rollback migrations
 	RollbackMigrations(db)
 	for _, model := range Models {
 		typeName := getTypeName(model)
@@ -45,10 +43,8 @@ func TestShowMigrationStatus(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
-	// Run migrations so table exists
 	RunMigrations(db)
 
-	// Capture stdout
 	old := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
@@ -81,10 +77,8 @@ func TestShowMigrationStatus_CountError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
-	// Run migrations so table exists
 	RunMigrations(db)
 
-	// Simulate error by closing the underlying database connection
 	sqlDB, err := db.DB()
 	if err != nil {
 		t.Fatalf("failed to get sql DB: %v", err)
@@ -93,7 +87,6 @@ func TestShowMigrationStatus_CountError(t *testing.T) {
 		t.Fatalf("failed to close sql DB: %v", cerr)
 	}
 
-	// Capture stdout
 	old := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
