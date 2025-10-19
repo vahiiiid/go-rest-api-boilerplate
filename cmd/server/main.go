@@ -69,8 +69,8 @@ func main() {
 	// Run migrations
 	// logger.Info("Database connection established")
 	logger.Info("Connected to database",
-		zap.String("host", dbConfig.Host),
-		zap.String("port", dbConfig.Port),
+		zap.String("host", cfg.Database.Host),
+		zap.String("port", fmt.Sprint(cfg.Database.Port)),
 	)
 	if err := database.AutoMigrate(&user.User{}); err != nil {
 		logger.Fatal("Failed to run migrations: ", zap.Error(err))
