@@ -34,7 +34,7 @@ services:
     volumes:
       # Mount source code for hot-reload in development
       - ./:/app
-      - /app/tmp  # Exclude tmp directory
+        - /app/tmp  # Exclude tmp directory
     depends_on:
       db:
         condition: service_healthy
