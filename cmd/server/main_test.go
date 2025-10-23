@@ -68,6 +68,10 @@ func TestGracefulShutdown_Integration(t *testing.T) {
 		t.Skip("skipping integration test in short mode")
 	}
 
+	if os.Getenv("SKIP_INTEGRATION_TESTS") != "" {
+		t.Skip("skipping integration test (SKIP_INTEGRATION_TESTS is set)")
+	}
+
 	t.Setenv("JWT_SECRET", "test-secret-key-for-testing-minimum-32-chars-long")
 	t.Setenv("DATABASE_HOST", "localhost")
 	t.Setenv("DATABASE_PORT", "5432")
@@ -169,6 +173,10 @@ func TestHTTPServer_TimeoutBehavior(t *testing.T) {
 		t.Skip("skipping integration test in short mode")
 	}
 
+	if os.Getenv("SKIP_INTEGRATION_TESTS") != "" {
+		t.Skip("skipping integration test (SKIP_INTEGRATION_TESTS is set)")
+	}
+
 	t.Setenv("JWT_SECRET", "test-secret-key-for-testing-minimum-32-chars-long")
 	t.Setenv("DATABASE_HOST", "localhost")
 	t.Setenv("DATABASE_PORT", "5432")
@@ -216,6 +224,10 @@ func TestHTTPServer_TimeoutBehavior(t *testing.T) {
 func TestServerShutdown_WithActiveConnections(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
+	}
+
+	if os.Getenv("SKIP_INTEGRATION_TESTS") != "" {
+		t.Skip("skipping integration test (SKIP_INTEGRATION_TESTS is set)")
 	}
 
 	t.Setenv("JWT_SECRET", "test-secret-key-for-testing-minimum-32-chars-long")
@@ -273,6 +285,10 @@ func TestServerConfig_DefaultValues(t *testing.T) {
 		t.Skip("skipping integration test in short mode")
 	}
 
+	if os.Getenv("SKIP_INTEGRATION_TESTS") != "" {
+		t.Skip("skipping integration test (SKIP_INTEGRATION_TESTS is set)")
+	}
+
 	t.Setenv("JWT_SECRET", "test-secret-key-for-testing-minimum-32-chars-long")
 	t.Setenv("DATABASE_HOST", "localhost")
 	t.Setenv("DATABASE_PORT", "5432")
@@ -310,6 +326,10 @@ func TestServerConfig_DefaultValues(t *testing.T) {
 func TestHTTPServer_MaxHeaderBytes(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
+	}
+
+	if os.Getenv("SKIP_INTEGRATION_TESTS") != "" {
+		t.Skip("skipping integration test (SKIP_INTEGRATION_TESTS is set)")
 	}
 
 	t.Setenv("JWT_SECRET", "test-secret-key-for-testing-minimum-32-chars-long")
