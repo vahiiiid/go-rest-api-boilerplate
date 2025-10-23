@@ -56,7 +56,8 @@ jobs:
     - name: Run tests
       run: |
         # Run all tests (unit, integration, e2e - anywhere in the project)
-        go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
+        # Skip server integration tests that require running database
+        SKIP_INTEGRATION_TESTS=1 go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
         
         # Show coverage summary
         echo ""

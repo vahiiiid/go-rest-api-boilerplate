@@ -29,6 +29,9 @@ server:
   port: "8080"
   readtimeout: 10
   writetimeout: 10
+  idletimeout: 120
+  shutdowntimeout: 30
+  maxheaderbytes: 1048576
 
 logging:
   level: "info"

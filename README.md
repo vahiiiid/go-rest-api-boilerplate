@@ -44,6 +44,7 @@ make quick-start  # ← One command. 90 seconds. You're building features.
 ✅ **Structured Logging** — JSON logs with request IDs and tracing  
 ✅ **Production Docker** — Multi-stage builds, health checks, optimized images  
 ✅ **Environment-Aware** — Dev/staging/prod configs + Make automation & more  
+✅ **Graceful Shutdown** — Zero-downtime deployments with configurable timeouts  
 ✅ **Hot-Reload (2 seconds!)** — Powered by Air, not magic  
 
 **And that's just scratching the surface.** Check the [full documentation](https://vahiiiid.github.io/go-rest-api-docs/) to see everything GRAB offers.

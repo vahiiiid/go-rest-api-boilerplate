@@ -382,9 +382,12 @@ func TestLogSafeConfig(t *testing.T) {
 					TTLHours: 0,
 				},
 				Server: ServerConfig{
-					Port:         "",
-					ReadTimeout:  0,
-					WriteTimeout: 0,
+					Port:            "",
+					ReadTimeout:     0,
+					WriteTimeout:    0,
+					IdleTimeout:     0,
+					ShutdownTimeout: 0,
+					MaxHeaderBytes:  0,
 				},
 				Logging: LoggingConfig{
 					Level: "",
@@ -405,6 +408,241 @@ func TestLogSafeConfig(t *testing.T) {
 			assert.NotPanics(t, func() {
 				tt.config.LogSafeConfig(logger)
 			})
+		})
+	}
+}
+
+func TestServerConfig_TimeoutFields(t *testing.T) {
+	viper.Reset()
+
+	t.Run("loads timeout fields from config file", func(t *testing.T) {
+		viper.Reset()
+		tempDir := t.TempDir()
+		path := createTempConfigFile(t, tempDir, "config.yaml", `
+database:
+  host: "testhost"
+jwt:
+  secret: "test-secret-for-validation-minimum-32-chars"
+server:
+  port: "8080"
+  readtimeout: 10
+  writetimeout: 10
+  idletimeout: 120
+  shutdowntimeout: 30
+  maxheaderbytes: 1048576
+`)
+		cfg, err := LoadConfig(path)
+		assert.NoError(t, err)
+		assert.NotNil(t, cfg)
+		assert.Equal(t, 10, cfg.Server.ReadTimeout)
+		assert.Equal(t, 10, cfg.Server.WriteTimeout)
+		assert.Equal(t, 120, cfg.Server.IdleTimeout)
+		assert.Equal(t, 30, cfg.Server.ShutdownTimeout)
+		assert.Equal(t, 1048576, cfg.Server.MaxHeaderBytes)
+	})
+
+	t.Run("environment variables override timeout values", func(t *testing.T) {
+		viper.Reset()
+		tempDir := t.TempDir()
+		path := createTempConfigFile(t, tempDir, "config.yaml", `
+database:
+  host: "testhost"
+jwt:
+  secret: "test-secret-for-validation-minimum-32-chars"
+server:
+  readtimeout: 10
+  writetimeout: 10
+  idletimeout: 120
+  shutdowntimeout: 30
+  maxheaderbytes: 1048576
+`)
+		t.Setenv("SERVER_READTIMEOUT", "15")
+		t.Setenv("SERVER_WRITETIMEOUT", "15")
+		t.Setenv("SERVER_IDLETIMEOUT", "180")
+		t.Setenv("SERVER_SHUTDOWNTIMEOUT", "60")
+		t.Setenv("SERVER_MAXHEADERBYTES", "2097152")
+
+		cfg, err := LoadConfig(path)
+		assert.NoError(t, err)
+		assert.NotNil(t, cfg)
+		assert.Equal(t, 15, cfg.Server.ReadTimeout)
+		assert.Equal(t, 15, cfg.Server.WriteTimeout)
+		assert.Equal(t, 180, cfg.Server.IdleTimeout)
+		assert.Equal(t, 60, cfg.Server.ShutdownTimeout)
+		assert.Equal(t, 2097152, cfg.Server.MaxHeaderBytes)
+	})
+
+	t.Run("zero timeout values are allowed", func(t *testing.T) {
+		viper.Reset()
+		tempDir := t.TempDir()
+		path := createTempConfigFile(t, tempDir, "config.yaml", `
+database:
+  host: "testhost"
+jwt:
+  secret: "test-secret-for-validation-minimum-32-chars"
+server:
+  readtimeout: 0
+  writetimeout: 0
+  idletimeout: 0
+  shutdowntimeout: 0
+  maxheaderbytes: 0
+`)
+		cfg, err := LoadConfig(path)
+		assert.NoError(t, err)
+		assert.NotNil(t, cfg)
+		assert.Equal(t, 0, cfg.Server.ReadTimeout)
+		assert.Equal(t, 0, cfg.Server.WriteTimeout)
+		assert.Equal(t, 0, cfg.Server.IdleTimeout)
+		assert.Equal(t, 0, cfg.Server.ShutdownTimeout)
+		assert.Equal(t, 0, cfg.Server.MaxHeaderBytes)
+	})
+}
+
+func TestValidate_TimeoutFields(t *testing.T) {
+	tests := []struct {
+		name        string
+		config      Config
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name: "valid timeout values",
+			config: Config{
+				App: AppConfig{Environment: "development"},
+				Database: DatabaseConfig{
+					Host: "localhost",
+				},
+				JWT: JWTConfig{
+					Secret: "test-secret-minimum-32-characters",
+				},
+				Server: ServerConfig{
+					ReadTimeout:     10,
+					WriteTimeout:    10,
+					IdleTimeout:     120,
+					ShutdownTimeout: 30,
+					MaxHeaderBytes:  1048576,
+				},
+			},
+			expectError: false,
+		},
+		{
+			name: "negative read timeout",
+			config: Config{
+				App: AppConfig{Environment: "development"},
+				Database: DatabaseConfig{
+					Host: "localhost",
+				},
+				JWT: JWTConfig{
+					Secret: "test-secret-minimum-32-characters",
+				},
+				Server: ServerConfig{
+					ReadTimeout: -1,
+				},
+			},
+			expectError: true,
+			errorMsg:    "server.readtimeout must be non-negative",
+		},
+		{
+			name: "negative write timeout",
+			config: Config{
+				App: AppConfig{Environment: "development"},
+				Database: DatabaseConfig{
+					Host: "localhost",
+				},
+				JWT: JWTConfig{
+					Secret: "test-secret-minimum-32-characters",
+				},
+				Server: ServerConfig{
+					WriteTimeout: -1,
+				},
+			},
+			expectError: true,
+			errorMsg:    "server.writetimeout must be non-negative",
+		},
+		{
+			name: "negative idle timeout",
+			config: Config{
+				App: AppConfig{Environment: "development"},
+				Database: DatabaseConfig{
+					Host: "localhost",
+				},
+				JWT: JWTConfig{
+					Secret: "test-secret-minimum-32-characters",
+				},
+				Server: ServerConfig{
+					IdleTimeout: -1,
+				},
+			},
+			expectError: true,
+			errorMsg:    "server.idletimeout must be non-negative",
+		},
+		{
+			name: "negative shutdown timeout",
+			config: Config{
+				App: AppConfig{Environment: "development"},
+				Database: DatabaseConfig{
+					Host: "localhost",
+				},
+				JWT: JWTConfig{
+					Secret: "test-secret-minimum-32-characters",
+				},
+				Server: ServerConfig{
+					ShutdownTimeout: -1,
+				},
+			},
+			expectError: true,
+			errorMsg:    "server.shutdowntimeout must be non-negative",
+		},
+		{
+			name: "negative max header bytes",
+			config: Config{
+				App: AppConfig{Environment: "development"},
+				Database: DatabaseConfig{
+					Host: "localhost",
+				},
+				JWT: JWTConfig{
+					Secret: "test-secret-minimum-32-characters",
+				},
+				Server: ServerConfig{
+					MaxHeaderBytes: -1,
+				},
+			},
+			expectError: true,
+			errorMsg:    "server.maxheaderbytes must be non-negative",
+		},
+		{
+			name: "zero timeouts are valid",
+			config: Config{
+				App: AppConfig{Environment: "development"},
+				Database: DatabaseConfig{
+					Host: "localhost",
+				},
+				JWT: JWTConfig{
+					Secret: "test-secret-minimum-32-characters",
+				},
+				Server: ServerConfig{
+					ReadTimeout:     0,
+					WriteTimeout:    0,
+					IdleTimeout:     0,
+					ShutdownTimeout: 0,
+					MaxHeaderBytes:  0,
+				},
+			},
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.config.Validate()
+			if tt.expectError {
+				assert.Error(t, err)
+				if tt.errorMsg != "" {
+					assert.Contains(t, err.Error(), tt.errorMsg)
+				}
+			} else {
+				assert.NoError(t, err)
+			}
 		})
 	}
 }
