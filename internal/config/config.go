@@ -46,9 +46,12 @@ type JWTConfig struct {
 
 // ServerConfig holds server-related configuration
 type ServerConfig struct {
-	Port         string `mapstructure:"port" yaml:"port"`
-	ReadTimeout  int    `mapstructure:"readtimeout" yaml:"readtimeout"`
-	WriteTimeout int    `mapstructure:"writetimeout" yaml:"writetimeout"`
+	Port            string `mapstructure:"port" yaml:"port"`
+	ReadTimeout     int    `mapstructure:"readtimeout" yaml:"readtimeout"`
+	WriteTimeout    int    `mapstructure:"writetimeout" yaml:"writetimeout"`
+	IdleTimeout     int    `mapstructure:"idletimeout" yaml:"idletimeout"`
+	ShutdownTimeout int    `mapstructure:"shutdowntimeout" yaml:"shutdowntimeout"`
+	MaxHeaderBytes  int    `mapstructure:"maxheaderbytes" yaml:"maxheaderbytes"`
 }
 
 // LoggingConfig holds logging-related configuration
@@ -166,7 +169,7 @@ func (c *Config) LogSafeConfig(logger *slog.Logger) {
 	logger.Info("App", "Name", c.App.Name, "Environment", c.App.Environment, "Debug", c.App.Debug)
 	logger.Info("Database", "Host", c.Database.Host, "Port", c.Database.Port, "User", c.Database.User, "Password", "<redacted>", "Name", c.Database.Name, "SSLMode", c.Database.SSLMode)
 	logger.Info("JWT", "Secret", "<redacted>", "TTLHours", c.JWT.TTLHours)
-	logger.Info("Server", "Port", c.Server.Port, "ReadTimeout", c.Server.ReadTimeout, "WriteTimeout", c.Server.WriteTimeout)
+	logger.Info("Server", "Port", c.Server.Port, "ReadTimeout", c.Server.ReadTimeout, "WriteTimeout", c.Server.WriteTimeout, "IdleTimeout", c.Server.IdleTimeout, "ShutdownTimeout", c.Server.ShutdownTimeout, "MaxHeaderBytes", c.Server.MaxHeaderBytes)
 	logger.Info("Logging", "Level", c.Logging.Level)
 	logger.Info("RateLimit", "Enabled", c.Ratelimit.Enabled, "Requests", c.Ratelimit.Requests, "Window", c.Ratelimit.Window)
 }

@@ -34,6 +34,9 @@ server:
   port: "8080"                      # Override with SERVER_PORT
   readtimeout: 10                   # Override with SERVER_READTIMEOUT (seconds)
   writetimeout: 10                  # Override with SERVER_WRITETIMEOUT (seconds)
+  idletimeout: 120                  # Override with SERVER_IDLETIMEOUT (seconds)
+  shutdowntimeout: 30               # Override with SERVER_SHUTDOWNTIMEOUT (seconds)
+  maxheaderbytes: 1048576           # Override with SERVER_MAXHEADERBYTES (1MB default)
 
 logging:
   level: "info"                     # Override with LOGGING_LEVEL (debug|info|warn|error)
