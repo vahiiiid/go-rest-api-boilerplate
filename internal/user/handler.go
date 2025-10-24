@@ -231,6 +231,10 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	}
 
 	if err := h.userService.DeleteUser(c.Request.Context(), uint(id)); err != nil {
+		if errors.Is(err, ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete user"})
 		return
 	}
