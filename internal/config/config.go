@@ -86,22 +86,36 @@ func LoadConfig(configPath string) (*Config, error) {
 
 	if configPath != "" {
 		v.SetConfigFile(configPath)
+		if err := v.ReadInConfig(); err != nil {
+			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+				return nil, fmt.Errorf("failed to read config file: %w", err)
+			}
+		}
 	} else {
 		env := v.GetString("APP_ENVIRONMENT")
 		if env == "" {
 			env = "development"
 		}
 
-		v.SetConfigName(fmt.Sprintf("config.%s", env))
+		// First load base config
+		v.SetConfigName("config")
 		v.SetConfigType("yaml")
 		v.AddConfigPath("configs")
 		v.AddConfigPath(".")
 		v.AddConfigPath("./configs")
-	}
 
-	if err := v.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return nil, fmt.Errorf("failed to read config file: %w", err)
+		if err := v.ReadInConfig(); err != nil {
+			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+				return nil, fmt.Errorf("failed to read base config file: %w", err)
+			}
+		}
+
+		// Then merge environment-specific config
+		v.SetConfigName(fmt.Sprintf("config.%s", env))
+		if err := v.MergeInConfig(); err != nil {
+			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+				return nil, fmt.Errorf("failed to merge environment config: %w", err)
+			}
 		}
 	}
 
@@ -125,7 +139,7 @@ func LoadConfig(configPath string) (*Config, error) {
 	return &cfg, nil
 }
 
-// This ensures ENV vars take precedence over config file values
+// bindEnvVariables ensures ENV vars take precedence over config file values
 func bindEnvVariables(v *viper.Viper) {
 	envBindings := map[string]string{
 		"app.name":               "APP_NAME",
@@ -149,6 +163,9 @@ func bindEnvVariables(v *viper.Viper) {
 		"ratelimit.enabled":      "RATELIMIT_ENABLED",
 		"ratelimit.requests":     "RATELIMIT_REQUESTS",
 		"ratelimit.window":       "RATELIMIT_WINDOW",
+		"migrations.directory":   "MIGRATIONS_DIRECTORY",
+		"migrations.timeout":     "MIGRATIONS_TIMEOUT",
+		"migrations.locktimeout": "MIGRATIONS_LOCKTIMEOUT",
 	}
 
 	for key, env := range envBindings {
