@@ -35,8 +35,3 @@ server:
 
 logging:
   level: "info"
-
-migrations:
-  directory: "./migrations"
-  timeout: 600
-  locktimeout: 30
