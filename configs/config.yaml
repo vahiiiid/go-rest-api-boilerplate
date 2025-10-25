@@ -42,7 +42,7 @@ logging:
   level: "info"                     # Override with LOGGING_LEVEL (debug|info|warn|error)
 
 ratelimit:
-  enabled: false                    # Override with RATELIMIT_ENABLED
+  enabled: true                    # Override with RATELIMIT_ENABLED
   requests: 100                     # Override with RATELIMIT_REQUESTS
   window: "1m"                      # Override with RATELIMIT_WINDOW
 

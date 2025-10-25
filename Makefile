@@ -8,10 +8,12 @@ CONTAINER_RUNNING := $(shell docker ps --format '{{.Names}}' 2>/dev/null | grep 
 
 # Determine execution command
 ifdef CONTAINER_RUNNING
-	EXEC_CMD = docker exec $(CONTAINER_RUNNING)
+	EXEC_CMD = docker exec $(CONTAINER_NAME)
+	EXEC_CMD_INTERACTIVE = docker exec -i $(CONTAINER_NAME)
 	ENV_MSG = 🐳 Running in Docker container
 else
 	EXEC_CMD = 
+	EXEC_CMD_INTERACTIVE = 
 	ENV_MSG = 💻 Running on host (Docker not available)
 endif
 
@@ -223,7 +225,7 @@ endif
 migrate-down:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) go run cmd/migrate/main.go down
+	@$(EXEC_CMD_INTERACTIVE) go run cmd/migrate/main.go down
 else
 	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
@@ -281,7 +283,7 @@ ifndef VERSION
 endif
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) go run cmd/migrate/main.go force $(VERSION)
+	@$(EXEC_CMD_INTERACTIVE) go run cmd/migrate/main.go force $(VERSION)
 else
 	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
@@ -297,7 +299,7 @@ endif
 migrate-drop:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) go run cmd/migrate/main.go drop --force
+	@$(EXEC_CMD_INTERACTIVE) go run cmd/migrate/main.go drop --force
 else
 	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
