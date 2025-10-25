@@ -69,6 +69,32 @@ docs: update API documentation
 test(handler): add tests for update endpoint
 ```
 
+### Database Migrations
+
+When adding or modifying database schema:
+
+1. **Create Migration Files**:
+```bash
+make migrate-create NAME=add_user_avatar
+```
+
+2. **Write Up Migration**: Add SQL for schema changes in `*_up.sql`
+3. **Write Down Migration**: Add rollback SQL in `*_down.sql`
+4. **Test Both Directions**:
+```bash
+make migrate-up
+make migrate-down
+make migrate-up
+```
+
+5. **Migration Checklist**:
+   - [ ] Both up and down migrations provided
+   - [ ] Migrations are idempotent (use `IF EXISTS`, `IF NOT EXISTS`)
+   - [ ] Transactions used (BEGIN/COMMIT)
+   - [ ] Tested locally in development
+   - [ ] Down migration tested and works correctly
+   - [ ] No destructive operations without safety checks
+
 ### Pull Request Process
 
 1. Update documentation if needed

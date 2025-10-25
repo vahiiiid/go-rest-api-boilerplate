@@ -95,7 +95,7 @@ RETRY_COUNT=0
 MIGRATION_SUCCESS=false
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-    if docker compose exec -T app go run cmd/migrate/main.go -action=up; then
+    if docker compose exec -T app go run cmd/migrate/main.go up; then
         MIGRATION_SUCCESS=true
         break
     else
@@ -142,7 +142,7 @@ echo ""
 echo "🗄️  Database Commands:"
 echo "   • Run migrations:     make migrate-up"
 echo "   • Rollback migration: make migrate-down"
-echo "   • Migration status:   make migrate-version"
+echo "   • Migration status:   make migrate-status"
 echo ""
 echo "📚 Documentation:"
 echo "   https://vahiiiid.github.io/go-rest-api-docs/"

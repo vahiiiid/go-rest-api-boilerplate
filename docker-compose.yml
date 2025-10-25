@@ -27,6 +27,9 @@ services:
       dockerfile: Dockerfile
       target: development  # Use development stage
     container_name: ${APP_CONTAINER_NAME:-go_api_app}
+    environment:
+      - DOCKER_ENV=true
+      - SKIP_INTEGRATION_TESTS=true
     env_file:
       - .env
     ports:
