@@ -74,6 +74,8 @@ func LoadConfig(configPath string) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
+	bindEnvVariables(v)
+
 	if configPath != "" {
 		v.SetConfigFile(configPath)
 	} else {
@@ -113,6 +115,42 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+// This ensures ENV vars take precedence over config file values
+func bindEnvVariables(v *viper.Viper) {
+	// App configuration
+	v.BindEnv("app.name", "APP_NAME")
+	v.BindEnv("app.environment", "APP_ENVIRONMENT")
+	v.BindEnv("app.debug", "APP_DEBUG")
+
+	// Database configuration
+	v.BindEnv("database.host", "DATABASE_HOST")
+	v.BindEnv("database.port", "DATABASE_PORT")
+	v.BindEnv("database.user", "DATABASE_USER")
+	v.BindEnv("database.password", "DATABASE_PASSWORD")
+	v.BindEnv("database.name", "DATABASE_NAME")
+	v.BindEnv("database.sslmode", "DATABASE_SSLMODE")
+
+	// JWT configuration
+	v.BindEnv("jwt.secret", "JWT_SECRET")
+	v.BindEnv("jwt.ttlhours", "JWT_TTLHOURS")
+
+	// Server configuration
+	v.BindEnv("server.port", "SERVER_PORT")
+	v.BindEnv("server.readtimeout", "SERVER_READTIMEOUT")
+	v.BindEnv("server.writetimeout", "SERVER_WRITETIMEOUT")
+	v.BindEnv("server.idletimeout", "SERVER_IDLETIMEOUT")
+	v.BindEnv("server.shutdowntimeout", "SERVER_SHUTDOWNTIMEOUT")
+	v.BindEnv("server.maxheaderbytes", "SERVER_MAXHEADERBYTES")
+
+	// Logging configuration
+	v.BindEnv("logging.level", "LOGGING_LEVEL")
+
+	// Rate limit configuration
+	v.BindEnv("ratelimit.enabled", "RATELIMIT_ENABLED")
+	v.BindEnv("ratelimit.requests", "RATELIMIT_REQUESTS")
+	v.BindEnv("ratelimit.window", "RATELIMIT_WINDOW")
 }
 
 // GetLogLevel converts string log level to slog.Level
