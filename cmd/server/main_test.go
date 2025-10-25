@@ -72,14 +72,47 @@ func TestGracefulShutdown_Integration(t *testing.T) {
 		t.Skip("skipping integration test (SKIP_INTEGRATION_TESTS is set)")
 	}
 
-	t.Setenv("JWT_SECRET", "test-secret-key-for-testing-minimum-32-chars-long")
-	t.Setenv("DATABASE_HOST", "localhost")
-	t.Setenv("DATABASE_PORT", "5432")
-	t.Setenv("DATABASE_USER", "postgres")
-	t.Setenv("DATABASE_PASSWORD", "postgres")
-	t.Setenv("DATABASE_NAME", "grab")
-	t.Setenv("SERVER_PORT", "18080")
-	t.Setenv("SERVER_SHUTDOWNTIMEOUT", "5")
+	// Skip in CI/Docker where signal handling might not work correctly
+	if os.Getenv("CI") != "" || os.Getenv("DOCKER_ENV") != "" {
+		t.Skip("skipping graceful shutdown test in CI/Docker environment")
+	}
+
+	// Set environment variables for the test
+	envVars := map[string]string{
+		"SKIP_MIGRATION_CHECK":   "true",
+		"JWT_SECRET":             "test-secret-key-for-testing-minimum-32-chars-long",
+		"DATABASE_HOST":          "localhost",
+		"DATABASE_PORT":          "5432",
+		"DATABASE_USER":          "postgres",
+		"DATABASE_PASSWORD":      "postgres",
+		"DATABASE_NAME":          "grab",
+		"SERVER_PORT":            "18080",
+		"SERVER_SHUTDOWNTIMEOUT": "5",
+	}
+
+	// Save original values and set new ones
+	originals := make(map[string]string)
+	for key, value := range envVars {
+		originals[key] = os.Getenv(key)
+		if err := os.Setenv(key, value); err != nil {
+			t.Fatalf("failed to set %s: %v", key, err)
+		}
+	}
+
+	// Restore original values after test
+	defer func() {
+		for key, value := range originals {
+			var err error
+			if value == "" {
+				err = os.Unsetenv(key)
+			} else {
+				err = os.Setenv(key, value)
+			}
+			if err != nil {
+				t.Logf("failed to restore %s: %v", key, err)
+			}
+		}
+	}()
 
 	done := make(chan error, 1)
 	go func() {

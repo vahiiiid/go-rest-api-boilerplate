@@ -35,3 +35,8 @@ server:
 
 logging:
   level: "info"
+
+migrations:
+  directory: "./migrations"
+  timeout: 300                      # 5 minutes for production
+  locktimeout: 15                   # 15 seconds lock timeout

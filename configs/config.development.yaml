@@ -35,3 +35,8 @@ server:
 
 logging:
   level: "debug"
+
+migrations:
+  directory: "./migrations"
+  timeout: 600
+  locktimeout: 30

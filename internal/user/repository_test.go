@@ -14,7 +14,22 @@ func setupTestDB(t *testing.T) *gorm.DB {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	require.NoError(t, err)
 
-	err = db.AutoMigrate(&User{})
+	sqlDB, err := db.DB()
+	require.NoError(t, err)
+
+	_, err = sqlDB.Exec(`
+		CREATE TABLE users (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			email TEXT UNIQUE NOT NULL,
+			password_hash TEXT NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			deleted_at DATETIME
+		);
+		CREATE INDEX idx_users_email ON users(email);
+		CREATE INDEX idx_users_deleted_at ON users(deleted_at);
+	`)
 	require.NoError(t, err)
 
 	return db
