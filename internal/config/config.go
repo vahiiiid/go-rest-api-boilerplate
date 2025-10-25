@@ -74,6 +74,8 @@ func LoadConfig(configPath string) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
+	bindEnvVariables(v)
+
 	if configPath != "" {
 		v.SetConfigFile(configPath)
 	} else {
@@ -113,6 +115,37 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+// This ensures ENV vars take precedence over config file values
+func bindEnvVariables(v *viper.Viper) {
+	envBindings := map[string]string{
+		"app.name":               "APP_NAME",
+		"app.environment":        "APP_ENVIRONMENT",
+		"app.debug":              "APP_DEBUG",
+		"database.host":          "DATABASE_HOST",
+		"database.port":          "DATABASE_PORT",
+		"database.user":          "DATABASE_USER",
+		"database.password":      "DATABASE_PASSWORD",
+		"database.name":          "DATABASE_NAME",
+		"database.sslmode":       "DATABASE_SSLMODE",
+		"jwt.secret":             "JWT_SECRET",
+		"jwt.ttlhours":           "JWT_TTLHOURS",
+		"server.port":            "SERVER_PORT",
+		"server.readtimeout":     "SERVER_READTIMEOUT",
+		"server.writetimeout":    "SERVER_WRITETIMEOUT",
+		"server.idletimeout":     "SERVER_IDLETIMEOUT",
+		"server.shutdowntimeout": "SERVER_SHUTDOWNTIMEOUT",
+		"server.maxheaderbytes":  "SERVER_MAXHEADERBYTES",
+		"logging.level":          "LOGGING_LEVEL",
+		"ratelimit.enabled":      "RATELIMIT_ENABLED",
+		"ratelimit.requests":     "RATELIMIT_REQUESTS",
+		"ratelimit.window":       "RATELIMIT_WINDOW",
+	}
+
+	for key, env := range envBindings {
+		_ = v.BindEnv(key, env)
+	}
 }
 
 // GetLogLevel converts string log level to slog.Level
