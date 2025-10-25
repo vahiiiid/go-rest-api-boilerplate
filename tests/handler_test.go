@@ -28,7 +28,22 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 	database, err := db.NewSQLiteDB(":memory:")
 	assert.NoError(t, err)
 
-	err = database.AutoMigrate(&user.User{})
+	sqlDB, err := database.DB()
+	assert.NoError(t, err)
+
+	_, err = sqlDB.Exec(`
+		CREATE TABLE users (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			email TEXT UNIQUE NOT NULL,
+			password_hash TEXT NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			deleted_at DATETIME
+		);
+		CREATE INDEX idx_users_email ON users(email);
+		CREATE INDEX idx_users_deleted_at ON users(deleted_at);
+	`)
 	assert.NoError(t, err)
 
 	authService := auth.NewService(&testCfg.JWT)
@@ -52,7 +67,22 @@ func setupRateLimitTestRouter(t *testing.T) *gin.Engine {
 	database, err := db.NewSQLiteDB(":memory:")
 	assert.NoError(t, err)
 
-	err = database.AutoMigrate(&user.User{})
+	sqlDB, err := database.DB()
+	assert.NoError(t, err)
+
+	_, err = sqlDB.Exec(`
+		CREATE TABLE users (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			email TEXT UNIQUE NOT NULL,
+			password_hash TEXT NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			deleted_at DATETIME
+		);
+		CREATE INDEX idx_users_email ON users(email);
+		CREATE INDEX idx_users_deleted_at ON users(deleted_at);
+	`)
 	assert.NoError(t, err)
 
 	authService := auth.NewService(&testCfg.JWT)

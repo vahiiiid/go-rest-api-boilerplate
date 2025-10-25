@@ -10,10 +10,13 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/vahiiiid/go-rest-api-boilerplate/api/docs" // swagger docs
+	"gorm.io/gorm"
+
+	_ "github.com/vahiiiid/go-rest-api-boilerplate/api/docs"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/db"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/migrate"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/server"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 )
@@ -65,6 +68,14 @@ func run() error {
 	if err != nil {
 		logger.Error("Failed to connect to database", "error", err)
 		return err
+	}
+
+	if os.Getenv("SKIP_MIGRATION_CHECK") == "" {
+		if err := checkMigrationStatus(database, &cfg.Migrations); err != nil {
+			logger.Warn("Migration check", "status", "⚠️", "error", err)
+		} else {
+			logger.Info("Migration check", "status", "✓")
+		}
 	}
 
 	authService := auth.NewService(&cfg.JWT)
@@ -133,5 +144,38 @@ func run() error {
 	}
 
 	logger.Info("Server exited gracefully")
+	return nil
+}
+
+func checkMigrationStatus(database *gorm.DB, cfg *config.MigrationsConfig) error {
+	sqlDB, err := database.DB()
+	if err != nil {
+		return fmt.Errorf("failed to get sql.DB: %w", err)
+	}
+
+	migrator, err := migrate.New(sqlDB, migrate.Config{
+		MigrationsDir: cfg.Directory,
+		Timeout:       time.Duration(cfg.Timeout) * time.Second,
+		LockTimeout:   time.Duration(cfg.LockTimeout) * time.Second,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create migrator: %w", err)
+	}
+	defer func() {
+		if err := migrator.Close(); err != nil {
+			slog.Error("Failed to close migrator", "err", err)
+		}
+	}()
+
+	version, dirty, err := migrator.Version()
+	if err != nil {
+		return fmt.Errorf("failed to get migration version: %w", err)
+	}
+
+	if dirty {
+		return fmt.Errorf("database in dirty state at version %d", version)
+	}
+
+	slog.Info("Database schema", "version", version)
 	return nil
 }

@@ -203,12 +203,24 @@ make down      # Stop containers
 
 ### Database Migrations
 
+Production-grade migrations using golang-migrate:
+
 ```bash
 make migrate-create NAME=add_todos_table  # Create new migration
-make migrate-up                            # Apply migrations
+make migrate-up                            # Apply all pending
 make migrate-down                          # Rollback last migration
-make migrate-version                       # Check current version
+make migrate-status                        # Check current version
 ```
+
+For long-running migrations:
+
+```bash
+go run cmd/migrate/main.go up --timeout=30m --lock-timeout=1m
+```
+
+All environments use SQL migrations for consistency and safety.
+
+👉 **[Complete Migration Guide](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/)**
 
 ### Without Docker
 

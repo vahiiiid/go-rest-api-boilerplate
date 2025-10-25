@@ -13,12 +13,13 @@ import (
 
 // Config represents the application configuration
 type Config struct {
-	App       AppConfig       `mapstructure:"app" yaml:"app"`
-	Database  DatabaseConfig  `mapstructure:"database" yaml:"database"`
-	JWT       JWTConfig       `mapstructure:"jwt" yaml:"jwt"`
-	Server    ServerConfig    `mapstructure:"server" yaml:"server"`
-	Logging   LoggingConfig   `mapstructure:"logging" yaml:"logging"`
-	Ratelimit RateLimitConfig `mapstructure:"ratelimit" yaml:"ratelimit"`
+	App        AppConfig        `mapstructure:"app" yaml:"app"`
+	Database   DatabaseConfig   `mapstructure:"database" yaml:"database"`
+	JWT        JWTConfig        `mapstructure:"jwt" yaml:"jwt"`
+	Server     ServerConfig     `mapstructure:"server" yaml:"server"`
+	Logging    LoggingConfig    `mapstructure:"logging" yaml:"logging"`
+	Ratelimit  RateLimitConfig  `mapstructure:"ratelimit" yaml:"ratelimit"`
+	Migrations MigrationsConfig `mapstructure:"migrations" yaml:"migrations"`
 }
 
 // AppConfig holds application-related configuration.
@@ -64,6 +65,13 @@ type RateLimitConfig struct {
 	Enabled  bool          `mapstructure:"enabled" yaml:"enabled"`
 	Requests int           `mapstructure:"requests" yaml:"requests"`
 	Window   time.Duration `mapstructure:"window" yaml:"window"`
+}
+
+// MigrationsConfig holds migration-related configuration
+type MigrationsConfig struct {
+	Directory   string `mapstructure:"directory" yaml:"directory"`
+	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`
+	LockTimeout int    `mapstructure:"locktimeout" yaml:"locktimeout"`
 }
 
 // LoadConfig loads configuration using Viper. If configPath is non-empty it
@@ -205,4 +213,5 @@ func (c *Config) LogSafeConfig(logger *slog.Logger) {
 	logger.Info("Server", "Port", c.Server.Port, "ReadTimeout", c.Server.ReadTimeout, "WriteTimeout", c.Server.WriteTimeout, "IdleTimeout", c.Server.IdleTimeout, "ShutdownTimeout", c.Server.ShutdownTimeout, "MaxHeaderBytes", c.Server.MaxHeaderBytes)
 	logger.Info("Logging", "Level", c.Logging.Level)
 	logger.Info("RateLimit", "Enabled", c.Ratelimit.Enabled, "Requests", c.Ratelimit.Requests, "Window", c.Ratelimit.Window)
+	logger.Info("Migrations", "Directory", c.Migrations.Directory, "Timeout", c.Migrations.Timeout, "LockTimeout", c.Migrations.LockTimeout)
 }
