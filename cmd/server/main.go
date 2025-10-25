@@ -161,11 +161,6 @@ func checkMigrationStatus(database *gorm.DB, cfg *config.MigrationsConfig) error
 	if err != nil {
 		return fmt.Errorf("failed to create migrator: %w", err)
 	}
-	defer func() {
-		if err := migrator.Close(); err != nil {
-			slog.Error("Failed to close migrator", "err", err)
-		}
-	}()
 
 	version, dirty, err := migrator.Version()
 	if err != nil {
