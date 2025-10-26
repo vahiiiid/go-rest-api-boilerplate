@@ -646,3 +646,107 @@ func TestValidate_TimeoutFields(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadConfig_ErrorPaths(t *testing.T) {
+	t.Run("unmarshal error with invalid config structure", func(t *testing.T) {
+		viper.Reset()
+		tempDir := t.TempDir()
+
+		invalidYAML := `
+app:
+  name: 123
+  environment: [this, should, not, be, an, array]
+database:
+  port: "not_a_number"
+`
+		path := createTempConfigFile(t, tempDir, "invalid.yaml", invalidYAML)
+
+		_, err := LoadConfig(path)
+		assert.Error(t, err)
+	})
+
+	t.Run("ENV fallback when app.environment is empty", func(t *testing.T) {
+		viper.Reset()
+		tempDir := t.TempDir()
+
+		configContent := `
+app:
+  name: "TestApp"
+database:
+  host: "testhost"
+  port: 5432
+  user: "testuser"
+  password: "testpass"
+  name: "testdb"
+  sslmode: "disable"
+jwt:
+  secret: "test-secret-minimum-32-characters"
+  ttlhours: 24
+server:
+  port: "8080"
+`
+		path := createTempConfigFile(t, tempDir, "config.yaml", configContent)
+		t.Setenv("ENV", "testing")
+		t.Setenv("APP_ENVIRONMENT", "")
+
+		cfg, err := LoadConfig(path)
+		assert.NoError(t, err)
+		assert.Equal(t, "testing", cfg.App.Environment)
+	})
+}
+
+func TestGetConfigPath_AllPaths(t *testing.T) {
+	t.Run("returns absolute path when config exists", func(t *testing.T) {
+		result := GetConfigPath()
+		assert.Contains(t, result, "config.yaml")
+	})
+
+	t.Run("returns default when no config found", func(t *testing.T) {
+		origWd, _ := os.Getwd()
+		defer func() { _ = os.Chdir(origWd) }()
+
+		tempDir := t.TempDir()
+		_ = os.Chdir(tempDir)
+
+		result := GetConfigPath()
+		assert.Equal(t, "configs/config.yaml", result)
+	})
+}
+
+func TestValidate_ProductionSSLMode(t *testing.T) {
+	cfg := Config{
+		App: AppConfig{
+			Environment: "production",
+		},
+		Database: DatabaseConfig{
+			Host:     "localhost",
+			Password: "securepassword",
+			SSLMode:  "disable",
+		},
+		JWT: JWTConfig{
+			Secret: "this-is-a-very-long-secret-key-for-production-use-32-chars",
+		},
+	}
+
+	err := cfg.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "SSL mode cannot be 'disable' in production")
+}
+
+func TestValidate_DatabaseHostRequired(t *testing.T) {
+	cfg := Config{
+		App: AppConfig{
+			Environment: "development",
+		},
+		Database: DatabaseConfig{
+			Host: "",
+		},
+		JWT: JWTConfig{
+			Secret: "test-secret-minimum-32-characters",
+		},
+	}
+
+	err := cfg.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "database.host is required")
+}

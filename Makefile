@@ -1,4 +1,4 @@
-.PHONY: help quick-start up down restart logs build test test-coverage lint lint-fix swag migrate-create migrate-up migrate-down migrate-version build-binary run-binary clean
+.PHONY: help quick-start up down restart logs build test test-coverage lint lint-fix swag migrate-create migrate-up migrate-down migrate-status migrate-goto migrate-force migrate-drop build-binary run-binary clean
 
 # Container name (from docker-compose.yml)
 CONTAINER_NAME := go_api_app
@@ -8,10 +8,12 @@ CONTAINER_RUNNING := $(shell docker ps --format '{{.Names}}' 2>/dev/null | grep 
 
 # Determine execution command
 ifdef CONTAINER_RUNNING
-	EXEC_CMD = docker exec $(CONTAINER_RUNNING)
+	EXEC_CMD = docker exec $(CONTAINER_NAME)
+	EXEC_CMD_INTERACTIVE = docker exec -i $(CONTAINER_NAME)
 	ENV_MSG = 🐳 Running in Docker container
 else
 	EXEC_CMD = 
+	EXEC_CMD_INTERACTIVE = 
 	ENV_MSG = 💻 Running on host (Docker not available)
 endif
 
@@ -39,9 +41,12 @@ help:
 	@echo ""
 	@echo "🗄️  Database Commands:"
 	@echo "  make migrate-create NAME=<name>  - Create new migration"
-	@echo "  make migrate-up                  - Run migrations"
-	@echo "  make migrate-down                - Drop all migration tables"
-	@echo "  make migrate-version             - Show migration status"
+	@echo "  make migrate-up                  - Apply all pending migrations"
+	@echo "  make migrate-down                - Rollback last migration (or STEPS=N for N migrations)"
+	@echo "  make migrate-status              - Show current migration version"
+	@echo "  make migrate-goto VERSION=<n>    - Go to specific version"
+	@echo "  make migrate-force VERSION=<n>   - Force set version (recovery)"
+	@echo "  make migrate-drop                - Drop all tables"
 	@echo ""
 	@echo "⚙️  Native Build (requires Go on host):"
 	@echo "  make build-binary   - Build Go binary directly (no Docker)"
@@ -179,39 +184,36 @@ else
 	fi
 endif
 
-## migrate-create: Create a new migration file
+## migrate-create: Create a new migration
 migrate-create:
 ifndef NAME
 	@echo "❌ Error: NAME is required"
-	@echo "Usage: make migrate-create NAME=create_users_table"
+	@echo "Usage: make migrate-create NAME=add_user_avatar"
 	@exit 1
 endif
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) migrate create -ext sql -dir migrations -seq $(NAME)
-	@echo "✅ Migration created: migrations/*_$(NAME).sql"
+	@$(EXEC_CMD) go run cmd/migrate/main.go create $(NAME)
 else
-	@if command -v migrate >/dev/null 2>&1; then \
+	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
-		migrate create -ext sql -dir migrations -seq $(NAME); \
-		echo "✅ Migration created: migrations/*_$(NAME).sql"; \
+		go run cmd/migrate/main.go create $(NAME); \
 	else \
-		echo "❌ Error: Docker container not running and migrate not installed"; \
+		echo "❌ Error: Docker container not running and Go not installed"; \
 		echo "Please run: make up"; \
-		echo "Or install: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest"; \
 		exit 1; \
 	fi
 endif
 
-## migrate-up: Run database migrations
+## migrate-up: Apply all pending migrations
 migrate-up:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) go run cmd/migrate/main.go -action=up
+	@$(EXEC_CMD) go run cmd/migrate/main.go up
 else
 	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
-		go run cmd/migrate/main.go -action=up; \
+		go run cmd/migrate/main.go up; \
 	else \
 		echo "❌ Error: Docker container not running and Go not installed"; \
 		echo "Please run: make up"; \
@@ -219,15 +221,23 @@ else
 	fi
 endif
 
-## migrate-down: Drop all migration tables
+## migrate-down: Rollback last migration (or N migrations with STEPS=N)
 migrate-down:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) go run cmd/migrate/main.go -action=down
+ifdef STEPS
+	@$(EXEC_CMD_INTERACTIVE) go run cmd/migrate/main.go down $(STEPS)
+else
+	@$(EXEC_CMD_INTERACTIVE) go run cmd/migrate/main.go down
+endif
 else
 	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
-		go run cmd/migrate/main.go -action=down; \
+ifdef STEPS
+		go run cmd/migrate/main.go down $(STEPS); \
+else
+		go run cmd/migrate/main.go down; \
+endif
 	else \
 		echo "❌ Error: Docker container not running and Go not installed"; \
 		echo "Please run: make up"; \
@@ -235,15 +245,73 @@ else
 	fi
 endif
 
-## migrate-version: Show current migration version
-migrate-version:
+## migrate-status: Show current migration version
+migrate-status:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) go run cmd/migrate/main.go -action=status
+	@$(EXEC_CMD) go run cmd/migrate/main.go version
 else
 	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
-		go run cmd/migrate/main.go -action=status; \
+		go run cmd/migrate/main.go version; \
+	else \
+		echo "❌ Error: Docker container not running and Go not installed"; \
+		echo "Please run: make up"; \
+		exit 1; \
+	fi
+endif
+
+## migrate-goto: Go to specific version
+migrate-goto:
+ifndef VERSION
+	@echo "❌ Error: VERSION is required"
+	@echo "Usage: make migrate-goto VERSION=5"
+	@exit 1
+endif
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD) go run cmd/migrate/main.go goto $(VERSION)
+else
+	@if command -v go >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		go run cmd/migrate/main.go goto $(VERSION); \
+	else \
+		echo "❌ Error: Docker container not running and Go not installed"; \
+		echo "Please run: make up"; \
+		exit 1; \
+	fi
+endif
+
+## migrate-force: Force set version (recovery)
+migrate-force:
+ifndef VERSION
+	@echo "❌ Error: VERSION is required"
+	@echo "Usage: make migrate-force VERSION=1"
+	@exit 1
+endif
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD_INTERACTIVE) go run cmd/migrate/main.go force $(VERSION)
+else
+	@if command -v go >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		go run cmd/migrate/main.go force $(VERSION); \
+	else \
+		echo "❌ Error: Docker container not running and Go not installed"; \
+		echo "Please run: make up"; \
+		exit 1; \
+	fi
+endif
+
+## migrate-drop: Drop all tables
+migrate-drop:
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD_INTERACTIVE) go run cmd/migrate/main.go drop --force
+else
+	@if command -v go >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		go run cmd/migrate/main.go drop --force; \
 	else \
 		echo "❌ Error: Docker container not running and Go not installed"; \
 		echo "Please run: make up"; \

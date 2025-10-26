@@ -13,12 +13,13 @@ import (
 
 // Config represents the application configuration
 type Config struct {
-	App       AppConfig       `mapstructure:"app" yaml:"app"`
-	Database  DatabaseConfig  `mapstructure:"database" yaml:"database"`
-	JWT       JWTConfig       `mapstructure:"jwt" yaml:"jwt"`
-	Server    ServerConfig    `mapstructure:"server" yaml:"server"`
-	Logging   LoggingConfig   `mapstructure:"logging" yaml:"logging"`
-	Ratelimit RateLimitConfig `mapstructure:"ratelimit" yaml:"ratelimit"`
+	App        AppConfig        `mapstructure:"app" yaml:"app"`
+	Database   DatabaseConfig   `mapstructure:"database" yaml:"database"`
+	JWT        JWTConfig        `mapstructure:"jwt" yaml:"jwt"`
+	Server     ServerConfig     `mapstructure:"server" yaml:"server"`
+	Logging    LoggingConfig    `mapstructure:"logging" yaml:"logging"`
+	Ratelimit  RateLimitConfig  `mapstructure:"ratelimit" yaml:"ratelimit"`
+	Migrations MigrationsConfig `mapstructure:"migrations" yaml:"migrations"`
 }
 
 // AppConfig holds application-related configuration.
@@ -66,6 +67,13 @@ type RateLimitConfig struct {
 	Window   time.Duration `mapstructure:"window" yaml:"window"`
 }
 
+// MigrationsConfig holds migration-related configuration
+type MigrationsConfig struct {
+	Directory   string `mapstructure:"directory" yaml:"directory"`
+	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`
+	LockTimeout int    `mapstructure:"locktimeout" yaml:"locktimeout"`
+}
+
 // LoadConfig loads configuration using Viper. If configPath is non-empty it
 // will be used as the exact config file path, otherwise Viper searches common locations.
 func LoadConfig(configPath string) (*Config, error) {
@@ -78,22 +86,36 @@ func LoadConfig(configPath string) (*Config, error) {
 
 	if configPath != "" {
 		v.SetConfigFile(configPath)
+		if err := v.ReadInConfig(); err != nil {
+			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+				return nil, fmt.Errorf("failed to read config file: %w", err)
+			}
+		}
 	} else {
 		env := v.GetString("APP_ENVIRONMENT")
 		if env == "" {
 			env = "development"
 		}
 
-		v.SetConfigName(fmt.Sprintf("config.%s", env))
+		// First load base config
+		v.SetConfigName("config")
 		v.SetConfigType("yaml")
 		v.AddConfigPath("configs")
 		v.AddConfigPath(".")
 		v.AddConfigPath("./configs")
-	}
 
-	if err := v.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return nil, fmt.Errorf("failed to read config file: %w", err)
+		if err := v.ReadInConfig(); err != nil {
+			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+				return nil, fmt.Errorf("failed to read base config file: %w", err)
+			}
+		}
+
+		// Then merge environment-specific config
+		v.SetConfigName(fmt.Sprintf("config.%s", env))
+		if err := v.MergeInConfig(); err != nil {
+			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+				return nil, fmt.Errorf("failed to merge environment config: %w", err)
+			}
 		}
 	}
 
@@ -117,7 +139,7 @@ func LoadConfig(configPath string) (*Config, error) {
 	return &cfg, nil
 }
 
-// This ensures ENV vars take precedence over config file values
+// bindEnvVariables ensures ENV vars take precedence over config file values
 func bindEnvVariables(v *viper.Viper) {
 	envBindings := map[string]string{
 		"app.name":               "APP_NAME",
@@ -141,6 +163,9 @@ func bindEnvVariables(v *viper.Viper) {
 		"ratelimit.enabled":      "RATELIMIT_ENABLED",
 		"ratelimit.requests":     "RATELIMIT_REQUESTS",
 		"ratelimit.window":       "RATELIMIT_WINDOW",
+		"migrations.directory":   "MIGRATIONS_DIRECTORY",
+		"migrations.timeout":     "MIGRATIONS_TIMEOUT",
+		"migrations.locktimeout": "MIGRATIONS_LOCKTIMEOUT",
 	}
 
 	for key, env := range envBindings {
@@ -205,4 +230,5 @@ func (c *Config) LogSafeConfig(logger *slog.Logger) {
 	logger.Info("Server", "Port", c.Server.Port, "ReadTimeout", c.Server.ReadTimeout, "WriteTimeout", c.Server.WriteTimeout, "IdleTimeout", c.Server.IdleTimeout, "ShutdownTimeout", c.Server.ShutdownTimeout, "MaxHeaderBytes", c.Server.MaxHeaderBytes)
 	logger.Info("Logging", "Level", c.Logging.Level)
 	logger.Info("RateLimit", "Enabled", c.Ratelimit.Enabled, "Requests", c.Ratelimit.Requests, "Window", c.Ratelimit.Window)
+	logger.Info("Migrations", "Directory", c.Migrations.Directory, "Timeout", c.Migrations.Timeout, "LockTimeout", c.Migrations.LockTimeout)
 }
