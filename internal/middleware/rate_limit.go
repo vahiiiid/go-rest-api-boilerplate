@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/golang-lru/v2/expirable"
 	"golang.org/x/time/rate"
+
+	apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
 )
 
 // Storage abstracts the backing store for per-key limiters.
@@ -66,11 +68,7 @@ func NewRateLimitMiddleware(
 			c.Header("X-RateLimit-Remaining", "0")
 			c.Header("X-RateLimit-Reset", strconv.FormatInt(resetAt, 10))
 
-			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
-				"error":       "Rate limit exceeded",
-				"message":     "Too many requests. Please try again in " + strconv.Itoa(ra) + " seconds.",
-				"retry_after": ra,
-			})
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, apiErrors.TooManyRequests(ra))
 			return
 		}
 

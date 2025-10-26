@@ -160,7 +160,7 @@ func TestNewRateLimitMiddleware(t *testing.T) {
 					// Verify response body
 					var response map[string]interface{}
 					assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
-					assert.Equal(t, "Rate limit exceeded", response["error"])
+					assert.Equal(t, "Rate limit exceeded", response["message"])
 					assert.Contains(t, response, "message")
 					assert.Contains(t, response, "retry_after")
 				}
