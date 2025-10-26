@@ -258,10 +258,10 @@ func handleCreate(migrationsDir string, args []string) {
 	}
 
 	name := args[1]
-	timestamp := time.Now().Unix()
+	timestamp := time.Now().Format("20060102150405")
 
-	upFile := fmt.Sprintf("%s/%d_%s.up.sql", migrationsDir, timestamp, name)
-	downFile := fmt.Sprintf("%s/%d_%s.down.sql", migrationsDir, timestamp, name)
+	upFile := fmt.Sprintf("%s/%s_%s.up.sql", migrationsDir, timestamp, name)
+	downFile := fmt.Sprintf("%s/%s_%s.down.sql", migrationsDir, timestamp, name)
 
 	upContent := fmt.Sprintf(`-- Migration: %s
 -- Created: %s

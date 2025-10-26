@@ -136,7 +136,20 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 #### 🗄️ Database Setup That Doesn't Fight You
 
 - **PostgreSQL + GORM** — Production-grade ORM with relationship support
-- **Migration CLI** — Version control for your schema (`make migrate-create`, `make migrate-up`, `make migrate-down`, `make migrate-version`)
+- **golang-migrate** — Industry-standard migrations with timestamp versioning
+- **Complete migration CLI** — Create, apply, rollback with ease
+
+  ```bash
+  make migrate-create NAME=add_posts_table  # Create with timestamp
+  make migrate-up                            # Apply all pending
+  make migrate-down                          # Rollback last (safe)
+  make migrate-down STEPS=3                  # Rollback multiple
+  make migrate-status                        # Check current version
+  make migrate-goto VERSION=<timestamp>      # Jump to specific version
+  ```
+
+- **Safety features** — Confirmation prompts, dirty state detection
+- **Transaction support** — BEGIN/COMMIT wrappers for data integrity
 - **Connection pooling** — Configured for performance out of the box
 
 👉 [Migrations Guide](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/)
@@ -335,11 +348,11 @@ We ❤️ contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 - **[Gin](https://github.com/gin-gonic/gin)** — Fast HTTP web framework
 - **[GORM](https://gorm.io/)** — Developer-friendly ORM
+- **[golang-migrate](https://github.com/golang-migrate/migrate)** — Database migration toolkit
 - **[Viper](https://github.com/spf13/viper)** — Configuration management
 - **[golang-jwt](https://github.com/golang-jwt/jwt)** — JWT implementation
 - **[swaggo](https://github.com/swaggo/swag)** — Swagger documentation generator
 - **[Air](https://github.com/air-verse/air)** — Hot-reload for development
-- **[golang-migrate](https://github.com/golang-migrate/migrate)** — Database migrations
 
 ---
 

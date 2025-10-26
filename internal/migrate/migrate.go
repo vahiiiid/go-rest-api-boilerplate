@@ -20,8 +20,18 @@ type Config struct {
 	LockTimeout   time.Duration
 }
 
+type migrateInterface interface {
+	Up() error
+	Steps(n int) error
+	Migrate(version uint) error
+	Version() (uint, bool, error)
+	Force(version int) error
+	Drop() error
+	Close() (error, error)
+}
+
 type Migrator struct {
-	migrate *migrate.Migrate
+	migrate migrateInterface
 	db      *sql.DB
 	config  Config
 }

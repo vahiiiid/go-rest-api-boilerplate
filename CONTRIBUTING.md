@@ -73,27 +73,80 @@ test(handler): add tests for update endpoint
 
 When adding or modifying database schema:
 
-1. **Create Migration Files**:
-```bash
-make migrate-create NAME=add_user_avatar
-```
+1. **Create Migration Files** (uses timestamp versioning):
+
+   ```bash
+   make migrate-create NAME=add_user_avatar
+   ```
+
+   This creates two files with timestamp format (YYYYMMDDHHMMSS):
+   - `20251026103539_add_user_avatar.up.sql`
+   - `20251026103539_add_user_avatar.down.sql`
 
 2. **Write Up Migration**: Add SQL for schema changes in `*_up.sql`
+
+   ```sql
+   -- Migration: add_user_avatar
+   -- Created: 2025-10-26T10:35:39Z
+   -- Description: Add avatar column to users table
+
+   BEGIN;
+
+   ALTER TABLE users ADD COLUMN avatar VARCHAR(255);
+   CREATE INDEX idx_users_avatar ON users(avatar);
+
+   COMMIT;
+   ```
+
 3. **Write Down Migration**: Add rollback SQL in `*_down.sql`
+
+   ```sql
+   -- Migration: add_user_avatar (rollback)
+   -- Created: 2025-10-26T10:35:39Z
+
+   BEGIN;
+
+   DROP INDEX IF EXISTS idx_users_avatar;
+   ALTER TABLE users DROP COLUMN IF EXISTS avatar;
+
+   COMMIT;
+   ```
+
 4. **Test Both Directions**:
-```bash
-make migrate-up
-make migrate-down
-make migrate-up
-```
+
+   ```bash
+   make migrate-up          # Apply migration
+   make migrate-status      # Verify version
+   make migrate-down        # Rollback
+   make migrate-up          # Re-apply to confirm
+   ```
 
 5. **Migration Checklist**:
    - [ ] Both up and down migrations provided
    - [ ] Migrations are idempotent (use `IF EXISTS`, `IF NOT EXISTS`)
-   - [ ] Transactions used (BEGIN/COMMIT)
+   - [ ] Wrapped in transactions (BEGIN/COMMIT)
    - [ ] Tested locally in development
    - [ ] Down migration tested and works correctly
-   - [ ] No destructive operations without safety checks
+   - [ ] No data loss in down migration (consider backup strategy)
+   - [ ] Performance tested for large datasets
+   - [ ] Compatible with zero-downtime deployments
+
+6. **Advanced Migration Commands**:
+
+   ```bash
+   make migrate-down STEPS=3              # Rollback 3 migrations
+   make migrate-goto VERSION=20251026     # Jump to specific version
+   make migrate-force VERSION=20251026    # Force version (recovery)
+   ```
+
+**Migration Best Practices:**
+
+- Use timestamp versioning (automatic, prevents conflicts)
+- One logical change per migration
+- Never modify existing migration files
+- Test on production-like data volume
+- Consider adding/removing columns in separate migrations
+- Use `ALTER TABLE` instead of `DROP/CREATE` when possible
 
 ### Pull Request Process
 
@@ -128,11 +181,11 @@ internal/
 6. Register routes in `internal/server/router.go`
 7. Write tests in `tests/`
 
-### Database Migrations
+### Database Migrations (Legacy Reference)
 
-This project uses GORM AutoMigrate. For production, consider using a migration tool like:
-- [golang-migrate](https://github.com/golang-migrate/migrate)
-- [goose](https://github.com/pressly/goose)
+This project uses **[golang-migrate](https://github.com/golang-migrate/migrate)** for production-grade database migrations with timestamp versioning.
+
+For detailed migration documentation, see the [Migrations Guide](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/).
 
 ### Documentation
 

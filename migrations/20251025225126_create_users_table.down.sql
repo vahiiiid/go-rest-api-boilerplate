@@ -1,4 +1,4 @@
--- Migration: 000001_create_users_table (rollback)
+-- Migration: create_users_table (rollback)
 -- Description: Drops users table and associated indexes
 
 BEGIN;

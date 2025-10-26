@@ -42,7 +42,7 @@ help:
 	@echo "🗄️  Database Commands:"
 	@echo "  make migrate-create NAME=<name>  - Create new migration"
 	@echo "  make migrate-up                  - Apply all pending migrations"
-	@echo "  make migrate-down                - Rollback last migration"
+	@echo "  make migrate-down                - Rollback last migration (or STEPS=N for N migrations)"
 	@echo "  make migrate-status              - Show current migration version"
 	@echo "  make migrate-goto VERSION=<n>    - Go to specific version"
 	@echo "  make migrate-force VERSION=<n>   - Force set version (recovery)"
@@ -221,15 +221,23 @@ else
 	fi
 endif
 
-## migrate-down: Rollback last migration
+## migrate-down: Rollback last migration (or N migrations with STEPS=N)
 migrate-down:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
+ifdef STEPS
+	@$(EXEC_CMD_INTERACTIVE) go run cmd/migrate/main.go down $(STEPS)
+else
 	@$(EXEC_CMD_INTERACTIVE) go run cmd/migrate/main.go down
+endif
 else
 	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
+ifdef STEPS
+		go run cmd/migrate/main.go down $(STEPS); \
+else
 		go run cmd/migrate/main.go down; \
+endif
 	else \
 		echo "❌ Error: Docker container not running and Go not installed"; \
 		echo "Please run: make up"; \

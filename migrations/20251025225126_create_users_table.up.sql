@@ -1,4 +1,4 @@
--- Migration: 000001_create_users_table
+-- Migration: create_users_table
 -- Description: Creates users table with indexes and constraints
 
 BEGIN;
