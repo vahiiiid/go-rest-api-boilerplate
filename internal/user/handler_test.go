@@ -778,6 +778,24 @@ func TestHandler_DeleteUser(t *testing.T) {
 			},
 		},
 		{
+			name:   "user not found",
+			userID: "1",
+			setupMocks: func(ms *MockService, mas *MockAuthService) {
+				ms.On("DeleteUser", mock.Anything, uint(1)).Return(ErrUserNotFound)
+			},
+			setupContext: func(c *gin.Context) {
+				claims := &auth.Claims{UserID: 1}
+				c.Set(auth.KeyUser, claims)
+			},
+			expectedStatus: http.StatusNotFound,
+			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
+				var response map[string]interface{}
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.Equal(t, "user not found", response["error"])
+			},
+		},
+		{
 			name:   "service error",
 			userID: "1",
 			setupMocks: func(ms *MockService, mas *MockAuthService) {

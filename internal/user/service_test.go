@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 func TestNewService(t *testing.T) {
@@ -345,6 +346,14 @@ func TestService_DeleteUser(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
+			name:   "user not found",
+			userID: 1,
+			setupMock: func(m *MockRepository) {
+				m.On("Delete", mock.Anything, uint(1)).Return(gorm.ErrRecordNotFound)
+			},
+			expectedErr: ErrUserNotFound,
+		},
+		{
 			name:   "repository error",
 			userID: 1,
 			setupMock: func(m *MockRepository) {
@@ -364,7 +373,11 @@ func TestService_DeleteUser(t *testing.T) {
 
 			if tt.expectedErr != nil {
 				assert.Error(t, err)
-				assert.Contains(t, err.Error(), tt.expectedErr.Error())
+				if errors.Is(tt.expectedErr, ErrUserNotFound) {
+					assert.ErrorIs(t, err, ErrUserNotFound)
+				} else {
+					assert.Contains(t, err.Error(), tt.expectedErr.Error())
+				}
 			} else {
 				assert.NoError(t, err)
 			}

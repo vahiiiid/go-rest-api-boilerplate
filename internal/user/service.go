@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 var (
@@ -128,6 +129,9 @@ func (s *service) UpdateUser(ctx context.Context, id uint, req UpdateUserRequest
 // DeleteUser deletes a user
 func (s *service) DeleteUser(ctx context.Context, id uint) error {
 	if err := s.repo.Delete(ctx, id); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrUserNotFound
+		}
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
 	return nil
