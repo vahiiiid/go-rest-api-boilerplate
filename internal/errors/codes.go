@@ -1,5 +1,6 @@
 package errors
 
+// Error code constants for machine-readable API error identification.
 const (
 	CodeInternal        = "INTERNAL_ERROR"
 	CodeNotFound        = "NOT_FOUND"

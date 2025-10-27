@@ -801,7 +801,7 @@ func TestHandler_DeleteUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "user not found", response["error"])
+				assert.Equal(t, "User not found", response["message"])
 			},
 		},
 		{

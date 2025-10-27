@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+// APIError represents a structured API error with code, message, details and HTTP status.
 type APIError struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
@@ -15,6 +16,7 @@ type APIError struct {
 	Status  int    `json:"-"`
 }
 
+// RateLimitError extends APIError with retry-after information for rate limiting.
 type RateLimitError struct {
 	APIError
 	RetryAfter int `json:"retry_after"`
@@ -24,7 +26,7 @@ func (e *APIError) Error() string {
 	return e.Message
 }
 
-// Constructors
+// NotFound creates a 404 Not Found error.
 func NotFound(message string) *APIError {
 	return &APIError{
 		Code:    CodeNotFound,
@@ -33,6 +35,7 @@ func NotFound(message string) *APIError {
 	}
 }
 
+// BadRequest creates a 400 Bad Request error for validation failures.
 func BadRequest(message string) *APIError {
 	return &APIError{
 		Code:    CodeValidation,
@@ -41,6 +44,7 @@ func BadRequest(message string) *APIError {
 	}
 }
 
+// Conflict creates a 409 Conflict error for duplicate resources.
 func Conflict(message string) *APIError {
 	return &APIError{
 		Code:    CodeConflict,
@@ -49,6 +53,7 @@ func Conflict(message string) *APIError {
 	}
 }
 
+// Forbidden creates a 403 Forbidden error for authorization failures.
 func Forbidden(message string) *APIError {
 	return &APIError{
 		Code:    CodeForbidden,
@@ -57,6 +62,7 @@ func Forbidden(message string) *APIError {
 	}
 }
 
+// Unauthorized creates a 401 Unauthorized error for authentication failures.
 func Unauthorized(message string) *APIError {
 	return &APIError{
 		Code:    CodeUnauthorized,
@@ -65,6 +71,7 @@ func Unauthorized(message string) *APIError {
 	}
 }
 
+// InternalServerError creates a 500 Internal Server Error with details from the original error.
 func InternalServerError(err error) *APIError {
 	return &APIError{
 		Code:    CodeInternal,
@@ -74,6 +81,7 @@ func InternalServerError(err error) *APIError {
 	}
 }
 
+// TooManyRequests creates a 429 Too Many Requests error with retry-after seconds.
 func TooManyRequests(ra int) *RateLimitError {
 	return &RateLimitError{
 		APIError: APIError{
@@ -86,6 +94,7 @@ func TooManyRequests(ra int) *RateLimitError {
 	}
 }
 
+// ValidationError creates a validation error with field-level details.
 func ValidationError(details interface{}) *APIError {
 	return &APIError{
 		Code:    CodeValidation,
@@ -95,6 +104,7 @@ func ValidationError(details interface{}) *APIError {
 	}
 }
 
+// FromGinValidation converts Gin/validator errors to structured APIError with field-level details.
 func FromGinValidation(err error) *APIError {
 	if validationErrs, ok := err.(validator.ValidationErrors); ok {
 		details := make(map[string]string)
@@ -114,6 +124,8 @@ func FromGinValidation(err error) *APIError {
 	}
 }
 
+// formatValidationError converts validator field errors to human-readable messages.
+// Handles common validation tags: required, email, min, max.
 func formatValidationError(fe validator.FieldError) string {
 	switch fe.Tag() {
 	case "required":
