@@ -42,6 +42,7 @@ make quick-start  # ← One command. 90 seconds. You're building features.
 ✅ **Comprehensive Tests** — Unit + integration with CI/CD pipeline  
 ✅ **Interactive Docs** — Auto-generated Swagger + Postman collection  
 ✅ **Structured Logging** — JSON logs with request IDs and tracing  
+✅ **Structured Error Handling** — Consistent API errors with codes and details  
 ✅ **Production Docker** — Multi-stage builds, health checks, optimized images  
 ✅ **Environment-Aware** — Dev/staging/prod configs + Make automation & more  
 ✅ **Graceful Shutdown** — Zero-downtime deployments with configurable timeouts  
@@ -181,6 +182,15 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 
 👉 [Testing Guide](https://vahiiiid.github.io/go-rest-api-docs/TESTING/)
 
+#### ⚠️ Error Handling That Makes Sense
+
+- **Structured API errors** — Consistent JSON format with code, message, and details
+- **Machine-readable codes** — NOT_FOUND, VALIDATION_ERROR, etc.
+- **Validation details** — Clear field-level error messages
+- **Centralized middleware** — Single error handler for all endpoints
+
+👉 [Error Handling Guide](https://vahiiiid.github.io/go-rest-api-docs/ERROR_HANDLING/)
+
 #### 🏗️ Architecture That Scales
 
 - **Clean layers** — Handler → Service → Repository (no shortcuts)
@@ -308,6 +318,7 @@ Complete guides covering everything:
 - 🐳 [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/) — Container workflows
 - 🗄️ [Migrations](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/) — Database schema management
 - 🧪 [Testing](https://vahiiiid.github.io/go-rest-api-docs/TESTING/) — Writing and running tests
+- ⚠️ [Error Handling](https://vahiiiid.github.io/go-rest-api-docs/ERROR_HANDLING/) — Structured API errors
 - 📚 [Swagger](https://vahiiiid.github.io/go-rest-api-docs/SWAGGER/) — API documentation
 - ⚙️ [Configuration](https://vahiiiid.github.io/go-rest-api-docs/CONFIGURATION/) — Environment setup
 

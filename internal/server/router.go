@@ -10,6 +10,7 @@ import (
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 )
@@ -30,6 +31,7 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 		skipPaths,
 	)
 	router.Use(middleware.Logger(loggerConfig))
+	router.Use(errors.ErrorHandler())
 	router.Use(gin.Recovery())
 
 	corsConfig := cors.DefaultConfig()

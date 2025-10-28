@@ -132,7 +132,7 @@ func TestRegisterHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusConflict,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["error"].(string); !ok || errorMsg == "" {
+				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -146,7 +146,7 @@ func TestRegisterHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["error"].(string); !ok || errorMsg == "" {
+				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -158,7 +158,7 @@ func TestRegisterHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["error"].(string); !ok || errorMsg == "" {
+				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -232,7 +232,7 @@ func TestLoginHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusUnauthorized,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["error"].(string); !ok || errorMsg == "" {
+				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -245,7 +245,7 @@ func TestLoginHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusUnauthorized,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["error"].(string); !ok || errorMsg == "" {
+				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -257,7 +257,7 @@ func TestLoginHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["error"].(string); !ok || errorMsg == "" {
+				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
