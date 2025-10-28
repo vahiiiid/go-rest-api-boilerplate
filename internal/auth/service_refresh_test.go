@@ -203,3 +203,71 @@ func TestGenerateRandomToken(t *testing.T) {
 
 	assert.NotEqual(t, token1, token2, "Each token should be unique")
 }
+
+func TestService_GenerateTokenPair_NilRepository(t *testing.T) {
+	cfg := &config.JWTConfig{
+		Secret:          "test-secret-for-jwt-tokens-min-32-chars",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+	}
+
+	svc := NewService(cfg)
+	ctx := context.Background()
+
+	_, err := svc.GenerateTokenPair(ctx, 1, "test@example.com", "Test User")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "refresh token repository not initialized")
+}
+
+func TestService_RefreshAccessToken_NilRepository(t *testing.T) {
+	cfg := &config.JWTConfig{
+		Secret:          "test-secret-for-jwt-tokens-min-32-chars",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+	}
+
+	svc := NewService(cfg)
+	ctx := context.Background()
+
+	_, err := svc.RefreshAccessToken(ctx, "some-token")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "refresh token repository not initialized")
+}
+
+func TestService_RevokeRefreshToken_NilRepository(t *testing.T) {
+	cfg := &config.JWTConfig{
+		Secret:          "test-secret-for-jwt-tokens-min-32-chars",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+	}
+
+	svc := NewService(cfg)
+	ctx := context.Background()
+
+	err := svc.RevokeRefreshToken(ctx, "some-token")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "refresh token repository not initialized")
+}
+
+func TestService_RevokeAllUserTokens_NilRepository(t *testing.T) {
+	cfg := &config.JWTConfig{
+		Secret:          "test-secret-for-jwt-tokens-min-32-chars",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+	}
+
+	svc := NewService(cfg)
+	ctx := context.Background()
+
+	err := svc.RevokeAllUserTokens(ctx, 1)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "refresh token repository not initialized")
+}
+
+func TestService_RevokeRefreshToken_TokenNotFound(t *testing.T) {
+	svc, _ := setupServiceTest(t)
+	ctx := context.Background()
+
+	err := svc.RevokeRefreshToken(ctx, "non-existent-token")
+	assert.NoError(t, err)
+}
