@@ -72,8 +72,6 @@ func (r *refreshTokenRepository) FindByTokenHash(ctx context.Context, tokenHash 
 	var token RefreshToken
 	err := r.db.WithContext(ctx).
 		Where("token_hash = ?", tokenHash).
-		Where("expires_at > ?", time.Now()).
-		Where("revoked_at IS NULL").
 		First(&token).Error
 	if err != nil {
 		return nil, err
