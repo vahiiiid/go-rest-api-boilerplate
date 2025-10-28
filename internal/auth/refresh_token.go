@@ -12,7 +12,7 @@ import (
 
 // RefreshToken represents a refresh token in the database
 type RefreshToken struct {
-	ID          uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	ID          uuid.UUID `gorm:"type:uuid;primary_key"`
 	UserID      uint      `gorm:"not null;index"`
 	TokenHash   string    `gorm:"type:varchar(64);not null;index"`
 	TokenFamily uuid.UUID `gorm:"type:uuid;not null;index"`
@@ -20,6 +20,17 @@ type RefreshToken struct {
 	UsedAt      *time.Time
 	RevokedAt   *time.Time
 	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+}
+
+// BeforeCreate is a GORM hook that sets the ID and CreatedAt before creating the record
+func (rt *RefreshToken) BeforeCreate(tx *gorm.DB) error {
+	if rt.ID == uuid.Nil {
+		rt.ID = uuid.New()
+	}
+	if rt.CreatedAt.IsZero() {
+		rt.CreatedAt = time.Now()
+	}
+	return nil
 }
 
 // TableName specifies the table name for RefreshToken
