@@ -11,6 +11,10 @@ import (
 )
 
 func TestRun_ConfigLoadError(t *testing.T) {
+	if os.Getenv("SKIP_INTEGRATION_TESTS") != "" {
+		t.Skip("skipping integration test (SKIP_INTEGRATION_TESTS is set)")
+	}
+
 	if err := os.Setenv("APP_ENVIRONMENT", "nonexistent"); err != nil {
 		t.Fatalf("failed to set environment variable: %v", err)
 	}
