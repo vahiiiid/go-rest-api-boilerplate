@@ -303,7 +303,7 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Param request body auth.RefreshTokenRequest true "Refresh token to revoke"
-// @Success 204 "Successfully logged out"
+// @Success 200 {object} map[string]string "Successfully logged out"
 // @Failure 400 {object} errors.APIError "Validation error"
 // @Failure 401 {object} errors.APIError "Unauthorized"
 // @Failure 500 {object} errors.APIError "Failed to logout"
@@ -320,5 +320,5 @@ func (h *Handler) Logout(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
 }
