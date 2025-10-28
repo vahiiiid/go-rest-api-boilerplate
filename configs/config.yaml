@@ -28,7 +28,9 @@ database:
 
 jwt:
   secret: "change-me"              # Override with JWT_SECRET (required for production)
-  ttlhours: 24                      # Override with JWT_TTLHOURS
+  access_token_ttl: "15m"          # Override with JWT_ACCESS_TOKEN_TTL (15 minutes - industry standard)
+  refresh_token_ttl: "168h"        # Override with JWT_REFRESH_TOKEN_TTL (7 days - industry standard)
+  ttlhours: 24                      # Deprecated: use access_token_ttl instead
 
 server:
   port: "8080"                      # Override with SERVER_PORT

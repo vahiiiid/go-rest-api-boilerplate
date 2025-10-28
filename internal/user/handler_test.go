@@ -2,6 +2,7 @@ package user
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -34,6 +35,32 @@ func (m *MockAuthService) GenerateToken(userID uint, email string, name string) 
 	return args.String(0), args.Error(1)
 }
 
+func (m *MockAuthService) GenerateTokenPair(ctx context.Context, userID uint, email string, name string) (*auth.TokenPair, error) {
+	args := m.Called(ctx, userID, email, name)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*auth.TokenPair), args.Error(1)
+}
+
+func (m *MockAuthService) RefreshAccessToken(ctx context.Context, refreshToken string) (*auth.TokenPair, error) {
+	args := m.Called(ctx, refreshToken)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*auth.TokenPair), args.Error(1)
+}
+
+func (m *MockAuthService) RevokeRefreshToken(ctx context.Context, refreshToken string) error {
+	args := m.Called(ctx, refreshToken)
+	return args.Error(0)
+}
+
+func (m *MockAuthService) RevokeAllUserTokens(ctx context.Context, userID uint) error {
+	args := m.Called(ctx, userID)
+	return args.Error(0)
+}
+
 func TestHandler_Register(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -56,14 +83,21 @@ func TestHandler_Register(t *testing.T) {
 					Email: "john@example.com",
 				}
 				ms.On("RegisterUser", mock.Anything, mock.AnythingOfType("user.RegisterRequest")).Return(user, nil)
-				mas.On("GenerateToken", uint(1), "john@example.com", "John Doe").Return("mock-token", nil)
+				tokenPair := &auth.TokenPair{
+					AccessToken:  "mock-access-token",
+					RefreshToken: "mock-refresh-token",
+					TokenType:    "Bearer",
+					ExpiresIn:    900,
+				}
+				mas.On("GenerateTokenPair", mock.Anything, uint(1), "john@example.com", "John Doe").Return(tokenPair, nil)
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Contains(t, response, "token")
+				assert.Contains(t, response, "access_token")
+				assert.Contains(t, response, "refresh_token")
 				assert.Contains(t, response, "user")
 			},
 		},
@@ -148,7 +182,7 @@ func TestHandler_Register(t *testing.T) {
 					Email: "john@example.com",
 				}
 				ms.On("RegisterUser", mock.Anything, mock.AnythingOfType("user.RegisterRequest")).Return(user, nil)
-				mas.On("GenerateToken", uint(1), "john@example.com", "John Doe").Return("", errors.New("token generation failed"))
+				mas.On("GenerateTokenPair", mock.Anything, uint(1), "john@example.com", "John Doe").Return(nil, errors.New("token generation failed"))
 			},
 			expectedStatus: http.StatusInternalServerError,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -404,14 +438,21 @@ func TestHandler_Login(t *testing.T) {
 					Email: "john@example.com",
 				}
 				ms.On("AuthenticateUser", mock.Anything, mock.AnythingOfType("user.LoginRequest")).Return(user, nil)
-				mas.On("GenerateToken", uint(1), "john@example.com", "John Doe").Return("mock-token", nil)
+				tokenPair := &auth.TokenPair{
+					AccessToken:  "mock-access-token",
+					RefreshToken: "mock-refresh-token",
+					TokenType:    "Bearer",
+					ExpiresIn:    900,
+				}
+				mas.On("GenerateTokenPair", mock.Anything, uint(1), "john@example.com", "John Doe").Return(tokenPair, nil)
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "mock-token", response["token"])
+				assert.Equal(t, "mock-access-token", response["access_token"])
+				assert.Equal(t, "mock-refresh-token", response["refresh_token"])
 
 				user := response["user"].(map[string]interface{})
 				assert.Equal(t, float64(1), user["id"])
@@ -466,7 +507,7 @@ func TestHandler_Login(t *testing.T) {
 					Email: "john@example.com",
 				}
 				ms.On("AuthenticateUser", mock.Anything, mock.AnythingOfType("user.LoginRequest")).Return(user, nil)
-				mas.On("GenerateToken", uint(1), "john@example.com", "John Doe").Return("", errors.New("failed to generate token"))
+				mas.On("GenerateTokenPair", mock.Anything, uint(1), "john@example.com", "John Doe").Return(nil, errors.New("failed to generate token"))
 			},
 			expectedStatus: http.StatusInternalServerError,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {

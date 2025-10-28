@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -21,12 +22,38 @@ func (m *MockAuthService) GenerateToken(userID uint, email string, name string) 
 	return args.String(0), args.Error(1)
 }
 
+func (m *MockAuthService) GenerateTokenPair(ctx context.Context, userID uint, email string, name string) (*TokenPair, error) {
+	args := m.Called(ctx, userID, email, name)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*TokenPair), args.Error(1)
+}
+
+func (m *MockAuthService) RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenPair, error) {
+	args := m.Called(ctx, refreshToken)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*TokenPair), args.Error(1)
+}
+
 func (m *MockAuthService) ValidateToken(tokenString string) (*Claims, error) {
 	args := m.Called(tokenString)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*Claims), args.Error(1)
+}
+
+func (m *MockAuthService) RevokeRefreshToken(ctx context.Context, refreshToken string) error {
+	args := m.Called(ctx, refreshToken)
+	return args.Error(0)
+}
+
+func (m *MockAuthService) RevokeAllUserTokens(ctx context.Context, userID uint) error {
+	args := m.Called(ctx, userID)
+	return args.Error(0)
 }
 
 func setupTestRouter(authService Service) *gin.Engine {

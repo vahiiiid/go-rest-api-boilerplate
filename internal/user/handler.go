@@ -28,7 +28,7 @@ func NewHandler(userService Service, authService auth.Service) *Handler {
 
 // Register godoc
 // @Summary Register a new user
-// @Description Register a new user with name, email and password
+// @Description Register a new user with name, email and password, returns access and refresh tokens
 // @Tags auth
 // @Accept json
 // @Produce json
@@ -55,21 +55,24 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.GenerateToken(user.ID, user.Email, user.Name)
+	tokenPair, err := h.authService.GenerateTokenPair(c.Request.Context(), user.ID, user.Email, user.Name)
 	if err != nil {
 		_ = c.Error(apiErrors.InternalServerError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, AuthResponse{
-		Token: token,
-		User:  ToUserResponse(user),
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
+		TokenType:    tokenPair.TokenType,
+		ExpiresIn:    tokenPair.ExpiresIn,
+		User:         ToUserResponse(user),
 	})
 }
 
 // Login godoc
 // @Summary Login user
-// @Description Authenticate user with email and password
+// @Description Authenticate user with email and password, returns access and refresh tokens
 // @Tags auth
 // @Accept json
 // @Produce json
@@ -96,15 +99,18 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.GenerateToken(user.ID, user.Email, user.Name)
+	tokenPair, err := h.authService.GenerateTokenPair(c.Request.Context(), user.ID, user.Email, user.Name)
 	if err != nil {
 		_ = c.Error(apiErrors.InternalServerError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"token": token,
-		"user":  ToUserResponse(user),
+	c.JSON(http.StatusOK, AuthResponse{
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
+		TokenType:    tokenPair.TokenType,
+		ExpiresIn:    tokenPair.ExpiresIn,
+		User:         ToUserResponse(user),
 	})
 }
 
@@ -236,6 +242,80 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 			_ = c.Error(apiErrors.NotFound("User not found"))
 			return
 		}
+		_ = c.Error(apiErrors.InternalServerError(err))
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+// RefreshToken godoc
+// @Summary Refresh access token
+// @Description Exchange refresh token for new access and refresh tokens with automatic rotation
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body auth.RefreshTokenRequest true "Refresh token request"
+// @Success 200 {object} auth.TokenPairResponse
+// @Failure 400 {object} errors.APIError "Validation error"
+// @Failure 401 {object} errors.APIError "Invalid or expired refresh token"
+// @Failure 403 {object} errors.APIError "Token reuse detected - all tokens revoked"
+// @Failure 500 {object} errors.APIError "Failed to refresh token"
+// @Router /api/v1/auth/refresh [post]
+func (h *Handler) RefreshToken(c *gin.Context) {
+	var req auth.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		_ = c.Error(apiErrors.FromGinValidation(err))
+		return
+	}
+
+	tokenPair, err := h.authService.RefreshAccessToken(c.Request.Context(), req.RefreshToken)
+	if err != nil {
+		if errors.Is(err, auth.ErrInvalidToken) || errors.Is(err, auth.ErrExpiredToken) {
+			_ = c.Error(apiErrors.Unauthorized("Invalid or expired refresh token"))
+			return
+		}
+		if errors.Is(err, auth.ErrTokenReuse) {
+			_ = c.Error(apiErrors.Forbidden("Token reuse detected. All tokens have been revoked for security."))
+			return
+		}
+		if errors.Is(err, auth.ErrTokenRevoked) {
+			_ = c.Error(apiErrors.Unauthorized("Token has been revoked"))
+			return
+		}
+		_ = c.Error(apiErrors.InternalServerError(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, auth.TokenPairResponse{
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
+		TokenType:    tokenPair.TokenType,
+		ExpiresIn:    tokenPair.ExpiresIn,
+	})
+}
+
+// Logout godoc
+// @Summary Logout user
+// @Description Revoke refresh token and invalidate user session
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body auth.RefreshTokenRequest true "Refresh token to revoke"
+// @Success 204 "Successfully logged out"
+// @Failure 400 {object} errors.APIError "Validation error"
+// @Failure 401 {object} errors.APIError "Unauthorized"
+// @Failure 500 {object} errors.APIError "Failed to logout"
+// @Router /api/v1/auth/logout [post]
+func (h *Handler) Logout(c *gin.Context) {
+	var req auth.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		_ = c.Error(apiErrors.FromGinValidation(err))
+		return
+	}
+
+	if err := h.authService.RevokeRefreshToken(c.Request.Context(), req.RefreshToken); err != nil {
 		_ = c.Error(apiErrors.InternalServerError(err))
 		return
 	}

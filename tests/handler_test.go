@@ -46,7 +46,26 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 	`)
 	assert.NoError(t, err)
 
-	authService := auth.NewService(&testCfg.JWT)
+	_, err = sqlDB.Exec(`
+		CREATE TABLE refresh_tokens (
+			id TEXT PRIMARY KEY,
+			user_id INTEGER NOT NULL,
+			token_hash TEXT NOT NULL,
+			token_family TEXT NOT NULL,
+			expires_at DATETIME NOT NULL,
+			used_at DATETIME,
+			revoked_at DATETIME,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+		);
+		CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
+		CREATE INDEX idx_refresh_tokens_token_hash ON refresh_tokens(token_hash);
+		CREATE INDEX idx_refresh_tokens_token_family ON refresh_tokens(token_family);
+		CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
+	`)
+	assert.NoError(t, err)
+
+	authService := auth.NewServiceWithRepo(&testCfg.JWT, database)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
@@ -85,7 +104,26 @@ func setupRateLimitTestRouter(t *testing.T) *gin.Engine {
 	`)
 	assert.NoError(t, err)
 
-	authService := auth.NewService(&testCfg.JWT)
+	_, err = sqlDB.Exec(`
+		CREATE TABLE refresh_tokens (
+			id TEXT PRIMARY KEY,
+			user_id INTEGER NOT NULL,
+			token_hash TEXT NOT NULL,
+			token_family TEXT NOT NULL,
+			expires_at DATETIME NOT NULL,
+			used_at DATETIME,
+			revoked_at DATETIME,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+		);
+		CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
+		CREATE INDEX idx_refresh_tokens_token_hash ON refresh_tokens(token_hash);
+		CREATE INDEX idx_refresh_tokens_token_family ON refresh_tokens(token_family);
+		CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
+	`)
+	assert.NoError(t, err)
+
+	authService := auth.NewServiceWithRepo(&testCfg.JWT, database)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
@@ -111,8 +149,11 @@ func TestRegisterHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if token, ok := body["token"].(string); !ok || token == "" {
-					t.Error("Expected token in response")
+				if accessToken, ok := body["access_token"].(string); !ok || accessToken == "" {
+					t.Error("Expected access_token in response")
+				}
+				if refreshToken, ok := body["refresh_token"].(string); !ok || refreshToken == "" {
+					t.Error("Expected refresh_token in response")
 				}
 				if userData, ok := body["user"].(map[string]interface{}); !ok {
 					t.Error("Expected user object in response")
@@ -219,8 +260,11 @@ func TestLoginHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if token, ok := body["token"].(string); !ok || token == "" {
-					t.Error("Expected token in response")
+				if accessToken, ok := body["access_token"].(string); !ok || accessToken == "" {
+					t.Error("Expected access_token in response")
+				}
+				if refreshToken, ok := body["refresh_token"].(string); !ok || refreshToken == "" {
+					t.Error("Expected refresh_token in response")
 				}
 			},
 		},
