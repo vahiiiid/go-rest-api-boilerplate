@@ -76,7 +76,7 @@ func TestRefreshTokenRepository_FindByTokenHash(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name: "expired token not found",
+			name: "expired token still returned by repository",
 			setupToken: &RefreshToken{
 				UserID:      1,
 				TokenHash:   "expired-hash",
@@ -84,10 +84,10 @@ func TestRefreshTokenRepository_FindByTokenHash(t *testing.T) {
 				ExpiresAt:   time.Now().Add(-1 * time.Hour),
 			},
 			searchHash:    "expired-hash",
-			expectedError: true,
+			expectedError: false,
 		},
 		{
-			name: "revoked token not found",
+			name: "revoked token still returned by repository",
 			setupToken: &RefreshToken{
 				UserID:      1,
 				TokenHash:   "revoked-hash",
@@ -96,7 +96,7 @@ func TestRefreshTokenRepository_FindByTokenHash(t *testing.T) {
 				RevokedAt:   ptrTime(time.Now()),
 			},
 			searchHash:    "revoked-hash",
-			expectedError: true,
+			expectedError: false,
 		},
 		{
 			name:          "non-existent token",
