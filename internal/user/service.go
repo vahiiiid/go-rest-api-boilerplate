@@ -20,11 +20,11 @@ var (
 
 // Service defines user service interface
 type Service interface {
-	RegisterUser(ctx context.Context, req RegisterRequest) (*User, error)
-	AuthenticateUser(ctx context.Context, req LoginRequest) (*User, error)
-	GetUserByID(ctx context.Context, id uint) (*User, error)
-	UpdateUser(ctx context.Context, id uint, req UpdateUserRequest) (*User, error)
-	DeleteUser(ctx context.Context, id uint) error
+	RegisterUser(contextutil context.Context, req RegisterRequest) (*User, error)
+	AuthenticateUser(contextutil context.Context, req LoginRequest) (*User, error)
+	GetUserByID(contextutil context.Context, id uint) (*User, error)
+	UpdateUser(contextutil context.Context, id uint, req UpdateUserRequest) (*User, error)
+	DeleteUser(contextutil context.Context, id uint) error
 }
 
 type service struct {
@@ -39,8 +39,8 @@ func NewService(repo Repository) Service {
 }
 
 // RegisterUser registers a new user
-func (s *service) RegisterUser(ctx context.Context, req RegisterRequest) (*User, error) {
-	existingUser, err := s.repo.FindByEmail(ctx, req.Email)
+func (s *service) RegisterUser(contextutil context.Context, req RegisterRequest) (*User, error) {
+	existingUser, err := s.repo.FindByEmail(contextutil, req.Email)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check existing email: %w", err)
 	}
@@ -59,7 +59,7 @@ func (s *service) RegisterUser(ctx context.Context, req RegisterRequest) (*User,
 		PasswordHash: hashedPassword,
 	}
 
-	if err := s.repo.Create(ctx, user); err != nil {
+	if err := s.repo.Create(contextutil, user); err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
@@ -67,8 +67,8 @@ func (s *service) RegisterUser(ctx context.Context, req RegisterRequest) (*User,
 }
 
 // AuthenticateUser authenticates a user with email and password
-func (s *service) AuthenticateUser(ctx context.Context, req LoginRequest) (*User, error) {
-	user, err := s.repo.FindByEmail(ctx, req.Email)
+func (s *service) AuthenticateUser(contextutil context.Context, req LoginRequest) (*User, error) {
+	user, err := s.repo.FindByEmail(contextutil, req.Email)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find user: %w", err)
 	}
@@ -84,8 +84,8 @@ func (s *service) AuthenticateUser(ctx context.Context, req LoginRequest) (*User
 }
 
 // GetUserByID retrieves a user by ID
-func (s *service) GetUserByID(ctx context.Context, id uint) (*User, error) {
-	user, err := s.repo.FindByID(ctx, id)
+func (s *service) GetUserByID(contextutil context.Context, id uint) (*User, error) {
+	user, err := s.repo.FindByID(contextutil, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find user: %w", err)
 	}
@@ -96,8 +96,8 @@ func (s *service) GetUserByID(ctx context.Context, id uint) (*User, error) {
 }
 
 // UpdateUser updates a user's information
-func (s *service) UpdateUser(ctx context.Context, id uint, req UpdateUserRequest) (*User, error) {
-	user, err := s.repo.FindByID(ctx, id)
+func (s *service) UpdateUser(contextutil context.Context, id uint, req UpdateUserRequest) (*User, error) {
+	user, err := s.repo.FindByID(contextutil, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find user: %w", err)
 	}
@@ -109,7 +109,7 @@ func (s *service) UpdateUser(ctx context.Context, id uint, req UpdateUserRequest
 		user.Name = req.Name
 	}
 	if req.Email != "" {
-		existingUser, err := s.repo.FindByEmail(ctx, req.Email)
+		existingUser, err := s.repo.FindByEmail(contextutil, req.Email)
 		if err != nil {
 			return nil, fmt.Errorf("failed to check existing email: %w", err)
 		}
@@ -119,7 +119,7 @@ func (s *service) UpdateUser(ctx context.Context, id uint, req UpdateUserRequest
 		user.Email = req.Email
 	}
 
-	if err := s.repo.Update(ctx, user); err != nil {
+	if err := s.repo.Update(contextutil, user); err != nil {
 		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
 
@@ -127,8 +127,8 @@ func (s *service) UpdateUser(ctx context.Context, id uint, req UpdateUserRequest
 }
 
 // DeleteUser deletes a user
-func (s *service) DeleteUser(ctx context.Context, id uint) error {
-	if err := s.repo.Delete(ctx, id); err != nil {
+func (s *service) DeleteUser(contextutil context.Context, id uint) error {
+	if err := s.repo.Delete(contextutil, id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ErrUserNotFound
 		}
