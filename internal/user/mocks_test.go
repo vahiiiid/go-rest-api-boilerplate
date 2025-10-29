@@ -11,40 +11,40 @@ type MockService struct {
 	mock.Mock
 }
 
-func (m *MockService) RegisterUser(ctx context.Context, req RegisterRequest) (*User, error) {
-	args := m.Called(ctx, req)
+func (m *MockService) RegisterUser(contextutil context.Context, req RegisterRequest) (*User, error) {
+	args := m.Called(contextutil, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*User), args.Error(1)
 }
 
-func (m *MockService) AuthenticateUser(ctx context.Context, req LoginRequest) (*User, error) {
-	args := m.Called(ctx, req)
+func (m *MockService) AuthenticateUser(contextutil context.Context, req LoginRequest) (*User, error) {
+	args := m.Called(contextutil, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*User), args.Error(1)
 }
 
-func (m *MockService) GetUserByID(ctx context.Context, id uint) (*User, error) {
-	args := m.Called(ctx, id)
+func (m *MockService) GetUserByID(contextutil context.Context, id uint) (*User, error) {
+	args := m.Called(contextutil, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*User), args.Error(1)
 }
 
-func (m *MockService) UpdateUser(ctx context.Context, id uint, req UpdateUserRequest) (*User, error) {
-	args := m.Called(ctx, id, req)
+func (m *MockService) UpdateUser(contextutil context.Context, id uint, req UpdateUserRequest) (*User, error) {
+	args := m.Called(contextutil, id, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*User), args.Error(1)
 }
 
-func (m *MockService) DeleteUser(ctx context.Context, id uint) error {
-	args := m.Called(ctx, id)
+func (m *MockService) DeleteUser(contextutil context.Context, id uint) error {
+	args := m.Called(contextutil, id)
 	return args.Error(0)
 }
 
@@ -53,33 +53,33 @@ type MockRepository struct {
 	mock.Mock
 }
 
-func (m *MockRepository) Create(ctx context.Context, user *User) error {
-	args := m.Called(ctx, user)
+func (m *MockRepository) Create(contextutil context.Context, user *User) error {
+	args := m.Called(contextutil, user)
 	return args.Error(0)
 }
 
-func (m *MockRepository) FindByEmail(ctx context.Context, email string) (*User, error) {
-	args := m.Called(ctx, email)
+func (m *MockRepository) FindByEmail(contextutil context.Context, email string) (*User, error) {
+	args := m.Called(contextutil, email)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*User), args.Error(1)
 }
 
-func (m *MockRepository) FindByID(ctx context.Context, id uint) (*User, error) {
-	args := m.Called(ctx, id)
+func (m *MockRepository) FindByID(contextutil context.Context, id uint) (*User, error) {
+	args := m.Called(contextutil, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*User), args.Error(1)
 }
 
-func (m *MockRepository) Update(ctx context.Context, user *User) error {
-	args := m.Called(ctx, user)
+func (m *MockRepository) Update(contextutil context.Context, user *User) error {
+	args := m.Called(contextutil, user)
 	return args.Error(0)
 }
 
-func (m *MockRepository) Delete(ctx context.Context, id uint) error {
-	args := m.Called(ctx, id)
+func (m *MockRepository) Delete(contextutil context.Context, id uint) error {
+	args := m.Called(contextutil, id)
 	return args.Error(0)
 }

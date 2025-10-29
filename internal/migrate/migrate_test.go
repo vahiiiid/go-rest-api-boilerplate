@@ -132,8 +132,8 @@ func TestMigrator_Up_Success(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Up(ctx)
+	contextutil := context.Background()
+	err := migrator.Up(contextutil)
 	assert.NoError(t, err)
 }
 
@@ -151,8 +151,8 @@ func TestMigrator_Up_NoChange(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Up(ctx)
+	contextutil := context.Background()
+	err := migrator.Up(contextutil)
 	assert.NoError(t, err)
 }
 
@@ -170,8 +170,8 @@ func TestMigrator_Up_Error(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Up(ctx)
+	contextutil := context.Background()
+	err := migrator.Up(contextutil)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "migration failed")
 }
@@ -191,10 +191,10 @@ func TestMigrator_Up_ContextTimeout(t *testing.T) {
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	contextutil, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()
 
-	err := migrator.Up(ctx)
+	err := migrator.Up(contextutil)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "timeout")
 }
@@ -214,8 +214,8 @@ func TestMigrator_Down_Success(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Down(ctx, 1)
+	contextutil := context.Background()
+	err := migrator.Down(contextutil, 1)
 	assert.NoError(t, err)
 }
 
@@ -234,8 +234,8 @@ func TestMigrator_Down_MultipleSteps(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Down(ctx, 3)
+	contextutil := context.Background()
+	err := migrator.Down(contextutil, 3)
 	assert.NoError(t, err)
 }
 
@@ -254,8 +254,8 @@ func TestMigrator_Down_NegativeSteps(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Down(ctx, -1)
+	contextutil := context.Background()
+	err := migrator.Down(contextutil, -1)
 	assert.NoError(t, err)
 }
 
@@ -274,8 +274,8 @@ func TestMigrator_Down_ZeroSteps(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Down(ctx, 0)
+	contextutil := context.Background()
+	err := migrator.Down(contextutil, 0)
 	assert.NoError(t, err)
 }
 
@@ -293,8 +293,8 @@ func TestMigrator_Down_Error(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Down(ctx, 1)
+	contextutil := context.Background()
+	err := migrator.Down(contextutil, 1)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "rollback failed")
 }
@@ -314,10 +314,10 @@ func TestMigrator_Down_ContextTimeout(t *testing.T) {
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	contextutil, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()
 
-	err := migrator.Down(ctx, 1)
+	err := migrator.Down(contextutil, 1)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "timeout")
 }
@@ -337,8 +337,8 @@ func TestMigrator_Steps_Forward(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Steps(ctx, 2)
+	contextutil := context.Background()
+	err := migrator.Steps(contextutil, 2)
 	assert.NoError(t, err)
 }
 
@@ -357,8 +357,8 @@ func TestMigrator_Steps_Backward(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Steps(ctx, -2)
+	contextutil := context.Background()
+	err := migrator.Steps(contextutil, -2)
 	assert.NoError(t, err)
 }
 
@@ -376,8 +376,8 @@ func TestMigrator_Steps_Error(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Steps(ctx, 1)
+	contextutil := context.Background()
+	err := migrator.Steps(contextutil, 1)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "steps failed")
 }
@@ -397,10 +397,10 @@ func TestMigrator_Steps_ContextTimeout(t *testing.T) {
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	contextutil, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()
 
-	err := migrator.Steps(ctx, 1)
+	err := migrator.Steps(contextutil, 1)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "timeout")
 }
@@ -420,8 +420,8 @@ func TestMigrator_Goto_Success(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Goto(ctx, 5)
+	contextutil := context.Background()
+	err := migrator.Goto(contextutil, 5)
 	assert.NoError(t, err)
 }
 
@@ -439,8 +439,8 @@ func TestMigrator_Goto_NoChange(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Goto(ctx, 5)
+	contextutil := context.Background()
+	err := migrator.Goto(contextutil, 5)
 	assert.NoError(t, err)
 }
 
@@ -458,8 +458,8 @@ func TestMigrator_Goto_Error(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	err := migrator.Goto(ctx, 5)
+	contextutil := context.Background()
+	err := migrator.Goto(contextutil, 5)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "goto failed")
 	assert.Contains(t, err.Error(), "version 5")
@@ -480,10 +480,10 @@ func TestMigrator_Goto_ContextTimeout(t *testing.T) {
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	contextutil, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()
 
-	err := migrator.Goto(ctx, 5)
+	err := migrator.Goto(contextutil, 5)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "timeout")
 }

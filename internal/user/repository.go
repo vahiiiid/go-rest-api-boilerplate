@@ -9,11 +9,11 @@ import (
 
 // Repository defines user repository interface
 type Repository interface {
-	Create(ctx context.Context, user *User) error
-	FindByEmail(ctx context.Context, email string) (*User, error)
-	FindByID(ctx context.Context, id uint) (*User, error)
-	Update(ctx context.Context, user *User) error
-	Delete(ctx context.Context, id uint) error
+	Create(contextutil context.Context, user *User) error
+	FindByEmail(contextutil context.Context, email string) (*User, error)
+	FindByID(contextutil context.Context, id uint) (*User, error)
+	Update(contextutil context.Context, user *User) error
+	Delete(contextutil context.Context, id uint) error
 }
 
 type repository struct {
@@ -26,8 +26,8 @@ func NewRepository(db *gorm.DB) Repository {
 }
 
 // Create creates a new user in the database
-func (r *repository) Create(ctx context.Context, user *User) error {
-	result := r.db.WithContext(ctx).Create(user)
+func (r *repository) Create(contextutil context.Context, user *User) error {
+	result := r.db.WithContext(contextutil).Create(user)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -35,9 +35,9 @@ func (r *repository) Create(ctx context.Context, user *User) error {
 }
 
 // FindByEmail finds a user by email
-func (r *repository) FindByEmail(ctx context.Context, email string) (*User, error) {
+func (r *repository) FindByEmail(contextutil context.Context, email string) (*User, error) {
 	var user User
-	result := r.db.WithContext(ctx).Where("email = ?", email).First(&user)
+	result := r.db.WithContext(contextutil).Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -48,9 +48,9 @@ func (r *repository) FindByEmail(ctx context.Context, email string) (*User, erro
 }
 
 // FindByID finds a user by ID
-func (r *repository) FindByID(ctx context.Context, id uint) (*User, error) {
+func (r *repository) FindByID(contextutil context.Context, id uint) (*User, error) {
 	var user User
-	result := r.db.WithContext(ctx).First(&user, id)
+	result := r.db.WithContext(contextutil).First(&user, id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -61,8 +61,8 @@ func (r *repository) FindByID(ctx context.Context, id uint) (*User, error) {
 }
 
 // Update updates a user in the database
-func (r *repository) Update(ctx context.Context, user *User) error {
-	result := r.db.WithContext(ctx).Save(user)
+func (r *repository) Update(contextutil context.Context, user *User) error {
+	result := r.db.WithContext(contextutil).Save(user)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -70,8 +70,8 @@ func (r *repository) Update(ctx context.Context, user *User) error {
 }
 
 // Delete soft deletes a user from the database
-func (r *repository) Delete(ctx context.Context, id uint) error {
-	result := r.db.WithContext(ctx).Delete(&User{}, id)
+func (r *repository) Delete(contextutil context.Context, id uint) error {
+	result := r.db.WithContext(contextutil).Delete(&User{}, id)
 	if result.Error != nil {
 		return result.Error
 	}

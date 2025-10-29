@@ -1,0 +1,618 @@
+💻 Running on host (Docker not available)
+FAIL	github.com/vahiiiid/go-rest-api-boilerplate/cmd/server [setup failed]
+FAIL	github.com/vahiiiid/go-rest-api-boilerplate/internal/server [setup failed]
+FAIL	github.com/vahiiiid/go-rest-api-boilerplate/internal/user [setup failed]
+FAIL	github.com/vahiiiid/go-rest-api-boilerplate/tests [setup failed]
+?   	github.com/vahiiiid/go-rest-api-boilerplate/cmd/migrate	[no test files]
+=== RUN   TestAuthMiddleware
+=== RUN   TestAuthMiddleware/successful_authentication
+=== RUN   TestAuthMiddleware/missing_authorization_header
+=== RUN   TestAuthMiddleware/invalid_authorization_header_format_-_no_Bearer
+=== RUN   TestAuthMiddleware/invalid_authorization_header_format_-_wrong_scheme
+=== RUN   TestAuthMiddleware/invalid_authorization_header_format_-_no_token
+=== RUN   TestAuthMiddleware/invalid_token
+=== RUN   TestAuthMiddleware/expired_token
+=== RUN   TestAuthMiddleware/service_error
+--- PASS: TestAuthMiddleware (0.00s)
+    --- PASS: TestAuthMiddleware/successful_authentication (0.00s)
+    --- PASS: TestAuthMiddleware/missing_authorization_header (0.00s)
+    --- PASS: TestAuthMiddleware/invalid_authorization_header_format_-_no_Bearer (0.00s)
+    --- PASS: TestAuthMiddleware/invalid_authorization_header_format_-_wrong_scheme (0.00s)
+    --- PASS: TestAuthMiddleware/invalid_authorization_header_format_-_no_token (0.00s)
+    --- PASS: TestAuthMiddleware/invalid_token (0.00s)
+    --- PASS: TestAuthMiddleware/expired_token (0.00s)
+    --- PASS: TestAuthMiddleware/service_error (0.00s)
+=== RUN   TestAuthMiddleware_ContextSetting
+--- PASS: TestAuthMiddleware_ContextSetting (0.00s)
+=== RUN   TestGetUserIDFromContext
+=== RUN   TestGetUserIDFromContext/user_ID_exists_in_context
+=== RUN   TestGetUserIDFromContext/user_ID_does_not_exist_in_context
+=== RUN   TestGetUserIDFromContext/user_ID_has_wrong_type_in_context
+--- PASS: TestGetUserIDFromContext (0.00s)
+    --- PASS: TestGetUserIDFromContext/user_ID_exists_in_context (0.00s)
+    --- PASS: TestGetUserIDFromContext/user_ID_does_not_exist_in_context (0.00s)
+    --- PASS: TestGetUserIDFromContext/user_ID_has_wrong_type_in_context (0.00s)
+=== RUN   TestNewService
+=== RUN   TestNewService/with_provided_config
+=== RUN   TestNewService/with_empty_secret_defaults_to_default
+=== RUN   TestNewService/with_zero_TTL_defaults_to_24_hours
+--- PASS: TestNewService (0.00s)
+    --- PASS: TestNewService/with_provided_config (0.00s)
+    --- PASS: TestNewService/with_empty_secret_defaults_to_default (0.00s)
+    --- PASS: TestNewService/with_zero_TTL_defaults_to_24_hours (0.00s)
+=== RUN   TestService_GenerateToken
+=== RUN   TestService_GenerateToken/successful_token_generation
+=== RUN   TestService_GenerateToken/token_generation_with_empty_email
+=== RUN   TestService_GenerateToken/token_generation_with_empty_name
+--- PASS: TestService_GenerateToken (0.00s)
+    --- PASS: TestService_GenerateToken/successful_token_generation (0.00s)
+    --- PASS: TestService_GenerateToken/token_generation_with_empty_email (0.00s)
+    --- PASS: TestService_GenerateToken/token_generation_with_empty_name (0.00s)
+=== RUN   TestService_ValidateToken
+=== RUN   TestService_ValidateToken/valid_token
+=== RUN   TestService_ValidateToken/invalid_token_format
+=== RUN   TestService_ValidateToken/token_with_wrong_signature
+=== RUN   TestService_ValidateToken/expired_token
+=== RUN   TestService_ValidateToken/token_with_invalid_user_ID
+=== RUN   TestService_ValidateToken/token_without_sub_claim
+=== RUN   TestService_ValidateToken/token_with_wrong_signing_method
+=== RUN   TestService_ValidateToken/token_with_optional_missing_fields
+--- PASS: TestService_ValidateToken (0.00s)
+    --- PASS: TestService_ValidateToken/valid_token (0.00s)
+    --- PASS: TestService_ValidateToken/invalid_token_format (0.00s)
+    --- PASS: TestService_ValidateToken/token_with_wrong_signature (0.00s)
+    --- PASS: TestService_ValidateToken/expired_token (0.00s)
+    --- PASS: TestService_ValidateToken/token_with_invalid_user_ID (0.00s)
+    --- PASS: TestService_ValidateToken/token_without_sub_claim (0.00s)
+    --- PASS: TestService_ValidateToken/token_with_wrong_signing_method (0.00s)
+    --- PASS: TestService_ValidateToken/token_with_optional_missing_fields (0.00s)
+PASS
+ok  	github.com/vahiiiid/go-rest-api-boilerplate/internal/auth	(cached)
+=== RUN   TestLoadConfig_Comprehensive
+=== RUN   TestLoadConfig_Comprehensive/loads_from_default_config_file
+=== RUN   TestLoadConfig_Comprehensive/environment_variables_override_file_values
+=== RUN   TestLoadConfig_Comprehensive/uses_config_file_defaults_when_no_env_var_is_set
+=== RUN   TestLoadConfig_Comprehensive/fails_validation_if_required_JWT_SECRET_is_missing
+=== RUN   TestLoadConfig_Comprehensive/fails_validation_if_DB_PASSWORD_is_missing_in_production
+=== RUN   TestLoadConfig_Comprehensive/fails_validation_for_short_JWT_secret_in_production
+=== RUN   TestLoadConfig_Comprehensive/loads_environment-specific_config_file_when_no_path_is_given
+--- PASS: TestLoadConfig_Comprehensive (0.00s)
+    --- PASS: TestLoadConfig_Comprehensive/loads_from_default_config_file (0.00s)
+    --- PASS: TestLoadConfig_Comprehensive/environment_variables_override_file_values (0.00s)
+    --- PASS: TestLoadConfig_Comprehensive/uses_config_file_defaults_when_no_env_var_is_set (0.00s)
+    --- PASS: TestLoadConfig_Comprehensive/fails_validation_if_required_JWT_SECRET_is_missing (0.00s)
+    --- PASS: TestLoadConfig_Comprehensive/fails_validation_if_DB_PASSWORD_is_missing_in_production (0.00s)
+    --- PASS: TestLoadConfig_Comprehensive/fails_validation_for_short_JWT_secret_in_production (0.00s)
+    --- PASS: TestLoadConfig_Comprehensive/loads_environment-specific_config_file_when_no_path_is_given (0.00s)
+=== RUN   TestLoggingConfig_GetLogLevel
+=== RUN   TestLoggingConfig_GetLogLevel/debug
+=== RUN   TestLoggingConfig_GetLogLevel/info
+=== RUN   TestLoggingConfig_GetLogLevel/warn
+=== RUN   TestLoggingConfig_GetLogLevel/warning
+=== RUN   TestLoggingConfig_GetLogLevel/error
+=== RUN   TestLoggingConfig_GetLogLevel/invalid
+=== RUN   TestLoggingConfig_GetLogLevel/#00
+--- PASS: TestLoggingConfig_GetLogLevel (0.00s)
+    --- PASS: TestLoggingConfig_GetLogLevel/debug (0.00s)
+    --- PASS: TestLoggingConfig_GetLogLevel/info (0.00s)
+    --- PASS: TestLoggingConfig_GetLogLevel/warn (0.00s)
+    --- PASS: TestLoggingConfig_GetLogLevel/warning (0.00s)
+    --- PASS: TestLoggingConfig_GetLogLevel/error (0.00s)
+    --- PASS: TestLoggingConfig_GetLogLevel/invalid (0.00s)
+    --- PASS: TestLoggingConfig_GetLogLevel/#00 (0.00s)
+=== RUN   TestGetSkipPaths
+=== RUN   TestGetSkipPaths/production
+=== RUN   TestGetSkipPaths/development
+=== RUN   TestGetSkipPaths/test
+=== RUN   TestGetSkipPaths/staging
+=== RUN   TestGetSkipPaths/#00
+--- PASS: TestGetSkipPaths (0.00s)
+    --- PASS: TestGetSkipPaths/production (0.00s)
+    --- PASS: TestGetSkipPaths/development (0.00s)
+    --- PASS: TestGetSkipPaths/test (0.00s)
+    --- PASS: TestGetSkipPaths/staging (0.00s)
+    --- PASS: TestGetSkipPaths/#00 (0.00s)
+=== RUN   TestGetConfigPath
+--- PASS: TestGetConfigPath (0.00s)
+=== RUN   TestNewTestConfig
+--- PASS: TestNewTestConfig (0.00s)
+=== RUN   TestNewTestConfig_Isolation
+--- PASS: TestNewTestConfig_Isolation (0.00s)
+=== RUN   TestLogSafeConfig
+=== RUN   TestLogSafeConfig/logs_all_configuration_sections_with_redacted_sensitive_data
+2025/10/30 00:23:41 INFO Loaded Configuration:
+2025/10/30 00:23:41 INFO App Name=TestApp Environment=production Debug=true
+2025/10/30 00:23:41 INFO Database Host=db.example.com Port=5432 User=testuser Password=<redacted> Name=testdb SSLMode=require
+2025/10/30 00:23:41 INFO JWT Secret=<redacted> TTLHours=24
+2025/10/30 00:23:41 INFO Server Port=8080 ReadTimeout=30 WriteTimeout=30 IdleTimeout=0 ShutdownTimeout=0 MaxHeaderBytes=0
+2025/10/30 00:23:41 INFO Logging Level=info
+2025/10/30 00:23:41 INFO RateLimit Enabled=true Requests=100 Window=60ns
+2025/10/30 00:23:41 INFO Migrations Directory="" Timeout=0 LockTimeout=0
+=== RUN   TestLogSafeConfig/handles_empty_configuration_values
+2025/10/30 00:23:41 INFO Loaded Configuration:
+2025/10/30 00:23:41 INFO App Name="" Environment="" Debug=false
+2025/10/30 00:23:41 INFO Database Host="" Port=0 User="" Password=<redacted> Name="" SSLMode=""
+2025/10/30 00:23:41 INFO JWT Secret=<redacted> TTLHours=0
+2025/10/30 00:23:41 INFO Server Port="" ReadTimeout=0 WriteTimeout=0 IdleTimeout=0 ShutdownTimeout=0 MaxHeaderBytes=0
+2025/10/30 00:23:41 INFO Logging Level=""
+2025/10/30 00:23:41 INFO RateLimit Enabled=false Requests=0 Window=0s
+2025/10/30 00:23:41 INFO Migrations Directory="" Timeout=0 LockTimeout=0
+--- PASS: TestLogSafeConfig (0.00s)
+    --- PASS: TestLogSafeConfig/logs_all_configuration_sections_with_redacted_sensitive_data (0.00s)
+    --- PASS: TestLogSafeConfig/handles_empty_configuration_values (0.00s)
+=== RUN   TestServerConfig_TimeoutFields
+=== RUN   TestServerConfig_TimeoutFields/loads_timeout_fields_from_config_file
+=== RUN   TestServerConfig_TimeoutFields/environment_variables_override_timeout_values
+=== RUN   TestServerConfig_TimeoutFields/zero_timeout_values_are_allowed
+--- PASS: TestServerConfig_TimeoutFields (0.00s)
+    --- PASS: TestServerConfig_TimeoutFields/loads_timeout_fields_from_config_file (0.00s)
+    --- PASS: TestServerConfig_TimeoutFields/environment_variables_override_timeout_values (0.00s)
+    --- PASS: TestServerConfig_TimeoutFields/zero_timeout_values_are_allowed (0.00s)
+=== RUN   TestValidate_TimeoutFields
+=== RUN   TestValidate_TimeoutFields/valid_timeout_values
+=== RUN   TestValidate_TimeoutFields/negative_read_timeout
+=== RUN   TestValidate_TimeoutFields/negative_write_timeout
+=== RUN   TestValidate_TimeoutFields/negative_idle_timeout
+=== RUN   TestValidate_TimeoutFields/negative_shutdown_timeout
+=== RUN   TestValidate_TimeoutFields/negative_max_header_bytes
+=== RUN   TestValidate_TimeoutFields/zero_timeouts_are_valid
+--- PASS: TestValidate_TimeoutFields (0.00s)
+    --- PASS: TestValidate_TimeoutFields/valid_timeout_values (0.00s)
+    --- PASS: TestValidate_TimeoutFields/negative_read_timeout (0.00s)
+    --- PASS: TestValidate_TimeoutFields/negative_write_timeout (0.00s)
+    --- PASS: TestValidate_TimeoutFields/negative_idle_timeout (0.00s)
+    --- PASS: TestValidate_TimeoutFields/negative_shutdown_timeout (0.00s)
+    --- PASS: TestValidate_TimeoutFields/negative_max_header_bytes (0.00s)
+    --- PASS: TestValidate_TimeoutFields/zero_timeouts_are_valid (0.00s)
+=== RUN   TestLoadConfig_ErrorPaths
+=== RUN   TestLoadConfig_ErrorPaths/unmarshal_error_with_invalid_config_structure
+=== RUN   TestLoadConfig_ErrorPaths/ENV_fallback_when_app.environment_is_empty
+--- PASS: TestLoadConfig_ErrorPaths (0.00s)
+    --- PASS: TestLoadConfig_ErrorPaths/unmarshal_error_with_invalid_config_structure (0.00s)
+    --- PASS: TestLoadConfig_ErrorPaths/ENV_fallback_when_app.environment_is_empty (0.00s)
+=== RUN   TestGetConfigPath_AllPaths
+=== RUN   TestGetConfigPath_AllPaths/returns_absolute_path_when_config_exists
+=== RUN   TestGetConfigPath_AllPaths/returns_default_when_no_config_found
+--- PASS: TestGetConfigPath_AllPaths (0.00s)
+    --- PASS: TestGetConfigPath_AllPaths/returns_absolute_path_when_config_exists (0.00s)
+    --- PASS: TestGetConfigPath_AllPaths/returns_default_when_no_config_found (0.00s)
+=== RUN   TestValidate_ProductionSSLMode
+--- PASS: TestValidate_ProductionSSLMode (0.00s)
+=== RUN   TestValidate_DatabaseHostRequired
+--- PASS: TestValidate_DatabaseHostRequired (0.00s)
+PASS
+ok  	github.com/vahiiiid/go-rest-api-boilerplate/internal/config	(cached)
+=== RUN   TestGetUser
+=== RUN   TestGetUser/successful_get_user
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestGetUser/user_not_found_in_context
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestGetUser/invalid_type_in_context
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestGetUser (0.00s)
+    --- PASS: TestGetUser/successful_get_user (0.00s)
+    --- PASS: TestGetUser/user_not_found_in_context (0.00s)
+    --- PASS: TestGetUser/invalid_type_in_context (0.00s)
+=== RUN   TestMustGetUser
+=== RUN   TestMustGetUser/successful_get_user
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestMustGetUser/user_not_found
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestMustGetUser (0.00s)
+    --- PASS: TestMustGetUser/successful_get_user (0.00s)
+    --- PASS: TestMustGetUser/user_not_found (0.00s)
+=== RUN   TestGetUserID
+=== RUN   TestGetUserID/successful_get_user_ID
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestGetUserID/user_not_found
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestGetUserID (0.00s)
+    --- PASS: TestGetUserID/successful_get_user_ID (0.00s)
+    --- PASS: TestGetUserID/user_not_found (0.00s)
+=== RUN   TestMustGetUserID
+=== RUN   TestMustGetUserID/successful_get_user_ID
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestMustGetUserID/user_not_found
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestMustGetUserID (0.00s)
+    --- PASS: TestMustGetUserID/successful_get_user_ID (0.00s)
+    --- PASS: TestMustGetUserID/user_not_found (0.00s)
+=== RUN   TestGetEmail
+=== RUN   TestGetEmail/successful_get_email
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestGetEmail/user_not_found
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestGetEmail (0.00s)
+    --- PASS: TestGetEmail/successful_get_email (0.00s)
+    --- PASS: TestGetEmail/user_not_found (0.00s)
+=== RUN   TestIsAuthenticated
+=== RUN   TestIsAuthenticated/authenticated_user
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestIsAuthenticated/unauthenticated_user
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestIsAuthenticated (0.00s)
+    --- PASS: TestIsAuthenticated/authenticated_user (0.00s)
+    --- PASS: TestIsAuthenticated/unauthenticated_user (0.00s)
+=== RUN   TestCanAccessUser
+=== RUN   TestCanAccessUser/can_access_own_user
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestCanAccessUser/cannot_access_other_user
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestCanAccessUser/unauthenticated_user
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestCanAccessUser (0.00s)
+    --- PASS: TestCanAccessUser/can_access_own_user (0.00s)
+    --- PASS: TestCanAccessUser/cannot_access_other_user (0.00s)
+    --- PASS: TestCanAccessUser/unauthenticated_user (0.00s)
+=== RUN   TestGetUserName
+=== RUN   TestGetUserName/successful_get_user_name
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestGetUserName/user_not_found
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestGetUserName (0.00s)
+    --- PASS: TestGetUserName/successful_get_user_name (0.00s)
+    --- PASS: TestGetUserName/user_not_found (0.00s)
+=== RUN   TestHasRole
+=== RUN   TestHasRole/authenticated_user_-_role_check_(not_yet_implemented)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+=== RUN   TestHasRole/unauthenticated_user
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestHasRole (0.00s)
+    --- PASS: TestHasRole/authenticated_user_-_role_check_(not_yet_implemented) (0.00s)
+    --- PASS: TestHasRole/unauthenticated_user (0.00s)
+PASS
+ok  	github.com/vahiiiid/go-rest-api-boilerplate/internal/ctx	(cached)
+=== RUN   TestNewSQLiteDB
+=== RUN   TestNewSQLiteDB/in-memory_database
+=== RUN   TestNewSQLiteDB/file_database
+=== RUN   TestNewSQLiteDB/invalid_sqlite_path
+--- PASS: TestNewSQLiteDB (0.00s)
+    --- PASS: TestNewSQLiteDB/in-memory_database (0.00s)
+    --- PASS: TestNewSQLiteDB/file_database (0.00s)
+    --- PASS: TestNewSQLiteDB/invalid_sqlite_path (0.00s)
+=== RUN   TestNewPostgresDB
+=== RUN   TestNewPostgresDB/valid_config_but_no_database_server_(expected_failure)
+
+2025/10/29 23:45:00 [35m/home/trintler/oss-contrib/go-rest-api-boilerplate/internal/db/db.go:32
+[0m[31m[error] [0mfailed to initialize database, got error failed to connect to `host=localhost user=testuser database=testdb`: dial error (dial tcp 127.0.0.1:5432: connect: connection refused)
+=== RUN   TestNewPostgresDB/invalid_host
+
+2025/10/29 23:45:00 [35m/home/trintler/oss-contrib/go-rest-api-boilerplate/internal/db/db.go:32
+[0m[31m[error] [0mfailed to initialize database, got error failed to connect to `host=invalid-host-that-does-not-exist user=testuser database=testdb`: hostname resolving error (lookup invalid-host-that-does-not-exist: no such host)
+=== RUN   TestNewPostgresDB/invalid_port
+
+2025/10/29 23:45:00 [35m/home/trintler/oss-contrib/go-rest-api-boilerplate/internal/db/db.go:32
+[0m[31m[error] [0mfailed to initialize database, got error cannot parse `host=localhost user=testuser password=xxxxx dbname=testdb port=99999 sslmode=disable`: invalid port (strconv.ParseUint: parsing "99999": value out of range)
+--- PASS: TestNewPostgresDB (0.01s)
+    --- PASS: TestNewPostgresDB/valid_config_but_no_database_server_(expected_failure) (0.00s)
+    --- PASS: TestNewPostgresDB/invalid_host (0.01s)
+    --- PASS: TestNewPostgresDB/invalid_port (0.00s)
+=== RUN   TestNewPostgresDBFromDatabaseConfig
+=== RUN   TestNewPostgresDBFromDatabaseConfig/valid_config_but_no_database_server_(expected_failure)
+
+2025/10/29 23:45:00 [35m/home/trintler/oss-contrib/go-rest-api-boilerplate/internal/db/db.go:61
+[0m[31m[error] [0mfailed to initialize database, got error failed to connect to `host=localhost user=testuser database=testdb`: dial error (dial tcp 127.0.0.1:5432: connect: connection refused)
+=== RUN   TestNewPostgresDBFromDatabaseConfig/invalid_database_name
+
+2025/10/29 23:45:00 [35m/home/trintler/oss-contrib/go-rest-api-boilerplate/internal/db/db.go:61
+[0m[31m[error] [0mfailed to initialize database, got error failed to connect to `host=localhost user=testuser database=port=5432`: dial error (dial tcp 127.0.0.1:5432: connect: connection refused)
+=== RUN   TestNewPostgresDBFromDatabaseConfig/empty_host
+
+2025/10/29 23:45:00 [35m/home/trintler/oss-contrib/go-rest-api-boilerplate/internal/db/db.go:61
+[0m[31m[error] [0mfailed to initialize database, got error failed to connect to `host=user=testuser user=trintler database=testdb`: hostname resolving error (lookup user=testuser: no such host)
+--- PASS: TestNewPostgresDBFromDatabaseConfig (0.00s)
+    --- PASS: TestNewPostgresDBFromDatabaseConfig/valid_config_but_no_database_server_(expected_failure) (0.00s)
+    --- PASS: TestNewPostgresDBFromDatabaseConfig/invalid_database_name (0.00s)
+    --- PASS: TestNewPostgresDBFromDatabaseConfig/empty_host (0.00s)
+=== RUN   TestLoadConfigFromEnv
+=== RUN   TestLoadConfigFromEnv/default_configuration
+=== RUN   TestLoadConfigFromEnv/production-like_configuration
+=== RUN   TestLoadConfigFromEnv/empty_values
+--- PASS: TestLoadConfigFromEnv (0.00s)
+    --- PASS: TestLoadConfigFromEnv/default_configuration (0.00s)
+    --- PASS: TestLoadConfigFromEnv/production-like_configuration (0.00s)
+    --- PASS: TestLoadConfigFromEnv/empty_values (0.00s)
+=== RUN   TestConfig_Validation
+=== RUN   TestConfig_Validation/valid_production_config
+=== RUN   TestConfig_Validation/missing_required_fields
+=== RUN   TestConfig_Validation/invalid_port_range
+=== RUN   TestConfig_Validation/negative_port
+--- PASS: TestConfig_Validation (0.00s)
+    --- PASS: TestConfig_Validation/valid_production_config (0.00s)
+    --- PASS: TestConfig_Validation/missing_required_fields (0.00s)
+    --- PASS: TestConfig_Validation/invalid_port_range (0.00s)
+    --- PASS: TestConfig_Validation/negative_port (0.00s)
+PASS
+ok  	github.com/vahiiiid/go-rest-api-boilerplate/internal/db	(cached)
+=== RUN   TestAPIError_Error
+--- PASS: TestAPIError_Error (0.00s)
+=== RUN   TestNotFound
+--- PASS: TestNotFound (0.00s)
+=== RUN   TestBadRequest
+--- PASS: TestBadRequest (0.00s)
+=== RUN   TestConflict
+--- PASS: TestConflict (0.00s)
+=== RUN   TestForbidden
+--- PASS: TestForbidden (0.00s)
+=== RUN   TestUnauthorized
+--- PASS: TestUnauthorized (0.00s)
+=== RUN   TestInternalServerError
+--- PASS: TestInternalServerError (0.00s)
+=== RUN   TestTooManyRequests
+--- PASS: TestTooManyRequests (0.00s)
+=== RUN   TestValidationError
+--- PASS: TestValidationError (0.00s)
+=== RUN   TestFormatValidationError
+=== RUN   TestFormatValidationError/required_field
+=== RUN   TestFormatValidationError/email_validation
+=== RUN   TestFormatValidationError/min_length_validation
+=== RUN   TestFormatValidationError/max_length_validation
+=== RUN   TestFormatValidationError/unknown_validation_tag
+--- PASS: TestFormatValidationError (0.00s)
+    --- PASS: TestFormatValidationError/required_field (0.00s)
+    --- PASS: TestFormatValidationError/email_validation (0.00s)
+    --- PASS: TestFormatValidationError/min_length_validation (0.00s)
+    --- PASS: TestFormatValidationError/max_length_validation (0.00s)
+    --- PASS: TestFormatValidationError/unknown_validation_tag (0.00s)
+=== RUN   TestFromGinValidation_WithValidationErrors
+--- PASS: TestFromGinValidation_WithValidationErrors (0.00s)
+=== RUN   TestFromGinValidation_WithNonValidationError
+--- PASS: TestFromGinValidation_WithNonValidationError (0.00s)
+=== RUN   TestRateLimitError_Structure
+--- PASS: TestRateLimitError_Structure (0.00s)
+=== RUN   TestAPIError_WithDetails
+--- PASS: TestAPIError_WithDetails (0.00s)
+=== RUN   TestAPIError_WithoutDetails
+--- PASS: TestAPIError_WithoutDetails (0.00s)
+=== RUN   TestErrorHandler_WithAPIError
+=== RUN   TestErrorHandler_WithAPIError/NotFound_error
+=== RUN   TestErrorHandler_WithAPIError/BadRequest_error
+=== RUN   TestErrorHandler_WithAPIError/Unauthorized_error
+=== RUN   TestErrorHandler_WithAPIError/Forbidden_error
+=== RUN   TestErrorHandler_WithAPIError/Conflict_error
+=== RUN   TestErrorHandler_WithAPIError/InternalServerError
+--- PASS: TestErrorHandler_WithAPIError (0.00s)
+    --- PASS: TestErrorHandler_WithAPIError/NotFound_error (0.00s)
+    --- PASS: TestErrorHandler_WithAPIError/BadRequest_error (0.00s)
+    --- PASS: TestErrorHandler_WithAPIError/Unauthorized_error (0.00s)
+    --- PASS: TestErrorHandler_WithAPIError/Forbidden_error (0.00s)
+    --- PASS: TestErrorHandler_WithAPIError/Conflict_error (0.00s)
+    --- PASS: TestErrorHandler_WithAPIError/InternalServerError (0.00s)
+=== RUN   TestErrorHandler_WithUnknownError
+--- PASS: TestErrorHandler_WithUnknownError (0.00s)
+=== RUN   TestErrorHandler_WithNoErrors
+--- PASS: TestErrorHandler_WithNoErrors (0.00s)
+=== RUN   TestErrorHandler_WithMultipleErrors
+--- PASS: TestErrorHandler_WithMultipleErrors (0.00s)
+=== RUN   TestErrorHandler_RateLimitError
+--- PASS: TestErrorHandler_RateLimitError (0.00s)
+=== RUN   TestErrorHandler_ValidationErrorWithDetails
+--- PASS: TestErrorHandler_ValidationErrorWithDetails (0.00s)
+=== RUN   TestErrorHandler_Integration
+=== RUN   TestErrorHandler_Integration/not_found_endpoint
+=== RUN   TestErrorHandler_Integration/validation_endpoint
+=== RUN   TestErrorHandler_Integration/internal_error_endpoint
+=== RUN   TestErrorHandler_Integration/success_endpoint
+--- PASS: TestErrorHandler_Integration (0.00s)
+    --- PASS: TestErrorHandler_Integration/not_found_endpoint (0.00s)
+    --- PASS: TestErrorHandler_Integration/validation_endpoint (0.00s)
+    --- PASS: TestErrorHandler_Integration/internal_error_endpoint (0.00s)
+    --- PASS: TestErrorHandler_Integration/success_endpoint (0.00s)
+PASS
+ok  	github.com/vahiiiid/go-rest-api-boilerplate/internal/errors	(cached)
+=== RUN   TestLogger
+--- PASS: TestLogger (0.00s)
+=== RUN   TestLoggerSkipPaths
+--- PASS: TestLoggerSkipPaths (0.00s)
+=== RUN   TestLoggerRequestID
+--- PASS: TestLoggerRequestID (0.00s)
+=== RUN   TestLoggerWithProvidedRequestID
+--- PASS: TestLoggerWithProvidedRequestID (0.00s)
+=== RUN   TestLoggerStatusCodes
+=== RUN   TestLoggerStatusCodes/Success
+=== RUN   TestLoggerStatusCodes/Client_Error
+=== RUN   TestLoggerStatusCodes/Not_Found
+=== RUN   TestLoggerStatusCodes/Server_Error
+--- PASS: TestLoggerStatusCodes (0.00s)
+    --- PASS: TestLoggerStatusCodes/Success (0.00s)
+    --- PASS: TestLoggerStatusCodes/Client_Error (0.00s)
+    --- PASS: TestLoggerStatusCodes/Not_Found (0.00s)
+    --- PASS: TestLoggerStatusCodes/Server_Error (0.00s)
+=== RUN   TestLoggerWithConfig
+{"time":"2025-10-29T23:45:00.505116458+01:00","level":"INFO","msg":"HTTP Request","request_id":"2b660c17-0540-45b9-80d6-ef0611d0186c","method":"GET","path":"/test","status":200,"duration":6419,"duration_ms":"0s","client_ip":"192.0.2.1","user_agent":"","response_size":18}
+--- PASS: TestLoggerWithConfig (0.00s)
+=== RUN   TestDefaultLoggerConfig
+--- PASS: TestDefaultLoggerConfig (0.00s)
+=== RUN   TestLoggerQueryParameters
+--- PASS: TestLoggerQueryParameters (0.00s)
+=== RUN   TestNewLoggerConfig
+=== RUN   TestNewLoggerConfig/info_level_with_default_skip_paths
+{"time":"2025-10-29T23:45:00.505168656+01:00","level":"INFO","msg":"HTTP Request","request_id":"cb202162-15d8-4447-974f-cf1ce5ec62dd","method":"GET","path":"/test","status":200,"duration":7104,"duration_ms":"0s","client_ip":"192.0.2.1","user_agent":"","response_size":18}
+=== RUN   TestNewLoggerConfig/debug_level_with_multiple_skip_paths
+{"time":"2025-10-29T23:45:00.505188559+01:00","level":"INFO","msg":"HTTP Request","request_id":"e1d852d2-8fa7-4ab0-b2eb-27c8d25e7082","method":"GET","path":"/test","status":200,"duration":4844,"duration_ms":"0s","client_ip":"192.0.2.1","user_agent":"","response_size":18}
+=== RUN   TestNewLoggerConfig/error_level_with_empty_skip_paths
+=== RUN   TestNewLoggerConfig/warn_level_with_nil_skip_paths
+--- PASS: TestNewLoggerConfig (0.00s)
+    --- PASS: TestNewLoggerConfig/info_level_with_default_skip_paths (0.00s)
+    --- PASS: TestNewLoggerConfig/debug_level_with_multiple_skip_paths (0.00s)
+    --- PASS: TestNewLoggerConfig/error_level_with_empty_skip_paths (0.00s)
+    --- PASS: TestNewLoggerConfig/warn_level_with_nil_skip_paths (0.00s)
+=== RUN   TestNewRateLimitMiddleware
+=== RUN   TestNewRateLimitMiddleware/basic_rate_limiting_with_IP-based_key
+=== RUN   TestNewRateLimitMiddleware/rate_limiting_with_custom_key_function
+=== RUN   TestNewRateLimitMiddleware/rate_limiting_with_nil_store_uses_default
+=== RUN   TestNewRateLimitMiddleware/high_rate_limit_allows_many_requests
+=== RUN   TestNewRateLimitMiddleware/very_strict_rate_limiting
+--- PASS: TestNewRateLimitMiddleware (0.00s)
+    --- PASS: TestNewRateLimitMiddleware/basic_rate_limiting_with_IP-based_key (0.00s)
+    --- PASS: TestNewRateLimitMiddleware/rate_limiting_with_custom_key_function (0.00s)
+    --- PASS: TestNewRateLimitMiddleware/rate_limiting_with_nil_store_uses_default (0.00s)
+    --- PASS: TestNewRateLimitMiddleware/high_rate_limit_allows_many_requests (0.00s)
+    --- PASS: TestNewRateLimitMiddleware/very_strict_rate_limiting (0.00s)
+=== RUN   TestRateLimitMiddleware_DifferentKeys
+--- PASS: TestRateLimitMiddleware_DifferentKeys (0.00s)
+=== RUN   TestRateLimitMiddleware_Headers
+--- PASS: TestRateLimitMiddleware_Headers (0.00s)
+PASS
+ok  	github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware	(cached)
+=== RUN   TestConfig
+--- PASS: TestConfig (0.00s)
+=== RUN   TestNew_InvalidDatabase
+--- PASS: TestNew_InvalidDatabase (0.00s)
+=== RUN   TestNew_InvalidMigrationsDir
+--- PASS: TestNew_InvalidMigrationsDir (0.00s)
+=== RUN   TestMigrator_Up_Success
+2025/10/29 23:45:00 INFO Running migrations...
+2025/10/29 23:45:00 INFO Migrations completed successfully status=✅
+--- PASS: TestMigrator_Up_Success (0.00s)
+=== RUN   TestMigrator_Up_NoChange
+2025/10/29 23:45:00 INFO Running migrations...
+2025/10/29 23:45:00 INFO No pending migrations
+--- PASS: TestMigrator_Up_NoChange (0.00s)
+=== RUN   TestMigrator_Up_Error
+2025/10/29 23:45:00 INFO Running migrations...
+--- PASS: TestMigrator_Up_Error (0.00s)
+=== RUN   TestMigrator_Up_ContextTimeout
+2025/10/29 23:45:00 INFO Running migrations...
+--- PASS: TestMigrator_Up_ContextTimeout (0.01s)
+=== RUN   TestMigrator_Down_Success
+2025/10/29 23:45:00 INFO Rolling back migrations... steps=1
+2025/10/29 23:45:00 INFO Rollback completed successfully status=✅
+--- PASS: TestMigrator_Down_Success (0.00s)
+=== RUN   TestMigrator_Down_MultipleSteps
+2025/10/29 23:45:00 INFO Rolling back migrations... steps=3
+2025/10/29 23:45:00 INFO Rollback completed successfully status=✅
+--- PASS: TestMigrator_Down_MultipleSteps (0.00s)
+=== RUN   TestMigrator_Down_NegativeSteps
+2025/10/29 23:45:00 INFO Rolling back migrations... steps=1
+2025/10/29 23:45:00 INFO Rollback completed successfully status=✅
+--- PASS: TestMigrator_Down_NegativeSteps (0.00s)
+=== RUN   TestMigrator_Down_ZeroSteps
+2025/10/29 23:45:00 INFO Rolling back migrations... steps=1
+2025/10/29 23:45:00 INFO Rollback completed successfully status=✅
+--- PASS: TestMigrator_Down_ZeroSteps (0.00s)
+=== RUN   TestMigrator_Down_Error
+2025/10/29 23:45:00 INFO Rolling back migrations... steps=1
+--- PASS: TestMigrator_Down_Error (0.00s)
+=== RUN   TestMigrator_Down_ContextTimeout
+2025/10/29 23:45:00 INFO Rolling back migrations... steps=1
+--- PASS: TestMigrator_Down_ContextTimeout (0.01s)
+=== RUN   TestMigrator_Steps_Forward
+2025/10/29 23:45:00 INFO Executing migration steps... steps=2 direction=forward
+2025/10/29 23:45:00 INFO Migration steps completed successfully status=✅
+--- PASS: TestMigrator_Steps_Forward (0.00s)
+=== RUN   TestMigrator_Steps_Backward
+2025/10/29 23:45:00 INFO Executing migration steps... steps=-2 direction=backward
+2025/10/29 23:45:00 INFO Migration steps completed successfully status=✅
+--- PASS: TestMigrator_Steps_Backward (0.00s)
+=== RUN   TestMigrator_Steps_Error
+2025/10/29 23:45:00 INFO Executing migration steps... steps=1 direction=forward
+--- PASS: TestMigrator_Steps_Error (0.00s)
+=== RUN   TestMigrator_Steps_ContextTimeout
+2025/10/29 23:45:00 INFO Executing migration steps... steps=1 direction=forward
+--- PASS: TestMigrator_Steps_ContextTimeout (0.01s)
+=== RUN   TestMigrator_Goto_Success
+2025/10/29 23:45:00 INFO Migrating to version... version=5
+2025/10/29 23:45:00 INFO Migration to version completed version=5 status=✅
+--- PASS: TestMigrator_Goto_Success (0.00s)
+=== RUN   TestMigrator_Goto_NoChange
+2025/10/29 23:45:00 INFO Migrating to version... version=5
+2025/10/29 23:45:00 INFO Migration to version completed version=5 status=✅
+--- PASS: TestMigrator_Goto_NoChange (0.00s)
+=== RUN   TestMigrator_Goto_Error
+2025/10/29 23:45:00 INFO Migrating to version... version=5
+--- PASS: TestMigrator_Goto_Error (0.00s)
+=== RUN   TestMigrator_Goto_ContextTimeout
+2025/10/29 23:45:00 INFO Migrating to version... version=5
+--- PASS: TestMigrator_Goto_ContextTimeout (0.01s)
+=== RUN   TestMigrator_Version_Success
+--- PASS: TestMigrator_Version_Success (0.00s)
+=== RUN   TestMigrator_Version_Dirty
+--- PASS: TestMigrator_Version_Dirty (0.00s)
+=== RUN   TestMigrator_Version_NilVersion
+--- PASS: TestMigrator_Version_NilVersion (0.00s)
+=== RUN   TestMigrator_Version_Error
+--- PASS: TestMigrator_Version_Error (0.00s)
+=== RUN   TestMigrator_Force_Success
+2025/10/29 23:45:00 WARN Forcing migration version version=3
+2025/10/29 23:45:00 INFO Migration version forced version=3 status=✅
+--- PASS: TestMigrator_Force_Success (0.00s)
+=== RUN   TestMigrator_Force_Error
+2025/10/29 23:45:00 WARN Forcing migration version version=3
+--- PASS: TestMigrator_Force_Error (0.00s)
+=== RUN   TestMigrator_Drop_Success
+2025/10/29 23:45:00 WARN Dropping all tables...
+2025/10/29 23:45:00 INFO All tables dropped status=✅
+--- PASS: TestMigrator_Drop_Success (0.00s)
+=== RUN   TestMigrator_Drop_Error
+2025/10/29 23:45:00 WARN Dropping all tables...
+--- PASS: TestMigrator_Drop_Error (0.00s)
+=== RUN   TestMigrator_Close_Success
+--- PASS: TestMigrator_Close_Success (0.00s)
+=== RUN   TestMigrator_Close_SourceError
+--- PASS: TestMigrator_Close_SourceError (0.00s)
+=== RUN   TestMigrator_Close_DatabaseError
+--- PASS: TestMigrator_Close_DatabaseError (0.00s)
+PASS
+ok  	github.com/vahiiiid/go-rest-api-boilerplate/internal/migrate	(cached)
+FAIL

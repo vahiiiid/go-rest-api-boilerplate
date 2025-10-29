@@ -135,10 +135,10 @@ func run() error {
 		shutdownTimeout = 30 * time.Second
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	contextutil, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(contextutil); err != nil {
 		logger.Error("Server forced to shutdown", "error", err)
 		return err
 	}

@@ -87,16 +87,16 @@ func main() {
 		}
 	}()
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	contextutil, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	switch command {
 	case "up":
-		handleUp(ctx, migrator, args)
+		handleUp(contextutil, migrator, args)
 	case "down":
-		handleDown(ctx, migrator, args)
+		handleDown(contextutil, migrator, args)
 	case "goto":
-		handleGoto(ctx, migrator, args)
+		handleGoto(contextutil, migrator, args)
 	case "version":
 		handleVersion(migrator)
 	case "force":
@@ -112,26 +112,26 @@ func main() {
 	}
 }
 
-func handleUp(ctx context.Context, migrator *migrate.Migrator, args []string) {
+func handleUp(contextutil context.Context, migrator *migrate.Migrator, args []string) {
 	if len(args) > 1 {
 		n, err := strconv.Atoi(args[1])
 		if err != nil || n < 1 {
 			slog.Error("Invalid number of steps", "value", args[1])
 			os.Exit(1)
 		}
-		if err := migrator.Steps(ctx, n); err != nil {
+		if err := migrator.Steps(contextutil, n); err != nil {
 			slog.Error("Migration error", "err", err)
 			os.Exit(1)
 		}
 	} else {
-		if err := migrator.Up(ctx); err != nil {
+		if err := migrator.Up(contextutil); err != nil {
 			slog.Error("Migration error", "err", err)
 			os.Exit(1)
 		}
 	}
 }
 
-func handleDown(ctx context.Context, migrator *migrate.Migrator, args []string) {
+func handleDown(contextutil context.Context, migrator *migrate.Migrator, args []string) {
 	steps := 1
 	if len(args) > 1 {
 		n, err := strconv.Atoi(args[1])
@@ -154,13 +154,13 @@ func handleDown(ctx context.Context, migrator *migrate.Migrator, args []string) 
 		return
 	}
 
-	if err := migrator.Down(ctx, steps); err != nil {
+	if err := migrator.Down(contextutil, steps); err != nil {
 		slog.Error("Migration error", "err", err)
 		os.Exit(1)
 	}
 }
 
-func handleGoto(ctx context.Context, migrator *migrate.Migrator, args []string) {
+func handleGoto(contextutil context.Context, migrator *migrate.Migrator, args []string) {
 	if len(args) < 2 {
 		slog.Error("Version number required")
 		fmt.Println("Usage: migrate goto VERSION")
@@ -173,7 +173,7 @@ func handleGoto(ctx context.Context, migrator *migrate.Migrator, args []string) 
 		os.Exit(1)
 	}
 
-	if err := migrator.Goto(ctx, uint(version)); err != nil {
+	if err := migrator.Goto(contextutil, uint(version)); err != nil {
 		slog.Error("Migration error", "err", err)
 		os.Exit(1)
 	}

@@ -62,7 +62,7 @@ func New(db *sql.DB, cfg Config) (*Migrator, error) {
 	}, nil
 }
 
-func (m *Migrator) Up(ctx context.Context) error {
+func (m *Migrator) Up(contextutil context.Context) error {
 	slog.Info("Running migrations...")
 
 	done := make(chan error, 1)
@@ -71,7 +71,7 @@ func (m *Migrator) Up(ctx context.Context) error {
 	}()
 
 	select {
-	case <-ctx.Done():
+	case <-contextutil.Done():
 		return fmt.Errorf("migration timeout exceeded (%v). Use --timeout flag for longer migrations (e.g., --timeout=30m)", m.config.Timeout)
 	case err := <-done:
 		if err != nil && !errors.Is(err, migrate.ErrNoChange) {
@@ -86,7 +86,7 @@ func (m *Migrator) Up(ctx context.Context) error {
 	}
 }
 
-func (m *Migrator) Down(ctx context.Context, steps int) error {
+func (m *Migrator) Down(contextutil context.Context, steps int) error {
 	if steps < 1 {
 		steps = 1
 	}
@@ -99,7 +99,7 @@ func (m *Migrator) Down(ctx context.Context, steps int) error {
 	}()
 
 	select {
-	case <-ctx.Done():
+	case <-contextutil.Done():
 		return fmt.Errorf("migration timeout exceeded (%v). Use --timeout flag for longer migrations", m.config.Timeout)
 	case err := <-done:
 		if err != nil {
@@ -110,7 +110,7 @@ func (m *Migrator) Down(ctx context.Context, steps int) error {
 	}
 }
 
-func (m *Migrator) Steps(ctx context.Context, n int) error {
+func (m *Migrator) Steps(contextutil context.Context, n int) error {
 	action := "forward"
 	if n < 0 {
 		action = "backward"
@@ -124,7 +124,7 @@ func (m *Migrator) Steps(ctx context.Context, n int) error {
 	}()
 
 	select {
-	case <-ctx.Done():
+	case <-contextutil.Done():
 		return fmt.Errorf("migration timeout exceeded (%v). Use --timeout flag for longer migrations", m.config.Timeout)
 	case err := <-done:
 		if err != nil {
@@ -135,7 +135,7 @@ func (m *Migrator) Steps(ctx context.Context, n int) error {
 	}
 }
 
-func (m *Migrator) Goto(ctx context.Context, version uint) error {
+func (m *Migrator) Goto(contextutil context.Context, version uint) error {
 	slog.Info("Migrating to version...", "version", version)
 
 	done := make(chan error, 1)
@@ -144,7 +144,7 @@ func (m *Migrator) Goto(ctx context.Context, version uint) error {
 	}()
 
 	select {
-	case <-ctx.Done():
+	case <-contextutil.Done():
 		return fmt.Errorf("migration timeout exceeded (%v). Use --timeout flag for longer migrations", m.config.Timeout)
 	case err := <-done:
 		if err != nil && !errors.Is(err, migrate.ErrNoChange) {
