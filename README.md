@@ -358,7 +358,7 @@ We ❤️ contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 ## 🙏 Built With Amazing Tools
 
 - **[Gin](https://github.com/gin-gonic/gin)** — Fast HTTP web framework
-- **[GORM](https://gorm.io/)** — Developer-friendly ORM
+- **[GORM](https://github.com/go-gorm/gorm)** — Developer-friendly ORM
 - **[golang-migrate](https://github.com/golang-migrate/migrate)** — Database migration toolkit
 - **[Viper](https://github.com/spf13/viper)** — Configuration management
 - **[golang-jwt](https://github.com/golang-jwt/jwt)** — JWT implementation
