@@ -300,3 +300,144 @@ func TestService_RevokeRefreshToken_TokenNotFound(t *testing.T) {
 	err := svc.RevokeRefreshToken(ctx, "non-existent-token")
 	assert.NoError(t, err)
 }
+
+func TestService_RevokeUserRefreshToken(t *testing.T) {
+	tests := []struct {
+		name          string
+		setupFunc     func(t *testing.T, svc *service, db *gorm.DB) (userID uint, refreshToken string)
+		userID        uint
+		expectedError string
+	}{
+		{
+			name: "successful_revocation",
+			setupFunc: func(t *testing.T, svc *service, db *gorm.DB) (uint, string) {
+				ctx := context.Background()
+				pair, err := svc.GenerateTokenPair(ctx, 1, "test@example.com", "Test User")
+				require.NoError(t, err)
+				return 1, pair.RefreshToken
+			},
+			expectedError: "",
+		},
+		{
+			name: "token_does_not_belong_to_user",
+			setupFunc: func(t *testing.T, svc *service, db *gorm.DB) (uint, string) {
+				ctx := context.Background()
+				pair, err := svc.GenerateTokenPair(ctx, 1, "test@example.com", "Test User")
+				require.NoError(t, err)
+				return 2, pair.RefreshToken
+			},
+			expectedError: "token does not belong to user",
+		},
+		{
+			name: "token_not_found_returns_nil",
+			setupFunc: func(t *testing.T, svc *service, db *gorm.DB) (uint, string) {
+				return 1, "non-existent-token-12345"
+			},
+			expectedError: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			svc, db := setupServiceTest(t)
+			ctx := context.Background()
+
+			userID, refreshToken := tt.setupFunc(t, svc, db)
+
+			err := svc.RevokeUserRefreshToken(ctx, userID, refreshToken)
+
+			if tt.expectedError != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.expectedError)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestService_RevokeUserRefreshToken_NilRepository(t *testing.T) {
+	svc := &service{
+		jwtSecret:        "test-secret",
+		accessTokenTTL:   15 * time.Minute,
+		refreshTokenTTL:  7 * 24 * time.Hour,
+		refreshTokenRepo: nil,
+	}
+	ctx := context.Background()
+
+	err := svc.RevokeUserRefreshToken(ctx, 1, "some-token")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "refresh token repository not initialized")
+}
+
+func TestService_RefreshAccessToken_UserNotFound(t *testing.T) {
+	svc, db := setupServiceTest(t)
+	ctx := context.Background()
+
+	pair, err := svc.GenerateTokenPair(ctx, 999, "nonexistent@example.com", "Ghost User")
+	require.NoError(t, err)
+
+	err = db.Exec("DELETE FROM users WHERE id = 999").Error
+	require.NoError(t, err)
+
+	_, err = svc.RefreshAccessToken(ctx, pair.RefreshToken)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to fetch user for token claims")
+}
+
+func TestService_GenerateTokenPair_DatabaseError(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	require.NoError(t, err)
+
+	err = db.AutoMigrate(&RefreshToken{}, &testUser{})
+	require.NoError(t, err)
+
+	svc := &service{
+		jwtSecret:        "test-secret",
+		accessTokenTTL:   15 * time.Minute,
+		refreshTokenTTL:  7 * 24 * time.Hour,
+		refreshTokenRepo: NewRefreshTokenRepository(db),
+		db:               db,
+	}
+
+	db.Exec("DROP TABLE refresh_tokens")
+
+	ctx := context.Background()
+	_, err = svc.GenerateTokenPair(ctx, 1, "test@example.com", "Test User")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to store refresh token")
+}
+
+func TestService_RefreshAccessToken_MarkAsUsedError(t *testing.T) {
+	svc, db := setupServiceTest(t)
+	ctx := context.Background()
+
+	pair, err := svc.GenerateTokenPair(ctx, 1, "test@example.com", "Test User")
+	require.NoError(t, err)
+
+	db.Exec("DROP TABLE refresh_tokens")
+
+	_, err = svc.RefreshAccessToken(ctx, pair.RefreshToken)
+	assert.Error(t, err)
+}
+
+func TestService_GenerateTokenPair_InvalidSecret(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	require.NoError(t, err)
+
+	err = db.AutoMigrate(&RefreshToken{})
+	require.NoError(t, err)
+
+	svc := &service{
+		jwtSecret:        "",
+		accessTokenTTL:   15 * time.Minute,
+		refreshTokenTTL:  7 * 24 * time.Hour,
+		refreshTokenRepo: NewRefreshTokenRepository(db),
+		db:               db,
+	}
+
+	ctx := context.Background()
+	pair, err := svc.GenerateTokenPair(ctx, 1, "test@example.com", "Test User")
+	assert.NoError(t, err)
+	assert.NotNil(t, pair)
+}
