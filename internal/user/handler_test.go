@@ -56,6 +56,11 @@ func (m *MockAuthService) RevokeRefreshToken(ctx context.Context, refreshToken s
 	return args.Error(0)
 }
 
+func (m *MockAuthService) RevokeUserRefreshToken(ctx context.Context, userID uint, refreshToken string) error {
+	args := m.Called(ctx, userID, refreshToken)
+	return args.Error(0)
+}
+
 func (m *MockAuthService) RevokeAllUserTokens(ctx context.Context, userID uint) error {
 	args := m.Called(ctx, userID)
 	return args.Error(0)
@@ -792,9 +797,8 @@ func TestHandler_DeleteUser(t *testing.T) {
 				claims := &auth.Claims{UserID: 1}
 				c.Set(auth.KeyUser, claims)
 			},
-			expectedStatus: http.StatusOK, // Gin test framework returns 200 by default
+			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				// Response body should be empty for successful deletion
 				assert.Equal(t, "", w.Body.String())
 			},
 		},

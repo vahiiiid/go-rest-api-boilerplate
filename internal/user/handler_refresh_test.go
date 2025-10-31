@@ -181,6 +181,7 @@ func TestHandler_Logout(t *testing.T) {
 		name           string
 		requestBody    interface{}
 		setupMocks     func(*MockAuthService)
+		setupContext   func(*gin.Context)
 		expectedStatus int
 		checkResponse  func(*testing.T, *httptest.ResponseRecorder)
 	}{
@@ -190,7 +191,11 @@ func TestHandler_Logout(t *testing.T) {
 				RefreshToken: "valid-refresh-token",
 			},
 			setupMocks: func(mas *MockAuthService) {
-				mas.On("RevokeRefreshToken", mock.Anything, "valid-refresh-token").Return(nil)
+				mas.On("RevokeUserRefreshToken", mock.Anything, uint(1), "valid-refresh-token").Return(nil)
+			},
+			setupContext: func(c *gin.Context) {
+				claims := &auth.Claims{UserID: 1}
+				c.Set(auth.KeyUser, claims)
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -201,9 +206,13 @@ func TestHandler_Logout(t *testing.T) {
 			},
 		},
 		{
-			name:           "missing refresh token",
-			requestBody:    map[string]string{},
-			setupMocks:     func(mas *MockAuthService) {},
+			name:        "missing refresh token",
+			requestBody: map[string]string{},
+			setupMocks:  func(mas *MockAuthService) {},
+			setupContext: func(c *gin.Context) {
+				claims := &auth.Claims{UserID: 1}
+				c.Set(auth.KeyUser, claims)
+			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
 				var response apiErrors.APIError
@@ -218,7 +227,11 @@ func TestHandler_Logout(t *testing.T) {
 				RefreshToken: "some-token",
 			},
 			setupMocks: func(mas *MockAuthService) {
-				mas.On("RevokeRefreshToken", mock.Anything, "some-token").Return(errors.New("database error"))
+				mas.On("RevokeUserRefreshToken", mock.Anything, uint(1), "some-token").Return(errors.New("database error"))
+			},
+			setupContext: func(c *gin.Context) {
+				claims := &auth.Claims{UserID: 1}
+				c.Set(auth.KeyUser, claims)
 			},
 			expectedStatus: http.StatusInternalServerError,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -234,7 +247,11 @@ func TestHandler_Logout(t *testing.T) {
 				RefreshToken: "non-existent-token",
 			},
 			setupMocks: func(mas *MockAuthService) {
-				mas.On("RevokeRefreshToken", mock.Anything, "non-existent-token").Return(nil)
+				mas.On("RevokeUserRefreshToken", mock.Anything, uint(1), "non-existent-token").Return(nil)
+			},
+			setupContext: func(c *gin.Context) {
+				claims := &auth.Claims{UserID: 1}
+				c.Set(auth.KeyUser, claims)
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -242,6 +259,23 @@ func TestHandler_Logout(t *testing.T) {
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
 				assert.Equal(t, "Successfully logged out", response["message"])
+			},
+		},
+		{
+			name: "unauthenticated user",
+			requestBody: auth.RefreshTokenRequest{
+				RefreshToken: "some-token",
+			},
+			setupMocks: func(mas *MockAuthService) {},
+			setupContext: func(c *gin.Context) {
+				// No authentication context set
+			},
+			expectedStatus: http.StatusUnauthorized,
+			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
+				var response apiErrors.APIError
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.Equal(t, "UNAUTHORIZED", response.Code)
 			},
 		},
 	}
@@ -263,6 +297,8 @@ func TestHandler_Logout(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/logout", bytes.NewBuffer(bodyBytes))
 			req.Header.Set("Content-Type", "application/json")
 			c.Request = req
+
+			tt.setupContext(c)
 
 			handler.Logout(c)
 			apiErrors.ErrorHandler()(c)

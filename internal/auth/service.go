@@ -43,6 +43,7 @@ type Service interface {
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenPair, error)
 	ValidateToken(tokenString string) (*Claims, error)
 	RevokeRefreshToken(ctx context.Context, refreshToken string) error
+	RevokeUserRefreshToken(ctx context.Context, userID uint, refreshToken string) error
 	RevokeAllUserTokens(ctx context.Context, userID uint) error
 }
 
@@ -51,6 +52,7 @@ type service struct {
 	accessTokenTTL   time.Duration
 	refreshTokenTTL  time.Duration
 	refreshTokenRepo RefreshTokenRepository
+	db               *gorm.DB
 }
 
 // NewService creates a new authentication service using typed config
@@ -107,6 +109,7 @@ func NewServiceWithRepo(cfg *config.JWTConfig, db *gorm.DB) Service {
 		accessTokenTTL:   accessTokenTTL,
 		refreshTokenTTL:  refreshTokenTTL,
 		refreshTokenRepo: NewRefreshTokenRepository(db),
+		db:               db,
 	}
 }
 
@@ -251,7 +254,17 @@ func (s *service) RefreshAccessToken(ctx context.Context, refreshToken string) (
 		return nil, fmt.Errorf("failed to mark token as used: %w", err)
 	}
 
-	accessToken, err := s.GenerateToken(storedToken.UserID, "", "")
+	type userModel struct {
+		ID    uint
+		Email string
+		Name  string
+	}
+	var user userModel
+	if err := s.db.WithContext(ctx).Table("users").Select("id, email, name").Where("id = ?", storedToken.UserID).First(&user).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch user for token claims: %w", err)
+	}
+
+	accessToken, err := s.GenerateToken(storedToken.UserID, user.Email, user.Name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate access token: %w", err)
 	}
@@ -295,6 +308,28 @@ func (s *service) RevokeRefreshToken(ctx context.Context, refreshToken string) e
 			return nil
 		}
 		return fmt.Errorf("failed to find refresh token: %w", err)
+	}
+
+	return s.refreshTokenRepo.RevokeTokenFamily(ctx, storedToken.TokenFamily)
+}
+
+// RevokeUserRefreshToken revokes a specific refresh token for an authenticated user
+func (s *service) RevokeUserRefreshToken(ctx context.Context, userID uint, refreshToken string) error {
+	if s.refreshTokenRepo == nil {
+		return errors.New("refresh token repository not initialized")
+	}
+
+	tokenHash := HashToken(refreshToken)
+	storedToken, err := s.refreshTokenRepo.FindByTokenHash(ctx, tokenHash)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return fmt.Errorf("failed to find refresh token: %w", err)
+	}
+
+	if storedToken.UserID != userID {
+		return fmt.Errorf("token does not belong to user")
 	}
 
 	return s.refreshTokenRepo.RevokeTokenFamily(ctx, storedToken.TokenFamily)

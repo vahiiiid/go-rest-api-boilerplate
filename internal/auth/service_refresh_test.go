@@ -14,11 +14,37 @@ import (
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 )
 
+// testUser is a minimal user struct for testing
+type testUser struct {
+	ID           uint   `gorm:"primaryKey"`
+	Name         string `gorm:"not null"`
+	Email        string `gorm:"uniqueIndex;not null"`
+	PasswordHash string `gorm:"not null"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    gorm.DeletedAt `gorm:"index"`
+}
+
+func (testUser) TableName() string {
+	return "users"
+}
+
 func setupServiceTest(t *testing.T) (*service, *gorm.DB) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	require.NoError(t, err)
 
-	err = db.AutoMigrate(&RefreshToken{})
+	err = db.AutoMigrate(&RefreshToken{}, &testUser{})
+	require.NoError(t, err)
+
+	testUserData := &testUser{
+		ID:           1,
+		Name:         "Test User",
+		Email:        "test@example.com",
+		PasswordHash: "hash",
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+	err = db.Create(testUserData).Error
 	require.NoError(t, err)
 
 	cfg := &config.JWTConfig{
@@ -32,6 +58,7 @@ func setupServiceTest(t *testing.T) (*service, *gorm.DB) {
 		accessTokenTTL:   cfg.AccessTokenTTL,
 		refreshTokenTTL:  cfg.RefreshTokenTTL,
 		refreshTokenRepo: NewRefreshTokenRepository(db),
+		db:               db,
 	}
 
 	return svc, db
@@ -61,6 +88,8 @@ func TestService_RefreshAccessToken_Success(t *testing.T) {
 
 	originalPair, err := svc.GenerateTokenPair(ctx, 1, "test@example.com", "Test User")
 	require.NoError(t, err)
+
+	time.Sleep(time.Second)
 
 	newPair, err := svc.RefreshAccessToken(ctx, originalPair.RefreshToken)
 	require.NoError(t, err)

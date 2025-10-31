@@ -306,16 +306,27 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 // @Success 200 {object} map[string]string "Successfully logged out"
 // @Failure 400 {object} errors.APIError "Validation error"
 // @Failure 401 {object} errors.APIError "Unauthorized"
+// @Failure 403 {object} errors.APIError "Token does not belong to user"
 // @Failure 500 {object} errors.APIError "Failed to logout"
 // @Router /api/v1/auth/logout [post]
 func (h *Handler) Logout(c *gin.Context) {
+	userID := ctx.GetUserID(c)
+	if userID == 0 {
+		_ = c.Error(apiErrors.Unauthorized("user not authenticated"))
+		return
+	}
+
 	var req auth.RefreshTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		_ = c.Error(apiErrors.FromGinValidation(err))
 		return
 	}
 
-	if err := h.authService.RevokeRefreshToken(c.Request.Context(), req.RefreshToken); err != nil {
+	if err := h.authService.RevokeUserRefreshToken(c.Request.Context(), userID, req.RefreshToken); err != nil {
+		if err.Error() == "token does not belong to user" {
+			_ = c.Error(apiErrors.Forbidden("token does not belong to user"))
+			return
+		}
 		_ = c.Error(apiErrors.InternalServerError(err))
 		return
 	}

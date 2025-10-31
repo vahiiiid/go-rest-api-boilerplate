@@ -51,6 +51,11 @@ func (m *MockAuthService) RevokeRefreshToken(ctx context.Context, refreshToken s
 	return args.Error(0)
 }
 
+func (m *MockAuthService) RevokeUserRefreshToken(ctx context.Context, userID uint, refreshToken string) error {
+	args := m.Called(ctx, userID, refreshToken)
+	return args.Error(0)
+}
+
 func (m *MockAuthService) RevokeAllUserTokens(ctx context.Context, userID uint) error {
 	args := m.Called(ctx, userID)
 	return args.Error(0)
