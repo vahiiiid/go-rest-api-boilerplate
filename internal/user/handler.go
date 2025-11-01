@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
-	"github.com/vahiiiid/go-rest-api-boilerplate/internal/ctx"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/contextutil"
 	apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
 )
 
@@ -136,7 +136,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	if !ctx.CanAccessUser(c, uint(id)) {
+	if !contextutil.CanAccessUser(c, uint(id)) {
 		_ = c.Error(apiErrors.Forbidden("Forbidden user ID"))
 		return
 	}
@@ -180,7 +180,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 	}
 
 	// Authorization check
-	if !ctx.CanAccessUser(c, uint(id)) {
+	if !contextutil.CanAccessUser(c, uint(id)) {
 		_ = c.Error(apiErrors.Forbidden("Forbidden user ID"))
 		return
 	}
@@ -232,7 +232,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	}
 
 	// Authorization check
-	if !ctx.CanAccessUser(c, uint(id)) {
+	if !contextutil.CanAccessUser(c, uint(id)) {
 		_ = c.Error(apiErrors.Forbidden("Forbidden user ID"))
 		return
 	}
@@ -310,7 +310,7 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 // @Failure 500 {object} errors.APIError "Failed to logout"
 // @Router /api/v1/auth/logout [post]
 func (h *Handler) Logout(c *gin.Context) {
-	userID := ctx.GetUserID(c)
+	userID := contextutil.GetUserID(c)
 	if userID == 0 {
 		_ = c.Error(apiErrors.Unauthorized("user not authenticated"))
 		return
