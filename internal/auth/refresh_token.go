@@ -4,10 +4,15 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+)
+
+var (
+	ErrTokenDoesNotBelongToUser = errors.New("token does not belong to user")
 )
 
 // RefreshToken represents a refresh token in the database
@@ -93,10 +98,21 @@ func (r *refreshTokenRepository) FindByTokenFamily(ctx context.Context, tokenFam
 
 func (r *refreshTokenRepository) MarkAsUsed(ctx context.Context, id uuid.UUID) error {
 	now := time.Now()
-	return r.db.WithContext(ctx).
+	result := r.db.WithContext(ctx).
 		Model(&RefreshToken{}).
 		Where("id = ?", id).
-		Update("used_at", now).Error
+		Where("used_at IS NULL").
+		Update("used_at", now)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("token already used or not found")
+	}
+
+	return nil
 }
 
 func (r *refreshTokenRepository) RevokeTokenFamily(ctx context.Context, tokenFamily uuid.UUID) error {

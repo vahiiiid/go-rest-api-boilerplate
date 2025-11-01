@@ -323,7 +323,7 @@ func (h *Handler) Logout(c *gin.Context) {
 	}
 
 	if err := h.authService.RevokeUserRefreshToken(c.Request.Context(), userID, req.RefreshToken); err != nil {
-		if err.Error() == "token does not belong to user" {
+		if errors.Is(err, auth.ErrTokenDoesNotBelongToUser) {
 			_ = c.Error(apiErrors.Forbidden("token does not belong to user"))
 			return
 		}

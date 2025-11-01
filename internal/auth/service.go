@@ -329,7 +329,7 @@ func (s *service) RevokeUserRefreshToken(ctx context.Context, userID uint, refre
 	}
 
 	if storedToken.UserID != userID {
-		return fmt.Errorf("token does not belong to user")
+		return ErrTokenDoesNotBelongToUser
 	}
 
 	return s.refreshTokenRepo.RevokeTokenFamily(ctx, storedToken.TokenFamily)
