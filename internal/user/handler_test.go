@@ -797,7 +797,7 @@ func TestHandler_DeleteUser(t *testing.T) {
 				claims := &auth.Claims{UserID: 1}
 				c.Set(auth.KeyUser, claims)
 			},
-			expectedStatus: http.StatusOK,
+			expectedStatus: http.StatusOK, // Note: Gin test recorder returns 200 for c.Status(204) without response body
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
 				assert.Equal(t, "", w.Body.String())
 			},

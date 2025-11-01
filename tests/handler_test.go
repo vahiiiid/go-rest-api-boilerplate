@@ -21,44 +21,11 @@ import (
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 )
 
-// createTestSchema creates the SQLite test schema that matches PostgreSQL production schema
+// createTestSchema creates the SQLite test schema using GORM AutoMigrate for consistency
 func createTestSchema(t *testing.T, database *gorm.DB) {
 	t.Helper()
-	sqlDB, err := database.DB()
-	assert.NoError(t, err)
 
-	_, err = sqlDB.Exec(`
-		CREATE TABLE users (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			email TEXT UNIQUE NOT NULL,
-			password_hash TEXT NOT NULL,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			deleted_at DATETIME
-		);
-		CREATE INDEX idx_users_email ON users(email);
-		CREATE INDEX idx_users_deleted_at ON users(deleted_at);
-	`)
-	assert.NoError(t, err)
-
-	_, err = sqlDB.Exec(`
-		CREATE TABLE refresh_tokens (
-			id TEXT PRIMARY KEY,
-			user_id INTEGER NOT NULL,
-			token_hash TEXT NOT NULL,
-			token_family TEXT NOT NULL,
-			expires_at DATETIME NOT NULL,
-			used_at DATETIME,
-			revoked_at DATETIME,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-		);
-		CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
-		CREATE INDEX idx_refresh_tokens_token_hash ON refresh_tokens(token_hash);
-		CREATE INDEX idx_refresh_tokens_token_family ON refresh_tokens(token_family);
-		CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
-	`)
+	err := database.AutoMigrate(&user.User{}, &auth.RefreshToken{})
 	assert.NoError(t, err)
 }
 
