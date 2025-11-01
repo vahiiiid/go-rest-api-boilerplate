@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
@@ -19,6 +20,14 @@ import (
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/server"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 )
+
+// createTestSchema creates the SQLite test schema using GORM AutoMigrate for consistency
+func createTestSchema(t *testing.T, database *gorm.DB) {
+	t.Helper()
+
+	err := database.AutoMigrate(&user.User{}, &auth.RefreshToken{})
+	assert.NoError(t, err)
+}
 
 func setupTestRouter(t *testing.T) *gin.Engine {
 	gin.SetMode(gin.TestMode)
@@ -28,25 +37,9 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 	database, err := db.NewSQLiteDB(":memory:")
 	assert.NoError(t, err)
 
-	sqlDB, err := database.DB()
-	assert.NoError(t, err)
+	createTestSchema(t, database)
 
-	_, err = sqlDB.Exec(`
-		CREATE TABLE users (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			email TEXT UNIQUE NOT NULL,
-			password_hash TEXT NOT NULL,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			deleted_at DATETIME
-		);
-		CREATE INDEX idx_users_email ON users(email);
-		CREATE INDEX idx_users_deleted_at ON users(deleted_at);
-	`)
-	assert.NoError(t, err)
-
-	authService := auth.NewService(&testCfg.JWT)
+	authService := auth.NewServiceWithRepo(&testCfg.JWT, database)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
@@ -67,25 +60,9 @@ func setupRateLimitTestRouter(t *testing.T) *gin.Engine {
 	database, err := db.NewSQLiteDB(":memory:")
 	assert.NoError(t, err)
 
-	sqlDB, err := database.DB()
-	assert.NoError(t, err)
+	createTestSchema(t, database)
 
-	_, err = sqlDB.Exec(`
-		CREATE TABLE users (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			email TEXT UNIQUE NOT NULL,
-			password_hash TEXT NOT NULL,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			deleted_at DATETIME
-		);
-		CREATE INDEX idx_users_email ON users(email);
-		CREATE INDEX idx_users_deleted_at ON users(deleted_at);
-	`)
-	assert.NoError(t, err)
-
-	authService := auth.NewService(&testCfg.JWT)
+	authService := auth.NewServiceWithRepo(&testCfg.JWT, database)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
@@ -111,8 +88,11 @@ func TestRegisterHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if token, ok := body["token"].(string); !ok || token == "" {
-					t.Error("Expected token in response")
+				if accessToken, ok := body["access_token"].(string); !ok || accessToken == "" {
+					t.Error("Expected access_token in response")
+				}
+				if refreshToken, ok := body["refresh_token"].(string); !ok || refreshToken == "" {
+					t.Error("Expected refresh_token in response")
 				}
 				if userData, ok := body["user"].(map[string]interface{}); !ok {
 					t.Error("Expected user object in response")
@@ -219,8 +199,11 @@ func TestLoginHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if token, ok := body["token"].(string); !ok || token == "" {
-					t.Error("Expected token in response")
+				if accessToken, ok := body["access_token"].(string); !ok || accessToken == "" {
+					t.Error("Expected access_token in response")
+				}
+				if refreshToken, ok := body["refresh_token"].(string); !ok || refreshToken == "" {
+					t.Error("Expected refresh_token in response")
 				}
 			},
 		},

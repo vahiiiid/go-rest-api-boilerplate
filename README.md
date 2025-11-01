@@ -37,7 +37,7 @@ make quick-start  # ← One command. 90 seconds. You're building features.
 **This is the real deal.** The production-grade boilerplate you wish you had from day one:
 
 ✅ **Clean Architecture** — Handler → Service → Repository (GO industry standard)  
-✅ **Security & JWT Auth** — Rate limiting, CORS, input validation built-in  
+✅ **Security & JWT Auth** — OAuth 2.0 BCP compliant with refresh token rotation, automatic reuse detection, rate limiting, CORS, and input validation ([learn more](https://vahiiiid.github.io/go-rest-api-docs/AUTHENTICATION/))  
 ✅ **Database Migrations** — PostgreSQL with version control & rollback  
 ✅ **Comprehensive Tests** — Unit + integration with CI/CD pipeline  
 ✅ **Interactive Docs** — Auto-generated Swagger + Postman collection  

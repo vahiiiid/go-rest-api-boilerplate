@@ -82,6 +82,103 @@ func TestNewService(t *testing.T) {
 	}
 }
 
+func TestNewServiceWithRepo(t *testing.T) {
+	tests := []struct {
+		name               string
+		cfg                *config.JWTConfig
+		expectedSecret     string
+		expectedAccessTTL  time.Duration
+		expectedRefreshTTL time.Duration
+	}{
+		{
+			name: "with all config values provided",
+			cfg: &config.JWTConfig{
+				Secret:          "test-secret-123",
+				AccessTokenTTL:  30 * time.Minute,
+				RefreshTokenTTL: 14 * 24 * time.Hour,
+			},
+			expectedSecret:     "test-secret-123",
+			expectedAccessTTL:  30 * time.Minute,
+			expectedRefreshTTL: 14 * 24 * time.Hour,
+		},
+		{
+			name: "with empty secret defaults to default",
+			cfg: &config.JWTConfig{
+				Secret:          "",
+				AccessTokenTTL:  15 * time.Minute,
+				RefreshTokenTTL: 7 * 24 * time.Hour,
+			},
+			expectedSecret:     "default-secret-change-in-production",
+			expectedAccessTTL:  15 * time.Minute,
+			expectedRefreshTTL: 7 * 24 * time.Hour,
+		},
+		{
+			name: "with zero AccessTokenTTL defaults to 15 minutes",
+			cfg: &config.JWTConfig{
+				Secret:          "test-secret",
+				AccessTokenTTL:  0,
+				RefreshTokenTTL: 7 * 24 * time.Hour,
+			},
+			expectedSecret:     "test-secret",
+			expectedAccessTTL:  15 * time.Minute,
+			expectedRefreshTTL: 7 * 24 * time.Hour,
+		},
+		{
+			name: "with zero RefreshTokenTTL defaults to 168 hours (7 days)",
+			cfg: &config.JWTConfig{
+				Secret:          "test-secret",
+				AccessTokenTTL:  15 * time.Minute,
+				RefreshTokenTTL: 0,
+			},
+			expectedSecret:     "test-secret",
+			expectedAccessTTL:  15 * time.Minute,
+			expectedRefreshTTL: 168 * time.Hour,
+		},
+		{
+			name: "with zero AccessTokenTTL but TTLHours set (deprecated field)",
+			cfg: &config.JWTConfig{
+				Secret:          "test-secret",
+				AccessTokenTTL:  0,
+				TTLHours:        2,
+				RefreshTokenTTL: 7 * 24 * time.Hour,
+			},
+			expectedSecret:     "test-secret",
+			expectedAccessTTL:  2 * time.Hour,
+			expectedRefreshTTL: 7 * 24 * time.Hour,
+		},
+		{
+			name: "with zero AccessTokenTTL and zero TTLHours defaults to 15 minutes",
+			cfg: &config.JWTConfig{
+				Secret:          "test-secret",
+				AccessTokenTTL:  0,
+				TTLHours:        0,
+				RefreshTokenTTL: 7 * 24 * time.Hour,
+			},
+			expectedSecret:     "test-secret",
+			expectedAccessTTL:  15 * time.Minute,
+			expectedRefreshTTL: 7 * 24 * time.Hour,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := setupTestDB(t)
+			authService := NewServiceWithRepo(tt.cfg, db)
+
+			assert.NotNil(t, authService)
+			assert.Implements(t, (*Service)(nil), authService)
+
+			svc, ok := authService.(*service)
+			assert.True(t, ok, "should be able to cast to *service")
+			assert.Equal(t, tt.expectedSecret, svc.jwtSecret)
+			assert.Equal(t, tt.expectedAccessTTL, svc.accessTokenTTL)
+			assert.Equal(t, tt.expectedRefreshTTL, svc.refreshTokenTTL)
+			assert.NotNil(t, svc.refreshTokenRepo)
+			assert.NotNil(t, svc.db)
+		})
+	}
+}
+
 func TestService_GenerateToken(t *testing.T) {
 	cfg := &config.JWTConfig{
 		Secret:   "test-secret",

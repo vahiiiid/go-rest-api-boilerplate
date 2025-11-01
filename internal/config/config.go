@@ -41,8 +41,10 @@ type DatabaseConfig struct {
 
 // JWTConfig holds JWT-related configuration
 type JWTConfig struct {
-	Secret   string `mapstructure:"secret" yaml:"secret"`
-	TTLHours int    `mapstructure:"ttlhours" yaml:"ttlhours"`
+	Secret          string        `mapstructure:"secret" yaml:"secret"`
+	AccessTokenTTL  time.Duration `mapstructure:"access_token_ttl" yaml:"access_token_ttl"`
+	RefreshTokenTTL time.Duration `mapstructure:"refresh_token_ttl" yaml:"refresh_token_ttl"`
+	TTLHours        int           `mapstructure:"ttlhours" yaml:"ttlhours"` // Deprecated: kept for backward compatibility
 }
 
 // ServerConfig holds server-related configuration
@@ -152,6 +154,8 @@ func bindEnvVariables(v *viper.Viper) {
 		"database.name":          "DATABASE_NAME",
 		"database.sslmode":       "DATABASE_SSLMODE",
 		"jwt.secret":             "JWT_SECRET",
+		"jwt.access_token_ttl":   "JWT_ACCESS_TOKEN_TTL",
+		"jwt.refresh_token_ttl":  "JWT_REFRESH_TOKEN_TTL",
 		"jwt.ttlhours":           "JWT_TTLHOURS",
 		"server.port":            "SERVER_PORT",
 		"server.readtimeout":     "SERVER_READTIMEOUT",
@@ -226,7 +230,7 @@ func (c *Config) LogSafeConfig(logger *slog.Logger) {
 	logger.Info("Loaded Configuration:")
 	logger.Info("App", "Name", c.App.Name, "Environment", c.App.Environment, "Debug", c.App.Debug)
 	logger.Info("Database", "Host", c.Database.Host, "Port", c.Database.Port, "User", c.Database.User, "Password", "<redacted>", "Name", c.Database.Name, "SSLMode", c.Database.SSLMode)
-	logger.Info("JWT", "Secret", "<redacted>", "TTLHours", c.JWT.TTLHours)
+	logger.Info("JWT", "Secret", "<redacted>", "AccessTokenTTL", c.JWT.AccessTokenTTL, "RefreshTokenTTL", c.JWT.RefreshTokenTTL)
 	logger.Info("Server", "Port", c.Server.Port, "ReadTimeout", c.Server.ReadTimeout, "WriteTimeout", c.Server.WriteTimeout, "IdleTimeout", c.Server.IdleTimeout, "ShutdownTimeout", c.Server.ShutdownTimeout, "MaxHeaderBytes", c.Server.MaxHeaderBytes)
 	logger.Info("Logging", "Level", c.Logging.Level)
 	logger.Info("RateLimit", "Enabled", c.Ratelimit.Enabled, "Requests", c.Ratelimit.Requests, "Window", c.Ratelimit.Window)

@@ -78,7 +78,7 @@ func run() error {
 		}
 	}
 
-	authService := auth.NewService(&cfg.JWT)
+	authService := auth.NewServiceWithRepo(&cfg.JWT, database)
 	userRepo := user.NewRepository(database)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)

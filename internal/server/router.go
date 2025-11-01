@@ -78,6 +78,8 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 		{
 			authGroup.POST("/register", userHandler.Register)
 			authGroup.POST("/login", userHandler.Login)
+			authGroup.POST("/refresh", userHandler.RefreshToken)
+			authGroup.POST("/logout", auth.AuthMiddleware(authService), userHandler.Logout)
 		}
 
 		usersGroup := v1.Group("/users")
