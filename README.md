@@ -37,7 +37,7 @@ make quick-start  # ← One command. 90 seconds. You're building features.
 **This is the real deal.** The production-grade boilerplate you wish you had from day one:
 
 ✅ **Clean Architecture** — Handler → Service → Repository (GO industry standard)  
-✅ **Security & JWT Auth** — OAuth 2.0 BCP compliant with refresh token rotation, automatic reuse detection, rate limiting, CORS, and input validation ([learn more](https://vahiiiid.github.io/go-rest-api-docs/AUTHENTICATION/))  
+✅ **Security & JWT Auth** — OAuth 2.0 BCP compliant with refresh token rotation, rate limiting, CORS, and input validation
 ✅ **Database Migrations** — PostgreSQL with version control & rollback  
 ✅ **Comprehensive Tests** — Unit + integration with CI/CD pipeline  
 ✅ **Interactive Docs** — Auto-generated Swagger + Postman collection  
@@ -127,12 +127,13 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 
 #### 🔐 Authentication That Actually Works
 
-- **JWT-based auth** (HS256) — Secure, stateless, ready for production
+- **OAuth 2.0 BCP compliant** — JWT-based auth (HS256) with refresh token rotation and automatic reuse detection
+- **Enhanced security** — Refresh tokens with family tracking, secure token invalidation, and breach detection
 - **Context helpers** — Type-safe user extraction (no more casting nightmares)
 - **Password security** — Bcrypt hashing with best-practice cost factor
 - **Rate limiting** — Token-bucket protection against abuse built-in
 
-👉 [Context Helpers Guide](https://vahiiiid.github.io/go-rest-api-docs/CONTEXT_HELPERS/)
+👉 [Authentication Guide](https://vahiiiid.github.io/go-rest-api-docs/AUTHENTICATION/) | [Context Helpers](https://vahiiiid.github.io/go-rest-api-docs/CONTEXT_HELPERS/)
 
 #### 🗄️ Database Setup That Doesn't Fight You
 
