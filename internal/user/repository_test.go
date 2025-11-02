@@ -172,6 +172,7 @@ func TestRepository_Update_NonExistentUser(t *testing.T) {
 	}
 
 	err := repo.Update(context.Background(), user)
+	// GORM does not return an error when updating a non-existent record; it just affects 0 rows.
 	assert.NoError(t, err)
 }
 
@@ -200,6 +201,7 @@ func TestRepository_Delete_NonExistentUser(t *testing.T) {
 	repo := NewRepository(db)
 
 	err := repo.Delete(context.Background(), 999999)
+	// Repository returns an error when no rows are affected (record not found).
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "record not found")
 }
