@@ -76,12 +76,10 @@ func TestGracefulShutdown_Integration(t *testing.T) {
 		t.Skip("skipping integration test (SKIP_INTEGRATION_TESTS is set)")
 	}
 
-	// Skip in CI/Docker where signal handling might not work correctly
 	if os.Getenv("CI") != "" || os.Getenv("DOCKER_ENV") != "" {
 		t.Skip("skipping graceful shutdown test in CI/Docker environment")
 	}
 
-	// Set environment variables for the test
 	envVars := map[string]string{
 		"SKIP_MIGRATION_CHECK":   "true",
 		"JWT_SECRET":             "test-secret-key-for-testing-minimum-32-chars-long",
@@ -94,7 +92,6 @@ func TestGracefulShutdown_Integration(t *testing.T) {
 		"SERVER_SHUTDOWNTIMEOUT": "5",
 	}
 
-	// Save original values and set new ones
 	originals := make(map[string]string)
 	for key, value := range envVars {
 		originals[key] = os.Getenv(key)
@@ -103,7 +100,6 @@ func TestGracefulShutdown_Integration(t *testing.T) {
 		}
 	}
 
-	// Restore original values after test
 	defer func() {
 		for key, value := range originals {
 			var err error

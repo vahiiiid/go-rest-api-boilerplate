@@ -35,7 +35,6 @@ func TestNewSQLiteDB(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Clean up file database if created
 			defer func() {
 				if tt.dbPath != ":memory:" && tt.dbPath != "/nonexistent/path/to/file.db" {
 					_ = os.Remove(tt.dbPath)
@@ -50,7 +49,6 @@ func TestNewSQLiteDB(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, db)
 
-				// Verify database connection works
 				sqlDB, err := db.DB()
 				assert.NoError(t, err)
 				assert.NoError(t, sqlDB.Ping())
@@ -186,7 +184,6 @@ func TestNewPostgresDBFromDatabaseConfig(t *testing.T) {
 }
 
 func TestLoadConfigFromEnv(t *testing.T) {
-	// Save original env values
 	originalValues := map[string]string{
 		"database.host":     viper.GetString("database.host"),
 		"database.port":     viper.GetString("database.port"),
@@ -196,7 +193,6 @@ func TestLoadConfigFromEnv(t *testing.T) {
 		"database.sslmode":  viper.GetString("database.sslmode"),
 	}
 
-	// Restore original values after test
 	defer func() {
 		for key, value := range originalValues {
 			viper.Set(key, value)
@@ -269,7 +265,6 @@ func TestLoadConfigFromEnv(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Set environment variables
 			for key, value := range tt.envVars {
 				viper.Set(key, value)
 			}

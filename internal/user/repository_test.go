@@ -64,7 +64,6 @@ func TestRepository_Create_DuplicateEmail(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewRepository(db)
 
-	// Create first user
 	user1 := &User{
 		Name:         "John Doe",
 		Email:        "john@example.com",
@@ -73,10 +72,9 @@ func TestRepository_Create_DuplicateEmail(t *testing.T) {
 	err := repo.Create(context.Background(), user1)
 	assert.NoError(t, err)
 
-	// Try to create second user with same email
 	user2 := &User{
 		Name:         "Jane Doe",
-		Email:        "john@example.com", // Same email
+		Email:        "john@example.com",
 		PasswordHash: "another_password",
 	}
 	err = repo.Create(context.Background(), user2)
@@ -87,7 +85,6 @@ func TestRepository_FindByEmail(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewRepository(db)
 
-	// Create a test user
 	originalUser := &User{
 		Name:         "John Doe",
 		Email:        "john@example.com",
@@ -115,7 +112,6 @@ func TestRepository_FindByID(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewRepository(db)
 
-	// Create a test user
 	originalUser := &User{
 		Name:         "John Doe",
 		Email:        "john@example.com",
@@ -144,7 +140,6 @@ func TestRepository_Update(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewRepository(db)
 
-	// Create a test user
 	user := &User{
 		Name:         "John Doe",
 		Email:        "john@example.com",
@@ -153,14 +148,12 @@ func TestRepository_Update(t *testing.T) {
 	err := repo.Create(context.Background(), user)
 	require.NoError(t, err)
 
-	// Update user
 	user.Name = "Updated Name"
 	user.Email = "updated@example.com"
 
 	err = repo.Update(context.Background(), user)
 	assert.NoError(t, err)
 
-	// Verify update
 	updatedUser, err := repo.FindByID(context.Background(), user.ID)
 	assert.NoError(t, err)
 	assert.Equal(t, "Updated Name", updatedUser.Name)
@@ -172,15 +165,14 @@ func TestRepository_Update_NonExistentUser(t *testing.T) {
 	repo := NewRepository(db)
 
 	user := &User{
-		ID:           999999, // Non-existent ID
+		ID:           999999,
 		Name:         "Ghost User",
 		Email:        "ghost@example.com",
 		PasswordHash: "password",
 	}
 
 	err := repo.Update(context.Background(), user)
-	// GORM doesn't return error for updating non-existent records
-	// Instead, it returns no error but affects 0 rows
+	// GORM does not return an error when updating a non-existent record; it just affects 0 rows.
 	assert.NoError(t, err)
 }
 
@@ -188,7 +180,6 @@ func TestRepository_Delete(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewRepository(db)
 
-	// Create a test user
 	user := &User{
 		Name:         "John Doe",
 		Email:        "john@example.com",
@@ -197,11 +188,9 @@ func TestRepository_Delete(t *testing.T) {
 	err := repo.Create(context.Background(), user)
 	require.NoError(t, err)
 
-	// Delete user
 	err = repo.Delete(context.Background(), user.ID)
 	assert.NoError(t, err)
 
-	// Verify deletion
 	deletedUser, err := repo.FindByID(context.Background(), user.ID)
 	assert.NoError(t, err)
 	assert.Nil(t, deletedUser)
@@ -211,9 +200,8 @@ func TestRepository_Delete_NonExistentUser(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewRepository(db)
 
-	// Try to delete non-existent user
 	err := repo.Delete(context.Background(), 999999)
-	// Repository returns error when no rows are affected (record not found)
+	// Repository returns an error when no rows are affected (record not found).
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "record not found")
 }

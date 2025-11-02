@@ -97,7 +97,6 @@ func TestService_RegisterUser(t *testing.T) {
 				assert.Equal(t, tt.request.Name, user.Name)
 				assert.Equal(t, tt.request.Email, user.Email)
 				assert.NotEmpty(t, user.PasswordHash)
-				// Verify password was hashed
 				err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(tt.request.Password))
 				assert.NoError(t, err)
 			}
@@ -395,7 +394,6 @@ func TestHashPassword(t *testing.T) {
 	assert.NotEmpty(t, hashedPassword)
 	assert.NotEqual(t, password, hashedPassword)
 
-	// Verify the hash can be used to verify the password
 	err = verifyPassword(hashedPassword, password)
 	assert.NoError(t, err)
 }

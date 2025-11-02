@@ -110,7 +110,6 @@ func TestHandler_Register(t *testing.T) {
 			name:        "invalid JSON format",
 			requestBody: `{"name": "John", "email": invalid-json`,
 			setupMocks: func(ms *MockService, mas *MockAuthService) {
-				// No mocks needed for JSON binding error
 			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -124,10 +123,8 @@ func TestHandler_Register(t *testing.T) {
 			name: "missing required fields",
 			requestBody: RegisterRequest{
 				Name: "John Doe",
-				// Missing email and password
 			},
 			setupMocks: func(ms *MockService, mas *MockAuthService) {
-				// No mocks needed for validation error
 			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -201,7 +198,6 @@ func TestHandler_Register(t *testing.T) {
 			name:        "empty request body",
 			requestBody: `{}`,
 			setupMocks: func(ms *MockService, mas *MockAuthService) {
-				// No mocks needed for validation error
 			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -286,7 +282,6 @@ func TestHandler_GetUser(t *testing.T) {
 			name:   "invalid user ID format",
 			userID: "invalid",
 			setupMocks: func(ms *MockService, mas *MockAuthService) {
-				// No mocks needed for invalid ID
 			},
 			setupContext: func(c *gin.Context) {
 				claims := &auth.Claims{UserID: 1}
@@ -305,10 +300,8 @@ func TestHandler_GetUser(t *testing.T) {
 			name:   "unauthenticated user - no context",
 			userID: "1",
 			setupMocks: func(ms *MockService, mas *MockAuthService) {
-				// No mocks needed for auth check
 			},
 			setupContext: func(c *gin.Context) {
-				// Don't set user context - unauthenticated
 			},
 			expectedStatus: http.StatusForbidden,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -322,10 +315,9 @@ func TestHandler_GetUser(t *testing.T) {
 			name:   "forbidden access - different user",
 			userID: "2",
 			setupMocks: func(ms *MockService, mas *MockAuthService) {
-				// No mocks needed for auth check
 			},
 			setupContext: func(c *gin.Context) {
-				claims := &auth.Claims{UserID: 1} // User 1 trying to access user 2
+				claims := &auth.Claims{UserID: 1}
 				c.Set(auth.KeyUser, claims)
 			},
 			expectedStatus: http.StatusForbidden,
@@ -403,7 +395,6 @@ func TestHandler_GetUser(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 
-			// Create a proper HTTP request
 			req := httptest.NewRequest("GET", "/users/"+tt.userID, nil)
 			c.Request = req
 			c.Params = gin.Params{{Key: "id", Value: tt.userID}}
@@ -550,11 +541,9 @@ func TestHandler_Login(t *testing.T) {
 
 			var requestBody []byte
 			if tt.requestBody != nil {
-				// If requestBody is already a string, use it as raw JSON (for invalid JSON tests)
 				if str, ok := tt.requestBody.(string); ok {
 					requestBody = []byte(str)
 				} else {
-					// Otherwise, marshal it to JSON
 					var err error
 					requestBody, err = json.Marshal(tt.requestBody)
 					assert.NoError(t, err)
@@ -748,11 +737,9 @@ func TestHandler_UpdateUser(t *testing.T) {
 
 			var requestBody []byte
 			if tt.requestBody != nil {
-				// If requestBody is already a string, use it as raw JSON (for invalid JSON tests)
 				if str, ok := tt.requestBody.(string); ok {
 					requestBody = []byte(str)
 				} else {
-					// Otherwise, marshal it to JSON
 					var err error
 					requestBody, err = json.Marshal(tt.requestBody)
 					assert.NoError(t, err)

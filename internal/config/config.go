@@ -99,7 +99,6 @@ func LoadConfig(configPath string) (*Config, error) {
 			env = "development"
 		}
 
-		// First load base config
 		v.SetConfigName("config")
 		v.SetConfigType("yaml")
 		v.AddConfigPath("configs")
@@ -112,7 +111,6 @@ func LoadConfig(configPath string) (*Config, error) {
 			}
 		}
 
-		// Then merge environment-specific config
 		v.SetConfigName(fmt.Sprintf("config.%s", env))
 		if err := v.MergeInConfig(); err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {

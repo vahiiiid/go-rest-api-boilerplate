@@ -41,7 +41,6 @@ func NewRateLimitMiddleware(
 		store = defaultStore
 	}
 
-	// Token-bucket parameters.
 	r := rate.Limit(float64(requests) / window.Seconds())
 	burst := requests
 
@@ -51,7 +50,6 @@ func NewRateLimitMiddleware(
 		lim, ok := store.Get(key)
 		if !ok {
 			lim = rate.NewLimiter(r, burst)
-			// Try to add to store, but don't fail if it doesn't work
 			store.Add(key, lim)
 		}
 
@@ -72,7 +70,6 @@ func NewRateLimitMiddleware(
 			return
 		}
 
-		// Set rate limit headers for successful requests
 		remaining := lim.Tokens()
 		resetAt := time.Now().Add(window).Unix()
 
