@@ -14,17 +14,14 @@ import (
 )
 
 func TestSetupRouter_HealthEndpoint(t *testing.T) {
-	// Create a simple mock user handler
 	mockUserHandler := &user.Handler{}
 
-	// Create a simple mock auth service
 	cfg := &config.JWTConfig{
 		Secret:   "test-secret",
 		TTLHours: 24,
 	}
 	mockAuthService := auth.NewService(cfg)
 
-	// Create a test config
 	testConfig := &config.Config{
 		Server: config.ServerConfig{
 			Port: "8080",
@@ -36,13 +33,10 @@ func TestSetupRouter_HealthEndpoint(t *testing.T) {
 		},
 	}
 
-	// Setup router
 	router := SetupRouter(mockUserHandler, mockAuthService, testConfig)
 
-	// Test that router is not nil
 	assert.NotNil(t, router)
 
-	// Test health endpoint
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/health", nil)
 	router.ServeHTTP(w, req)

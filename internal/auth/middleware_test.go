@@ -65,7 +65,6 @@ func setupTestRouter(authService Service) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
-	// Protected route
 	protected := r.Group("/api")
 	protected.Use(AuthMiddleware(authService))
 	protected.GET("/protected", func(c *gin.Context) {
@@ -189,10 +188,8 @@ func TestAuthMiddleware_ContextSetting(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
-	// Add middleware and a route that checks context
 	r.Use(AuthMiddleware(mockService))
 	r.GET("/test", func(c *gin.Context) {
-		// Check if user claims are set in context
 		user, exists := c.Get(KeyUser)
 		if !exists {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found in context"})

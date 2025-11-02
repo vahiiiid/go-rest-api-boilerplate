@@ -44,7 +44,6 @@ func NewPostgresDB(cfg Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to get database instance: %w", err)
 	}
 
-	// Set connection pool settings
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
@@ -70,7 +69,6 @@ func NewPostgresDBFromDatabaseConfig(cfg config.DatabaseConfig) (*gorm.DB, error
 		return nil, fmt.Errorf("failed to get sql.DB from gorm DB: %w", err)
 	}
 
-	// sensible defaults
 	sqlDB.SetConnMaxLifetime(time.Minute * 30)
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)

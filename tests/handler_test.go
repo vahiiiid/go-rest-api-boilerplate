@@ -173,7 +173,6 @@ func TestRegisterHandler(t *testing.T) {
 func TestLoginHandler(t *testing.T) {
 	router := setupTestRouter(t)
 
-	// First, register a user
 	registerPayload := map[string]string{
 		"name":     "Test User",
 		"email":    "test@example.com",
