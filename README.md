@@ -37,7 +37,7 @@ make quick-start  # ← One command. 90 seconds. You're building features.
 **This is the real deal.** The production-grade boilerplate you wish you had from day one:
 
 ✅ **Clean Architecture** — Handler → Service → Repository (GO industry standard)  
-✅ **Security & JWT Auth** — OAuth 2.0 BCP compliant with refresh token rotation, rate limiting, CORS, and input validation
+✅ **Security & JWT Auth** — OAuth 2.0 BCP compliant with refresh token rotation, rate limiting, CORS
 ✅ **Database Migrations** — PostgreSQL with version control & rollback  
 ✅ **Comprehensive Tests** — Unit + integration with CI/CD pipeline  
 ✅ **Interactive Docs** — Auto-generated Swagger + Postman collection  
