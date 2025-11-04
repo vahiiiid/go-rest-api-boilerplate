@@ -752,3 +752,79 @@ func TestValidate_DatabaseHostRequired(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "database.host is required")
 }
+
+func TestValidate_JWTSecret(t *testing.T) {
+	tests := []struct {
+		name        string
+		environment string
+		jwtSecret   string
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name:        "valid JWT secret in development",
+			environment: "development",
+			jwtSecret:   "abcdefghijklmnopqrstuvwxyz123456",
+			expectError: false,
+		},
+		{
+			name:        "JWT secret too short (< 32 chars)",
+			environment: "development",
+			jwtSecret:   "short",
+			expectError: true,
+			errorMsg:    "JWT_SECRET must be at least 32 characters",
+		},
+		{
+			name:        "JWT secret exactly 32 chars in development",
+			environment: "development",
+			jwtSecret:   "abcdefghijklmnopqrstuvwxyz123456",
+			expectError: false,
+		},
+		{
+			name:        "JWT secret 32 chars in production (too short)",
+			environment: "production",
+			jwtSecret:   "abcdefghijklmnopqrstuvwxyz123456",
+			expectError: true,
+			errorMsg:    "JWT secret must be at least 64 characters long in production",
+		},
+		{
+			name:        "JWT secret 50 chars in production (still too short)",
+			environment: "production",
+			jwtSecret:   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX",
+			expectError: true,
+			errorMsg:    "JWT secret must be at least 64 characters long in production",
+		},
+		{
+			name:        "valid JWT secret 64 chars in production",
+			environment: "production",
+			jwtSecret:   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789AB",
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := Config{
+				App: AppConfig{
+					Environment: tt.environment,
+				},
+				Database: DatabaseConfig{
+					Host:     "localhost",
+					Password: "secure-password",
+					SSLMode:  "require",
+				},
+				JWT: JWTConfig{
+					Secret: tt.jwtSecret,
+				},
+			}
+
+			err := cfg.Validate()
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorMsg)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}

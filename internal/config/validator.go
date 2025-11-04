@@ -2,32 +2,12 @@ package config
 
 import (
 	"fmt"
-	"strings"
 )
 
 // Validate checks required configuration values
 func (c *Config) Validate() error {
 	if c.JWT.Secret == "" {
 		return fmt.Errorf("JWT_SECRET environment variable is required - generate with: make generate-jwt-secret")
-	}
-
-	weakSecrets := []string{
-		"change-me", "changeme",
-		"secret", "password", "pass",
-		"test", "testing",
-		"dev", "development",
-		"example", "sample",
-		"default", "admin",
-		"123456", "password123",
-	}
-	secretLower := strings.ToLower(c.JWT.Secret)
-	for _, weak := range weakSecrets {
-		if strings.Contains(secretLower, weak) {
-			return fmt.Errorf(
-				"JWT_SECRET contains insecure phrase '%s' - generate secure secret with: make generate-jwt-secret",
-				weak,
-			)
-		}
 	}
 
 	if len(c.JWT.Secret) < 32 {

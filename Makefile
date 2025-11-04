@@ -41,7 +41,7 @@ help:
 	@echo ""
 	@echo "🔒 Security Commands:"
 	@echo "  make generate-jwt-secret  - Generate secure JWT secret"
-	@echo "  make check-env           - Check required environment variables"
+	@echo "  make check-env            - Check required environment variables"
 	@echo ""
 	@echo "�️  Database Commands:"
 	@echo "  make migrate-create NAME=<name>  - Create new migration"
