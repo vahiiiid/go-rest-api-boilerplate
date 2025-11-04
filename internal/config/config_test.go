@@ -299,11 +299,10 @@ func TestGetConfigPath(t *testing.T) {
 func TestNewTestConfig(t *testing.T) {
 	config := NewTestConfig()
 
-	// Verify the test config is properly initialized
 	assert.NotNil(t, config)
 	assert.Equal(t, "test", config.App.Environment)
 	assert.Equal(t, "test_db", config.Database.Name)
-	assert.Equal(t, "test-secret", config.JWT.Secret)
+	assert.Equal(t, "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP", config.JWT.Secret)
 	assert.Equal(t, 1, config.JWT.TTLHours)
 	assert.Equal(t, "8081", config.Server.Port)
 }
@@ -422,7 +421,7 @@ func TestServerConfig_TimeoutFields(t *testing.T) {
 database:
   host: "testhost"
 jwt:
-  secret: "test-secret-for-validation-minimum-32-chars"
+  secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
 server:
   port: "8080"
   readtimeout: 10
@@ -448,7 +447,7 @@ server:
 database:
   host: "testhost"
 jwt:
-  secret: "test-secret-for-validation-minimum-32-chars"
+  secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
 server:
   readtimeout: 10
   writetimeout: 10
@@ -479,7 +478,7 @@ server:
 database:
   host: "testhost"
 jwt:
-  secret: "test-secret-for-validation-minimum-32-chars"
+  secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
 server:
   readtimeout: 0
   writetimeout: 0
