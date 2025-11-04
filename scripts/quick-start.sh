@@ -52,9 +52,14 @@ echo "🔐 Checking JWT_SECRET..."
 # Use make command to generate JWT_SECRET if missing
 if ! grep -q "^JWT_SECRET=.\+" .env 2>/dev/null; then
     echo -e "${YELLOW}⚡ Generating secure JWT_SECRET...${NC}"
-    make generate-jwt-secret > /dev/null 2>&1
-    echo -e "${GREEN}✅ JWT_SECRET generated and added to .env${NC}"
-    echo -e "${YELLOW}⚠️  Keep your .env file secure and NEVER commit it to git!${NC}"
+    if make generate-jwt-secret > /dev/null 2>&1; then
+        echo -e "${GREEN}✅ JWT_SECRET generated and added to .env${NC}"
+        echo -e "${YELLOW}⚠️  Keep your .env file secure and NEVER commit it to git!${NC}"
+    else
+        echo -e "${RED}❌ Failed to generate JWT_SECRET${NC}"
+        echo -e "${YELLOW}Please run 'make generate-jwt-secret' manually to see the error${NC}"
+        exit 1
+    fi
 else
     echo -e "${GREEN}✅ JWT_SECRET already configured${NC}"
 fi
