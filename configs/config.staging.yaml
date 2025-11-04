@@ -22,7 +22,6 @@ database:
   sslmode: "require"                # SSL required in staging
 
 jwt:
-  # SECRET REMOVED FOR SECURITY - Must be set via JWT_SECRET environment variable
   ttlhours: 24
 
 server:

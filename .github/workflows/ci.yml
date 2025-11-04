@@ -55,7 +55,7 @@ jobs:
 
     - name: Run tests
       env:
-        JWT_SECRET: "test-jwt-secret-for-ci-pipeline-minimum-32-characters-long-secure-random-string-for-testing"
+        JWT_SECRET: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOPQRSTUVWXYZqrstuvwxyz0123456789"
         DATABASE_PASSWORD: "postgres"
       run: |
         # Run all tests (unit, integration, e2e - anywhere in the project)

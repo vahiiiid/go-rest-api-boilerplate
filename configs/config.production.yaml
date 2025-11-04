@@ -22,7 +22,6 @@ database:
   sslmode: "require"                # SSL required in production
 
 jwt:
-  # SECRET REMOVED FOR SECURITY - REQUIRED: Set via JWT_SECRET (64+ characters)
   ttlhours: 24
 
 server:
