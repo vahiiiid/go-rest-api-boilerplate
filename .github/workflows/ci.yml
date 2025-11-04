@@ -54,6 +54,9 @@ jobs:
       run: go vet ./...
 
     - name: Run tests
+      env:
+        JWT_SECRET: "test-jwt-secret-for-ci-pipeline-minimum-32-characters-long-secure-random-string-for-testing"
+        DATABASE_PASSWORD: "postgres"
       run: |
         # Run all tests (unit, integration, e2e - anywhere in the project)
         # Skip server integration tests that require running database

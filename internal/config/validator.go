@@ -1,11 +1,43 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Validate checks required configuration values
 func (c *Config) Validate() error {
+	// JWT Secret - REQUIRED in ALL environments
 	if c.JWT.Secret == "" {
-		return fmt.Errorf("JWT secret is required (set JWT_SECRET or jwt.secret in config)")
+		return fmt.Errorf("JWT_SECRET environment variable is required - generate with: make generate-jwt-secret")
+	}
+
+	// Reject common weak secrets
+	weakSecrets := []string{
+		"change-me", "changeme",
+		"secret", "password", "pass",
+		"test", "testing",
+		"dev", "development",
+		"example", "sample",
+		"default", "admin",
+		"123456", "password123",
+	}
+	secretLower := strings.ToLower(c.JWT.Secret)
+	for _, weak := range weakSecrets {
+		if strings.Contains(secretLower, weak) {
+			return fmt.Errorf(
+				"JWT_SECRET contains insecure phrase '%s' - generate secure secret with: make generate-jwt-secret",
+				weak,
+			)
+		}
+	}
+
+	// Minimum length for ALL environments
+	if len(c.JWT.Secret) < 32 {
+		return fmt.Errorf(
+			"JWT_SECRET must be at least 32 characters (current: %d)\nGenerate secure secret: make generate-jwt-secret",
+			len(c.JWT.Secret),
+		)
 	}
 
 	if c.Database.Host == "" {
@@ -37,8 +69,9 @@ func (c *Config) Validate() error {
 			return fmt.Errorf("database.password is required in production")
 		}
 
-		if len(c.JWT.Secret) < 32 {
-			return fmt.Errorf("JWT secret must be at least 32 characters long in production (current length: %d)", len(c.JWT.Secret))
+		// Production requires extra-strong secrets
+		if len(c.JWT.Secret) < 64 {
+			return fmt.Errorf("JWT secret must be at least 64 characters long in production (current length: %d)", len(c.JWT.Secret))
 		}
 
 		if c.Database.SSLMode == "disable" {

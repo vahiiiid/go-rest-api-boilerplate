@@ -22,7 +22,10 @@ database:
   sslmode: "require"                # SSL required in production
 
 jwt:
-  secret: ""                        # REQUIRED: set via JWT_SECRET environment variable
+  # SECRET REMOVED FOR SECURITY
+  # REQUIRED: Must be set via JWT_SECRET environment variable
+  # Minimum 64 characters in production
+  # Generate: make generate-jwt-secret
   ttlhours: 24
 
 server:

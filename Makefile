@@ -1,4 +1,4 @@
-.PHONY: help quick-start up down restart logs build test test-coverage lint lint-fix swag migrate-create migrate-up migrate-down migrate-status migrate-goto migrate-force migrate-drop build-binary run-binary clean
+.PHONY: help quick-start up down restart logs build test test-coverage lint lint-fix swag migrate-create migrate-up migrate-down migrate-status migrate-goto migrate-force migrate-drop build-binary run-binary clean generate-jwt-secret check-env
 
 # Container name (from docker-compose.yml)
 CONTAINER_NAME := go_api_app
@@ -39,7 +39,11 @@ help:
 	@echo "  make lint-fix       - Run linter and fix issues"
 	@echo "  make swag           - Generate Swagger docs"
 	@echo ""
-	@echo "🗄️  Database Commands:"
+	@echo "� Security Commands:"
+	@echo "  make generate-jwt-secret  - Generate secure JWT secret"
+	@echo "  make check-env           - Check required environment variables"
+	@echo ""
+	@echo "�🗄️  Database Commands:"
 	@echo "  make migrate-create NAME=<name>  - Create new migration"
 	@echo "  make migrate-up                  - Apply all pending migrations"
 	@echo "  make migrate-down                - Rollback last migration (or STEPS=N for N migrations)"
@@ -358,3 +362,36 @@ clean:
 	@rm -f bin/*
 	@docker compose down -v 2>/dev/null || true
 	@echo "✅ Clean complete"
+
+## generate-jwt-secret: Generate a cryptographically secure JWT secret
+generate-jwt-secret:
+	@echo "🔐 Generating JWT Secrets..."
+	@echo ""
+	@echo "For Development/Staging (32+ chars):"
+	@openssl rand -base64 48 | tr -d '\n' && echo ""
+	@echo ""
+	@echo "For Production (64+ chars - RECOMMENDED):"
+	@openssl rand -base64 96 | tr -d '\n' && echo ""
+	@echo ""
+	@echo "💡 Usage:"
+	@echo "   echo 'JWT_SECRET=<generated-value>' >> .env"
+	@echo ""
+	@echo "⚠️  NEVER commit secrets to git!"
+
+## check-env: Check if required environment variables are set
+check-env:
+	@echo "🔍 Checking required environment variables..."
+	@if [ -f .env ]; then \
+		echo "✅ .env file exists"; \
+		if grep -q "^JWT_SECRET=.\+" .env 2>/dev/null; then \
+			echo "✅ JWT_SECRET is set in .env"; \
+		else \
+			echo "❌ JWT_SECRET is missing or empty in .env"; \
+			echo "   Run: make generate-jwt-secret"; \
+			exit 1; \
+		fi \
+	else \
+		echo "❌ .env file not found"; \
+		echo "   Copy .env.example to .env and set JWT_SECRET"; \
+		exit 1; \
+	fi

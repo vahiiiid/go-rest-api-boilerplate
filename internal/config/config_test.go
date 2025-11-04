@@ -39,14 +39,14 @@ app:
 database:
   host: "testhost"
 jwt:
-  secret: "test-secret-for-validation"
+  secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
 `)
 		cfg, err := LoadConfig(path) // Pass the explicit path
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
 		assert.Equal(t, "Test API", cfg.App.Name)
 		assert.Equal(t, "testhost", cfg.Database.Host)
-		assert.Equal(t, "test-secret-for-validation", cfg.JWT.Secret)
+		assert.Equal(t, "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP", cfg.JWT.Secret)
 	})
 
 	t.Run("environment variables override file values", func(t *testing.T) {
@@ -57,18 +57,18 @@ database:
   host: "filehost"
   port: 5432
 jwt:
-  secret: "file-secret-for-validation"
+  secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
 `)
 		// Set env vars that should override the file
 		t.Setenv("DATABASE_HOST", "envhost")
-		t.Setenv("JWT_SECRET", "env-secret-for-validation")
+		t.Setenv("JWT_SECRET", "QRSTUVWXYZqrstuvwxyzQRSTUVWXYZab")
 
 		cfg, err := LoadConfig(path) // Pass the explicit path
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
-		assert.Equal(t, "envhost", cfg.Database.Host)                // Assert override
-		assert.Equal(t, 5432, cfg.Database.Port)                     // Assert value from file is still present
-		assert.Equal(t, "env-secret-for-validation", cfg.JWT.Secret) // Assert override
+		assert.Equal(t, "envhost", cfg.Database.Host)                        // Assert override
+		assert.Equal(t, 5432, cfg.Database.Port)                             // Assert value from file is still present
+		assert.Equal(t, "QRSTUVWXYZqrstuvwxyzQRSTUVWXYZab", cfg.JWT.Secret) // Assert override
 	})
 
 	t.Run("uses config file defaults when no env var is set", func(t *testing.T) {
@@ -94,7 +94,7 @@ database:
   name: "testdb"
   sslmode: "disable"
 jwt:
-  secret: "file-secret-for-validation"
+  secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
   ttlhours: 24
 server:
   port: "8080"
@@ -115,7 +115,7 @@ ratelimit:
 		assert.Equal(t, 10, cfg.Server.ReadTimeout)
 		assert.Equal(t, "development", cfg.App.Environment)
 		assert.Equal(t, "GRAB API (development)", cfg.App.Name)
-		assert.Equal(t, "file-secret-for-validation", cfg.JWT.Secret)
+		assert.Equal(t, "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP", cfg.JWT.Secret)
 	})
 
 	t.Run("fails validation if required JWT_SECRET is missing", func(t *testing.T) {
@@ -127,7 +127,7 @@ ratelimit:
 
 		_, err := LoadConfig("")
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "JWT secret is required")
+		assert.Contains(t, err.Error(), "JWT_SECRET environment variable is required")
 	})
 
 	t.Run("fails validation if DB_PASSWORD is missing in production", func(t *testing.T) {
@@ -145,7 +145,7 @@ database:
   name: "testdb"
   sslmode: "require"
 jwt:
-  secret: "this-is-a-very-strong-production-secret-for-testing"
+  secret: "PRODabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdef"
   ttlhours: 24
 `)
 		t.Setenv("APP_ENVIRONMENT", "production")
@@ -181,7 +181,7 @@ jwt:
 		_, err := LoadConfig(path)
 		assert.Error(t, err)
 		if err != nil {
-			assert.Contains(t, err.Error(), "JWT secret must be at least 32 characters long in production")
+			assert.Contains(t, err.Error(), "JWT_SECRET must be at least 32 characters")
 		}
 	})
 
@@ -205,7 +205,7 @@ app:
 database:
   host: "testhost"
 jwt:
-  secret: "default-secret"
+  secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
 `)
 		createTempConfigFile(t, configsDir, "config.production.yaml", `
 app:
@@ -219,7 +219,7 @@ database:
   name: "testdb"
   sslmode: "require"
 jwt:
-  secret: "this-is-a-very-strong-production-secret-for-testing-purposes-only"
+  secret: "qrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzAB"
   ttlhours: 24
 `)
 		// Temporarily change working directory so LoadConfig can find the "configs" folder
@@ -513,7 +513,7 @@ func TestValidate_TimeoutFields(t *testing.T) {
 					Host: "localhost",
 				},
 				JWT: JWTConfig{
-					Secret: "test-secret-minimum-32-characters",
+					Secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP",
 				},
 				Server: ServerConfig{
 					ReadTimeout:     10,
@@ -533,7 +533,7 @@ func TestValidate_TimeoutFields(t *testing.T) {
 					Host: "localhost",
 				},
 				JWT: JWTConfig{
-					Secret: "test-secret-minimum-32-characters",
+					Secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP",
 				},
 				Server: ServerConfig{
 					ReadTimeout: -1,
@@ -550,7 +550,7 @@ func TestValidate_TimeoutFields(t *testing.T) {
 					Host: "localhost",
 				},
 				JWT: JWTConfig{
-					Secret: "test-secret-minimum-32-characters",
+					Secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP",
 				},
 				Server: ServerConfig{
 					WriteTimeout: -1,
@@ -567,7 +567,7 @@ func TestValidate_TimeoutFields(t *testing.T) {
 					Host: "localhost",
 				},
 				JWT: JWTConfig{
-					Secret: "test-secret-minimum-32-characters",
+					Secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP",
 				},
 				Server: ServerConfig{
 					IdleTimeout: -1,
@@ -584,7 +584,7 @@ func TestValidate_TimeoutFields(t *testing.T) {
 					Host: "localhost",
 				},
 				JWT: JWTConfig{
-					Secret: "test-secret-minimum-32-characters",
+					Secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP",
 				},
 				Server: ServerConfig{
 					ShutdownTimeout: -1,
@@ -601,7 +601,7 @@ func TestValidate_TimeoutFields(t *testing.T) {
 					Host: "localhost",
 				},
 				JWT: JWTConfig{
-					Secret: "test-secret-minimum-32-characters",
+					Secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP",
 				},
 				Server: ServerConfig{
 					MaxHeaderBytes: -1,
@@ -618,7 +618,7 @@ func TestValidate_TimeoutFields(t *testing.T) {
 					Host: "localhost",
 				},
 				JWT: JWTConfig{
-					Secret: "test-secret-minimum-32-characters",
+					Secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP",
 				},
 				Server: ServerConfig{
 					ReadTimeout:     0,
@@ -680,7 +680,7 @@ database:
   name: "testdb"
   sslmode: "disable"
 jwt:
-  secret: "test-secret-minimum-32-characters"
+  secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
   ttlhours: 24
 server:
   port: "8080"
@@ -724,7 +724,7 @@ func TestValidate_ProductionSSLMode(t *testing.T) {
 			SSLMode:  "disable",
 		},
 		JWT: JWTConfig{
-			Secret: "this-is-a-very-long-secret-key-for-production-use-32-chars",
+			Secret: "longjwtauthenticationkeywithatleastsixtyfourcharsforprodvalidation",
 		},
 	}
 
@@ -742,7 +742,7 @@ func TestValidate_DatabaseHostRequired(t *testing.T) {
 			Host: "",
 		},
 		JWT: JWTConfig{
-			Secret: "test-secret-minimum-32-characters",
+			Secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP",
 		},
 	}
 

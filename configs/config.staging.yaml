@@ -19,10 +19,12 @@ database:
   user: "postgres"
   password: "postgres"              # Default for staging (override with DATABASE_PASSWORD)
   name: "grab"
-  sslmode: "disable"                # SSL can be disabled for staging
+  sslmode: "require"                # SSL required in staging
 
 jwt:
-  secret: "change-me"               # Default for staging (override with JWT_SECRET)
+  # SECRET REMOVED FOR SECURITY
+  # Must be set via JWT_SECRET environment variable
+  # Generate: make generate-jwt-secret
   ttlhours: 24
 
 server:
