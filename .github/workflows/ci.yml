@@ -55,7 +55,7 @@ jobs:
 
     - name: Run tests
       env:
-        JWT_SECRET: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOPQRSTUVWXYZqrstuvwxyz0123456789"
+        JWT_SECRET: "xKyLmNpQrStUvWzAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ"
         DATABASE_PASSWORD: "postgres"
       run: |
         # Run all tests (unit, integration, e2e - anywhere in the project)
