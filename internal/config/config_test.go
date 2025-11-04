@@ -420,6 +420,7 @@ func TestServerConfig_TimeoutFields(t *testing.T) {
 		path := createTempConfigFile(t, tempDir, "config.yaml", `
 database:
   host: "testhost"
+  password: "postgres"
 jwt:
   secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
 server:
@@ -446,6 +447,7 @@ server:
 		path := createTempConfigFile(t, tempDir, "config.yaml", `
 database:
   host: "testhost"
+  password: "postgres"
 jwt:
   secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
 server:
@@ -477,6 +479,7 @@ server:
 		path := createTempConfigFile(t, tempDir, "config.yaml", `
 database:
   host: "testhost"
+  password: "postgres"
 jwt:
   secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
 server:
