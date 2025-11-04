@@ -7,12 +7,10 @@ import (
 
 // Validate checks required configuration values
 func (c *Config) Validate() error {
-	// JWT Secret - REQUIRED in ALL environments
 	if c.JWT.Secret == "" {
 		return fmt.Errorf("JWT_SECRET environment variable is required - generate with: make generate-jwt-secret")
 	}
 
-	// Reject common weak secrets
 	weakSecrets := []string{
 		"change-me", "changeme",
 		"secret", "password", "pass",
@@ -32,7 +30,6 @@ func (c *Config) Validate() error {
 		}
 	}
 
-	// Minimum length for ALL environments
 	if len(c.JWT.Secret) < 32 {
 		return fmt.Errorf(
 			"JWT_SECRET must be at least 32 characters (current: %d)\nGenerate secure secret: make generate-jwt-secret",
@@ -69,7 +66,6 @@ func (c *Config) Validate() error {
 			return fmt.Errorf("database.password is required in production")
 		}
 
-		// Production requires extra-strong secrets
 		if len(c.JWT.Secret) < 64 {
 			return fmt.Errorf("JWT secret must be at least 64 characters long in production (current length: %d)", len(c.JWT.Secret))
 		}

@@ -66,8 +66,8 @@ jwt:
 		cfg, err := LoadConfig(path) // Pass the explicit path
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
-		assert.Equal(t, "envhost", cfg.Database.Host)                        // Assert override
-		assert.Equal(t, 5432, cfg.Database.Port)                             // Assert value from file is still present
+		assert.Equal(t, "envhost", cfg.Database.Host)                       // Assert override
+		assert.Equal(t, 5432, cfg.Database.Port)                            // Assert value from file is still present
 		assert.Equal(t, "QRSTUVWXYZqrstuvwxyzQRSTUVWXYZab", cfg.JWT.Secret) // Assert override
 	})
 
