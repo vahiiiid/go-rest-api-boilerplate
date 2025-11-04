@@ -37,7 +37,7 @@ make quick-start  # ← One command. 90 seconds. You're building features.
 **This is the real deal.** The production-grade boilerplate you wish you had from day one:
 
 ✅ **Clean Architecture** — Handler → Service → Repository (GO industry standard)  
-✅ **Security & JWT Auth** — OAuth 2.0 BCP compliant with refresh token rotation, rate limiting, CORS
+✅ **Security & JWT Auth** — OAuth 2.0 BCP compliant with refresh token rotation, rate limiting, CORS  
 ✅ **Database Migrations** — PostgreSQL with version control & rollback  
 ✅ **Comprehensive Tests** — Unit + integration with CI/CD pipeline  
 ✅ **Interactive Docs** — Auto-generated Swagger + Postman collection  
@@ -288,20 +288,6 @@ Ready for:
 - **Any VPS** — Using Docker Compose
 
 👉 **[Deployment Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** for step-by-step instructions
-
----
-
-## 🎃 Hacktoberfest 2025
-
-<div align="center">
-
-![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2025-orange?style=for-the-badge&logo=digitalocean&logoColor=white)
-
-**We're participating in Hacktoberfest 2025! 🚀**
-
-</div>
-
-We welcome contributions from developers of all skill levels! Pick up any [open issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) labeled `hacktoberfest` or `good first issue`, fork the repository, make your changes, and submit a pull request. Whether it's bug fixes, new features, documentation improvements, or test enhancements - every contribution counts! 🎉
 
 ---
 
