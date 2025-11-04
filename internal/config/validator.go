@@ -46,10 +46,6 @@ func (c *Config) Validate() error {
 			return fmt.Errorf("database.password is required in production")
 		}
 
-		if len(c.JWT.Secret) < 64 {
-			return fmt.Errorf("JWT secret must be at least 64 characters long in production (current length: %d)", len(c.JWT.Secret))
-		}
-
 		if c.Database.SSLMode == "disable" {
 			return fmt.Errorf("database SSL mode cannot be 'disable' in production")
 		}

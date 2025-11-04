@@ -40,7 +40,7 @@ help:
 	@echo "  make swag           - Generate Swagger docs"
 	@echo ""
 	@echo "🔒 Security Commands:"
-	@echo "  make generate-jwt-secret  - Generate secure JWT secret"
+	@echo "  make generate-jwt-secret  - Generate and set JWT secret in .env"
 	@echo "  make check-env            - Check required environment variables"
 	@echo ""
 	@echo "�️  Database Commands:"
@@ -363,20 +363,29 @@ clean:
 	@docker compose down -v 2>/dev/null || true
 	@echo "✅ Clean complete"
 
-## generate-jwt-secret: Generate a cryptographically secure JWT secret
+## generate-jwt-secret: Generate and set JWT_SECRET in .env if not exists
 generate-jwt-secret:
-	@echo "🔐 Generating JWT Secrets..."
-	@echo ""
-	@echo "For Development/Staging (32+ chars):"
-	@openssl rand -base64 48 | tr -d '\n' && echo ""
-	@echo ""
-	@echo "For Production (64+ chars - RECOMMENDED):"
-	@openssl rand -base64 96 | tr -d '\n' && echo ""
-	@echo ""
-	@echo "💡 Usage:"
-	@echo "   echo 'JWT_SECRET=<generated-value>' >> .env"
-	@echo ""
-	@echo "⚠️  NEVER commit secrets to git!"
+	@if [ ! -f .env ]; then \
+		echo "� Creating .env file from .env.example..."; \
+		cp .env.example .env 2>/dev/null || touch .env; \
+	fi
+	@if grep -q "^JWT_SECRET=.\+" .env 2>/dev/null; then \
+		echo "✅ JWT_SECRET already exists in .env"; \
+		echo "💡 Current value is set (not displayed for security)"; \
+		echo ""; \
+		echo "To regenerate, remove the current JWT_SECRET line from .env first"; \
+	else \
+		echo "🔐 Generating JWT secret..."; \
+		SECRET=$$(openssl rand -base64 48 | tr -d '\n'); \
+		if grep -q "^JWT_SECRET=" .env 2>/dev/null; then \
+			sed -i.bak "s|^JWT_SECRET=.*|JWT_SECRET=$$SECRET|" .env && rm -f .env.bak; \
+		else \
+			echo "JWT_SECRET=$$SECRET" >> .env; \
+		fi; \
+		echo "✅ JWT_SECRET generated and saved to .env"; \
+		echo ""; \
+		echo "⚠️  NEVER commit .env to git!"; \
+	fi
 
 ## check-env: Check if required environment variables are set
 check-env:

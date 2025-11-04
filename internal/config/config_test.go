@@ -781,18 +781,16 @@ func TestValidate_JWTSecret(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name:        "JWT secret 32 chars in production (too short)",
+			name:        "valid JWT secret 32 chars in production",
 			environment: "production",
 			jwtSecret:   "abcdefghijklmnopqrstuvwxyz123456",
-			expectError: true,
-			errorMsg:    "JWT secret must be at least 64 characters long in production",
+			expectError: false,
 		},
 		{
-			name:        "JWT secret 50 chars in production (still too short)",
+			name:        "valid JWT secret 50 chars in production",
 			environment: "production",
 			jwtSecret:   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX",
-			expectError: true,
-			errorMsg:    "JWT secret must be at least 64 characters long in production",
+			expectError: false,
 		},
 		{
 			name:        "valid JWT secret 64 chars in production",

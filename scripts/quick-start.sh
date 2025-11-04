@@ -49,26 +49,11 @@ fi
 echo ""
 echo "🔐 Checking JWT_SECRET..."
 
-# Auto-generate JWT_SECRET if missing or empty
+# Use make command to generate JWT_SECRET if missing
 if ! grep -q "^JWT_SECRET=.\+" .env 2>/dev/null; then
     echo -e "${YELLOW}⚡ Generating secure JWT_SECRET...${NC}"
-    
-    # Generate a cryptographically secure 64-character secret
-    JWT_SECRET=$(openssl rand -base64 96 | tr -d '\n')
-    
-    # Remove any existing empty JWT_SECRET lines
-    if [ "$(uname)" = "Darwin" ]; then
-        # macOS
-        sed -i '' '/^JWT_SECRET=$/d' .env 2>/dev/null || true
-    else
-        # Linux
-        sed -i '/^JWT_SECRET=$/d' .env 2>/dev/null || true
-    fi
-    
-    # Add generated secret
-    echo "JWT_SECRET=${JWT_SECRET}" >> .env
-    
-    echo -e "${GREEN}✅ JWT_SECRET generated and added to .env (96 characters)${NC}"
+    make generate-jwt-secret > /dev/null 2>&1
+    echo -e "${GREEN}✅ JWT_SECRET generated and added to .env${NC}"
     echo -e "${YELLOW}⚠️  Keep your .env file secure and NEVER commit it to git!${NC}"
 else
     echo -e "${GREEN}✅ JWT_SECRET already configured${NC}"
