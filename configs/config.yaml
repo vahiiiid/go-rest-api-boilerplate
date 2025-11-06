@@ -53,6 +53,6 @@ migrations:
   locktimeout: 30                   # Override with MIGRATIONS_LOCKTIMEOUT (seconds)
 
 health:
-  timeout: "5s"                     # Override with HEALTH_TIMEOUT
+  timeout: 5                        # Override with HEALTH_TIMEOUT (seconds)
   database_check_enabled: true      # Override with HEALTH_DATABASE_CHECK_ENABLED
  

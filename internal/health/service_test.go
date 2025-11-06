@@ -91,12 +91,54 @@ func TestService_GetReadiness(t *testing.T) {
 }
 
 func TestService_FormatUptime(t *testing.T) {
-	svc := &service{
-		startTime: time.Now().Add(-1 * time.Hour).Add(-30 * time.Minute),
+	tests := []struct {
+		name     string
+		duration time.Duration
+		contains []string
+	}{
+		{
+			name:     "hours and minutes",
+			duration: 1*time.Hour + 30*time.Minute,
+			contains: []string{"1h", "30m"},
+		},
+		{
+			name:     "days hours and minutes",
+			duration: 25*time.Hour + 45*time.Minute,
+			contains: []string{"1d", "1h", "45m"},
+		},
+		{
+			name:     "only minutes",
+			duration: 45 * time.Minute,
+			contains: []string{"45m"},
+		},
+		{
+			name:     "seconds only rounds to minutes",
+			duration: 30 * time.Second,
+			contains: []string{"0m"},
+		},
+		{
+			name:     "multiple days",
+			duration: 73*time.Hour + 20*time.Minute,
+			contains: []string{"3d", "1h", "20m"},
+		},
+		{
+			name:     "exactly one day",
+			duration: 24 * time.Hour,
+			contains: []string{"1d", "0h", "0m"},
+		},
 	}
 
-	uptime := svc.formatUptime()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			svc := &service{
+				startTime: time.Now().Add(-tt.duration),
+			}
 
-	assert.Contains(t, uptime, "1h")
-	assert.Contains(t, uptime, "30m")
+			uptime := svc.formatUptime()
+
+			for _, substr := range tt.contains {
+				assert.Contains(t, uptime, substr)
+			}
+		})
+	}
 }
