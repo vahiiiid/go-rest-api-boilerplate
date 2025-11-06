@@ -27,9 +27,8 @@ database:
   sslmode: "disable"                # Override with DATABASE_SSLMODE
 
 jwt:
-  secret: "change-me"              # Override with JWT_SECRET (required for production)
-  access_token_ttl: "15m"          # Override with JWT_ACCESS_TOKEN_TTL (15 minutes - industry standard)
-  refresh_token_ttl: "168h"        # Override with JWT_REFRESH_TOKEN_TTL (7 days - industry standard)
+  access_token_ttl: "15m"           # Override with JWT_ACCESS_TOKEN_TTL
+  refresh_token_ttl: "168h"         # Override with JWT_REFRESH_TOKEN_TTL
   ttlhours: 24                      # Deprecated: use access_token_ttl instead
 
 server:
@@ -44,7 +43,7 @@ logging:
   level: "info"                     # Override with LOGGING_LEVEL (debug|info|warn|error)
 
 ratelimit:
-  enabled: true                    # Override with RATELIMIT_ENABLED
+  enabled: true                     # Override with RATELIMIT_ENABLED
   requests: 100                     # Override with RATELIMIT_REQUESTS
   window: "1m"                      # Override with RATELIMIT_WINDOW
 

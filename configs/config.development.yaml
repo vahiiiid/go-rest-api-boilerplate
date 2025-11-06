@@ -22,7 +22,6 @@ database:
   sslmode: "disable"                # SSL disabled for development convenience
 
 jwt:
-  secret: "change-me"               # Default for development (override with JWT_SECRET)
   ttlhours: 24
 
 server:

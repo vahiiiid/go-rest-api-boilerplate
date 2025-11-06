@@ -39,13 +39,29 @@ echo ""
 
 # Create .env file if it doesn't exist
 if [ ! -f .env ]; then
-    echo "Creating .env file from .env.example..."
+    echo "📝 Creating .env file from .env.example..."
     cp .env.example .env
     echo -e "${GREEN}✅ .env file created${NC}"
-    echo ""
-    echo -e "${YELLOW}⚠️  Please review .env and update JWT_SECRET for production${NC}"
 else
     echo -e "${GREEN}✅ .env file exists${NC}"
+fi
+
+echo ""
+echo "🔐 Checking JWT_SECRET..."
+
+# Use make command to generate JWT_SECRET if missing
+if ! grep -q "^JWT_SECRET=.\+" .env 2>/dev/null; then
+    echo -e "${YELLOW}⚡ Generating secure JWT_SECRET...${NC}"
+    if make generate-jwt-secret > /dev/null 2>&1; then
+        echo -e "${GREEN}✅ JWT_SECRET generated and added to .env${NC}"
+        echo -e "${YELLOW}⚠️  Keep your .env file secure and NEVER commit it to git!${NC}"
+    else
+        echo -e "${RED}❌ Failed to generate JWT_SECRET${NC}"
+        echo -e "${YELLOW}Please run 'make generate-jwt-secret' manually to see the error${NC}"
+        exit 1
+    fi
+else
+    echo -e "${GREEN}✅ JWT_SECRET already configured${NC}"
 fi
 
 echo ""

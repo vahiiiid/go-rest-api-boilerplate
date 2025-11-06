@@ -1,11 +1,20 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Validate checks required configuration values
 func (c *Config) Validate() error {
 	if c.JWT.Secret == "" {
-		return fmt.Errorf("JWT secret is required (set JWT_SECRET or jwt.secret in config)")
+		return fmt.Errorf("JWT_SECRET environment variable is required - generate with: make generate-jwt-secret")
+	}
+
+	if len(c.JWT.Secret) < 32 {
+		return fmt.Errorf(
+			"JWT_SECRET must be at least 32 characters (current: %d)\nGenerate secure secret: make generate-jwt-secret",
+			len(c.JWT.Secret),
+		)
 	}
 
 	if c.Database.Host == "" {
@@ -35,10 +44,6 @@ func (c *Config) Validate() error {
 	if c.App.Environment == "production" {
 		if c.Database.Password == "" {
 			return fmt.Errorf("database.password is required in production")
-		}
-
-		if len(c.JWT.Secret) < 32 {
-			return fmt.Errorf("JWT secret must be at least 32 characters long in production (current length: %d)", len(c.JWT.Secret))
 		}
 
 		if c.Database.SSLMode == "disable" {

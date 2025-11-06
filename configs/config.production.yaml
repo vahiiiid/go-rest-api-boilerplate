@@ -22,7 +22,6 @@ database:
   sslmode: "require"                # SSL required in production
 
 jwt:
-  secret: ""                        # REQUIRED: set via JWT_SECRET environment variable
   ttlhours: 24
 
 server:

@@ -16,7 +16,7 @@ func NewTestConfig() *Config {
 			SSLMode: "disable",
 		},
 		JWT: JWTConfig{
-			Secret:   "test-secret",
+			Secret:   "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP",
 			TTLHours: 1,
 		},
 		Server: ServerConfig{

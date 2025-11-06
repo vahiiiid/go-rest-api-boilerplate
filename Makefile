@@ -1,4 +1,4 @@
-.PHONY: help quick-start up down restart logs build test test-coverage lint lint-fix swag migrate-create migrate-up migrate-down migrate-status migrate-goto migrate-force migrate-drop build-binary run-binary clean
+.PHONY: help quick-start up down restart logs build test test-coverage lint lint-fix swag migrate-create migrate-up migrate-down migrate-status migrate-goto migrate-force migrate-drop build-binary run-binary clean generate-jwt-secret check-env
 
 # Container name (from docker-compose.yml)
 CONTAINER_NAME := go_api_app
@@ -39,7 +39,11 @@ help:
 	@echo "  make lint-fix       - Run linter and fix issues"
 	@echo "  make swag           - Generate Swagger docs"
 	@echo ""
-	@echo "🗄️  Database Commands:"
+	@echo "🔒 Security Commands:"
+	@echo "  make generate-jwt-secret  - Generate and set JWT secret in .env"
+	@echo "  make check-env            - Check required environment variables"
+	@echo ""
+	@echo "�️  Database Commands:"
 	@echo "  make migrate-create NAME=<name>  - Create new migration"
 	@echo "  make migrate-up                  - Apply all pending migrations"
 	@echo "  make migrate-down                - Rollback last migration (or STEPS=N for N migrations)"
@@ -358,3 +362,45 @@ clean:
 	@rm -f bin/*
 	@docker compose down -v 2>/dev/null || true
 	@echo "✅ Clean complete"
+
+## generate-jwt-secret: Generate and set JWT_SECRET in .env if not exists
+generate-jwt-secret:
+	@if [ ! -f .env ]; then \
+		echo "� Creating .env file from .env.example..."; \
+		cp .env.example .env 2>/dev/null || touch .env; \
+	fi
+	@if grep -q "^JWT_SECRET=.\+" .env 2>/dev/null; then \
+		echo "✅ JWT_SECRET already exists in .env"; \
+		echo "💡 Current value is set (not displayed for security)"; \
+		echo ""; \
+		echo "To regenerate, remove the current JWT_SECRET line from .env first"; \
+	else \
+		echo "🔐 Generating JWT secret..."; \
+		SECRET=$$(openssl rand -base64 48 | tr -d '\n'); \
+		if grep -q "^JWT_SECRET=" .env 2>/dev/null; then \
+			sed -i.bak "s|^JWT_SECRET=.*|JWT_SECRET=$$SECRET|" .env && rm -f .env.bak; \
+		else \
+			echo "JWT_SECRET=$$SECRET" >> .env; \
+		fi; \
+		echo "✅ JWT_SECRET generated and saved to .env"; \
+		echo ""; \
+		echo "⚠️  NEVER commit .env to git!"; \
+	fi
+
+## check-env: Check if required environment variables are set
+check-env:
+	@echo "🔍 Checking required environment variables..."
+	@if [ -f .env ]; then \
+		echo "✅ .env file exists"; \
+		if grep -q "^JWT_SECRET=.\+" .env 2>/dev/null; then \
+			echo "✅ JWT_SECRET is set in .env"; \
+		else \
+			echo "❌ JWT_SECRET is missing or empty in .env"; \
+			echo "   Run: make generate-jwt-secret"; \
+			exit 1; \
+		fi \
+	else \
+		echo "❌ .env file not found"; \
+		echo "   Copy .env.example to .env and set JWT_SECRET"; \
+		exit 1; \
+	fi
