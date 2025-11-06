@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
@@ -14,6 +16,7 @@ import (
 )
 
 func TestSetupRouter_HealthEndpoint(t *testing.T) {
+	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	mockUserHandler := &user.Handler{}
 
 	cfg := &config.JWTConfig{
@@ -23,6 +26,9 @@ func TestSetupRouter_HealthEndpoint(t *testing.T) {
 	mockAuthService := auth.NewService(cfg)
 
 	testConfig := &config.Config{
+		App: config.AppConfig{
+			Environment: "test",
+		},
 		Server: config.ServerConfig{
 			Port: "8080",
 		},
@@ -31,9 +37,13 @@ func TestSetupRouter_HealthEndpoint(t *testing.T) {
 			Requests: 100,
 			Window:   time.Minute,
 		},
+		Health: config.HealthConfig{
+			Timeout:              5 * time.Second,
+			DatabaseCheckEnabled: true,
+		},
 	}
 
-	router := SetupRouter(mockUserHandler, mockAuthService, testConfig)
+	router := SetupRouter(mockUserHandler, mockAuthService, testConfig, db)
 
 	assert.NotNil(t, router)
 
@@ -43,5 +53,5 @@ func TestSetupRouter_HealthEndpoint(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Contains(t, w.Body.String(), "status")
-	assert.Contains(t, w.Body.String(), "ok")
+	assert.Contains(t, w.Body.String(), "healthy")
 }

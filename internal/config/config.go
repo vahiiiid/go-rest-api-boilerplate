@@ -20,6 +20,7 @@ type Config struct {
 	Logging    LoggingConfig    `mapstructure:"logging" yaml:"logging"`
 	Ratelimit  RateLimitConfig  `mapstructure:"ratelimit" yaml:"ratelimit"`
 	Migrations MigrationsConfig `mapstructure:"migrations" yaml:"migrations"`
+	Health     HealthConfig     `mapstructure:"health" yaml:"health"`
 }
 
 // AppConfig holds application-related configuration.
@@ -74,6 +75,12 @@ type MigrationsConfig struct {
 	Directory   string `mapstructure:"directory" yaml:"directory"`
 	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`
 	LockTimeout int    `mapstructure:"locktimeout" yaml:"locktimeout"`
+}
+
+// HealthConfig holds health check configuration
+type HealthConfig struct {
+	Timeout              time.Duration `mapstructure:"timeout" yaml:"timeout"`
+	DatabaseCheckEnabled bool          `mapstructure:"database_check_enabled" yaml:"database_check_enabled"`
 }
 
 // LoadConfig loads configuration using Viper. If configPath is non-empty it

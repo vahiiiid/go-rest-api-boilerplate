@@ -83,7 +83,7 @@ func run() error {
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
-	router := server.SetupRouter(userHandler, authService, cfg)
+	router := server.SetupRouter(userHandler, authService, cfg, database)
 
 	port := cfg.Server.Port
 	if port == "" {
@@ -108,6 +108,8 @@ func run() error {
 		logger.Info("Server starting", "address", srv.Addr)
 		logger.Info("Swagger UI available", "url", fmt.Sprintf("http://localhost:%s/swagger/index.html", port))
 		logger.Info("Health check available", "url", fmt.Sprintf("http://localhost:%s/health", port))
+		logger.Info("Liveness probe available", "url", fmt.Sprintf("http://localhost:%s/health/live", port))
+		logger.Info("Readiness probe available", "url", fmt.Sprintf("http://localhost:%s/health/ready", port))
 
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Error("Server error", "error", err)

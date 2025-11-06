@@ -50,4 +50,9 @@ ratelimit:
 migrations:
   directory: "./migrations"         # Override with MIGRATIONS_DIRECTORY
   timeout: 600                      # Override with MIGRATIONS_TIMEOUT (seconds)
-  locktimeout: 30                   # Override with MIGRATIONS_LOCKTIMEOUT (seconds) 
+  locktimeout: 30                   # Override with MIGRATIONS_LOCKTIMEOUT (seconds)
+
+health:
+  timeout: "5s"                     # Override with HEALTH_TIMEOUT
+  database_check_enabled: true      # Override with HEALTH_DATABASE_CHECK_ENABLED
+ 
