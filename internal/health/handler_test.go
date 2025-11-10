@@ -50,7 +50,7 @@ func TestHandler_Health(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockSvc := &mockService{response: tt.response}
-			handler := NewHandler(mockSvc, 5*time.Second)
+			handler := NewHandler(mockSvc)
 
 			gin.SetMode(gin.TestMode)
 			router := gin.New()
@@ -78,7 +78,7 @@ func TestHandler_Live(t *testing.T) {
 			Checks:      make(map[string]CheckResult),
 		},
 	}
-	handler := NewHandler(mockSvc, 5*time.Second)
+	handler := NewHandler(mockSvc)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
@@ -146,7 +146,7 @@ func TestHandler_Ready(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockSvc := &mockService{response: tt.response}
-			handler := NewHandler(mockSvc, 5*time.Second)
+			handler := NewHandler(mockSvc)
 
 			gin.SetMode(gin.TestMode)
 			router := gin.New()

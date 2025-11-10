@@ -39,9 +39,13 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 	corsConfig.AllowHeaders = append(corsConfig.AllowHeaders, "Authorization")
 	router.Use(cors.New(corsConfig))
 
-	dbChecker := health.NewDatabaseChecker(db)
-	healthService := health.NewService([]health.Checker{dbChecker}, "1.2.0", cfg.App.Environment)
-	healthHandler := health.NewHandler(healthService, cfg.Health.Timeout)
+	var checkers []health.Checker
+	if cfg.Health.DatabaseCheckEnabled {
+		dbChecker := health.NewDatabaseChecker(db)
+		checkers = append(checkers, dbChecker)
+	}
+	healthService := health.NewService(checkers, cfg.App.Version, cfg.App.Environment)
+	healthHandler := health.NewHandler(healthService)
 
 	router.GET("/health", healthHandler.Health)
 	router.GET("/health/live", healthHandler.Live)

@@ -24,6 +24,7 @@ type Config struct {
 
 type AppConfig struct {
 	Name        string `mapstructure:"name" yaml:"name"`
+	Version     string `mapstructure:"version" yaml:"version"`
 	Environment string `mapstructure:"environment" yaml:"environment"`
 	Debug       bool   `mapstructure:"debug" yaml:"debug"`
 }
@@ -70,8 +71,8 @@ type MigrationsConfig struct {
 }
 
 type HealthConfig struct {
-	Timeout              time.Duration `mapstructure:"timeout" yaml:"timeout"`
-	DatabaseCheckEnabled bool          `mapstructure:"database_check_enabled" yaml:"database_check_enabled"`
+	Timeout              int  `mapstructure:"timeout" yaml:"timeout"`
+	DatabaseCheckEnabled bool `mapstructure:"database_check_enabled" yaml:"database_check_enabled"`
 }
 
 // LoadConfig loads configuration using Viper. If configPath is non-empty it
@@ -140,6 +141,7 @@ func LoadConfig(configPath string) (*Config, error) {
 func bindEnvVariables(v *viper.Viper) {
 	envBindings := map[string]string{
 		"app.name":                      "APP_NAME",
+		"app.version":                   "APP_VERSION",
 		"app.environment":               "APP_ENVIRONMENT",
 		"app.debug":                     "APP_DEBUG",
 		"database.host":                 "DATABASE_HOST",

@@ -48,7 +48,7 @@ func (d *DatabaseChecker) Check(ctx context.Context) CheckResult {
 
 	duration := time.Since(start)
 	status := CheckPass
-	message := "PostgreSQL connection healthy"
+	message := "Database connection healthy"
 
 	if duration > 500*time.Millisecond {
 		status = CheckFail

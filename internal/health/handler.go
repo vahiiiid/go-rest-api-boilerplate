@@ -2,20 +2,17 @@ package health
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
 	service Service
-	timeout time.Duration
 }
 
-func NewHandler(service Service, timeout time.Duration) *Handler {
+func NewHandler(service Service) *Handler {
 	return &Handler{
 		service: service,
-		timeout: timeout,
 	}
 }
 

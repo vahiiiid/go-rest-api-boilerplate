@@ -16,7 +16,10 @@ import (
 )
 
 func TestSetupRouter_HealthEndpoint(t *testing.T) {
-	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("Failed to open database: %v", err)
+	}
 	mockUserHandler := &user.Handler{}
 
 	cfg := &config.JWTConfig{
@@ -27,6 +30,7 @@ func TestSetupRouter_HealthEndpoint(t *testing.T) {
 
 	testConfig := &config.Config{
 		App: config.AppConfig{
+			Version:     "1.0.0",
 			Environment: "test",
 		},
 		Server: config.ServerConfig{
@@ -38,7 +42,7 @@ func TestSetupRouter_HealthEndpoint(t *testing.T) {
 			Window:   time.Minute,
 		},
 		Health: config.HealthConfig{
-			Timeout:              5 * time.Second,
+			Timeout:              5,
 			DatabaseCheckEnabled: true,
 		},
 	}

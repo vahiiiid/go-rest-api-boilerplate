@@ -15,6 +15,7 @@
 
 app:
   name: "GRAB API"                  # Override with APP_NAME
+  version: "1.0.0"                  # Override with APP_VERSION
   environment: "development"        # Override with APP_ENVIRONMENT
   debug: true                       # Override with APP_DEBUG
 
@@ -55,4 +56,3 @@ migrations:
 health:
   timeout: 5                        # Override with HEALTH_TIMEOUT (seconds)
   database_check_enabled: true      # Override with HEALTH_DATABASE_CHECK_ENABLED
- 
