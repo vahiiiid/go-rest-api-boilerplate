@@ -193,13 +193,13 @@ func (l *LoggingConfig) GetLogLevel() slog.Level {
 func GetSkipPaths(env string) []string {
 	switch env {
 	case "production":
-		return []string{"/health", "/metrics", "/debug", "/pprof"}
+		return []string{"/health", "/health/live", "/health/ready", "/metrics", "/debug", "/pprof"}
 	case "development":
-		return []string{"/health"}
+		return []string{"/health", "/health/live", "/health/ready"}
 	case "test":
-		return []string{"/health"}
+		return []string{"/health", "/health/live", "/health/ready"}
 	default:
-		return []string{"/health"}
+		return []string{"/health", "/health/live", "/health/ready"}
 	}
 }
 
