@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-// Validate checks required configuration values
 func (c *Config) Validate() error {
 	if c.JWT.Secret == "" {
 		return fmt.Errorf("JWT_SECRET environment variable is required - generate with: make generate-jwt-secret")

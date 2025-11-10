@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Config represents the application configuration
 type Config struct {
 	App        AppConfig        `mapstructure:"app" yaml:"app"`
 	Database   DatabaseConfig   `mapstructure:"database" yaml:"database"`
@@ -20,16 +19,16 @@ type Config struct {
 	Logging    LoggingConfig    `mapstructure:"logging" yaml:"logging"`
 	Ratelimit  RateLimitConfig  `mapstructure:"ratelimit" yaml:"ratelimit"`
 	Migrations MigrationsConfig `mapstructure:"migrations" yaml:"migrations"`
+	Health     HealthConfig     `mapstructure:"health" yaml:"health"`
 }
 
-// AppConfig holds application-related configuration.
 type AppConfig struct {
 	Name        string `mapstructure:"name" yaml:"name"`
+	Version     string `mapstructure:"version" yaml:"version"`
 	Environment string `mapstructure:"environment" yaml:"environment"`
 	Debug       bool   `mapstructure:"debug" yaml:"debug"`
 }
 
-// DatabaseConfig holds database-related configuration
 type DatabaseConfig struct {
 	Host     string `mapstructure:"host" yaml:"host"`
 	Port     int    `mapstructure:"port" yaml:"port"`
@@ -39,7 +38,6 @@ type DatabaseConfig struct {
 	SSLMode  string `mapstructure:"sslmode" yaml:"sslmode"`
 }
 
-// JWTConfig holds JWT-related configuration
 type JWTConfig struct {
 	Secret          string        `mapstructure:"secret" yaml:"secret"`
 	AccessTokenTTL  time.Duration `mapstructure:"access_token_ttl" yaml:"access_token_ttl"`
@@ -47,7 +45,6 @@ type JWTConfig struct {
 	TTLHours        int           `mapstructure:"ttlhours" yaml:"ttlhours"` // Deprecated: kept for backward compatibility
 }
 
-// ServerConfig holds server-related configuration
 type ServerConfig struct {
 	Port            string `mapstructure:"port" yaml:"port"`
 	ReadTimeout     int    `mapstructure:"readtimeout" yaml:"readtimeout"`
@@ -57,23 +54,25 @@ type ServerConfig struct {
 	MaxHeaderBytes  int    `mapstructure:"maxheaderbytes" yaml:"maxheaderbytes"`
 }
 
-// LoggingConfig holds logging-related configuration
 type LoggingConfig struct {
 	Level string `mapstructure:"level" yaml:"level"`
 }
 
-// RateLimitConfig holds rate-limit configuration
 type RateLimitConfig struct {
 	Enabled  bool          `mapstructure:"enabled" yaml:"enabled"`
 	Requests int           `mapstructure:"requests" yaml:"requests"`
 	Window   time.Duration `mapstructure:"window" yaml:"window"`
 }
 
-// MigrationsConfig holds migration-related configuration
 type MigrationsConfig struct {
 	Directory   string `mapstructure:"directory" yaml:"directory"`
 	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`
 	LockTimeout int    `mapstructure:"locktimeout" yaml:"locktimeout"`
+}
+
+type HealthConfig struct {
+	Timeout              int  `mapstructure:"timeout" yaml:"timeout"`
+	DatabaseCheckEnabled bool `mapstructure:"database_check_enabled" yaml:"database_check_enabled"`
 }
 
 // LoadConfig loads configuration using Viper. If configPath is non-empty it
@@ -139,43 +138,43 @@ func LoadConfig(configPath string) (*Config, error) {
 	return &cfg, nil
 }
 
-// bindEnvVariables ensures ENV vars take precedence over config file values
 func bindEnvVariables(v *viper.Viper) {
 	envBindings := map[string]string{
-		"app.name":               "APP_NAME",
-		"app.environment":        "APP_ENVIRONMENT",
-		"app.debug":              "APP_DEBUG",
-		"database.host":          "DATABASE_HOST",
-		"database.port":          "DATABASE_PORT",
-		"database.user":          "DATABASE_USER",
-		"database.password":      "DATABASE_PASSWORD",
-		"database.name":          "DATABASE_NAME",
-		"database.sslmode":       "DATABASE_SSLMODE",
-		"jwt.secret":             "JWT_SECRET",
-		"jwt.access_token_ttl":   "JWT_ACCESS_TOKEN_TTL",
-		"jwt.refresh_token_ttl":  "JWT_REFRESH_TOKEN_TTL",
-		"jwt.ttlhours":           "JWT_TTLHOURS",
-		"server.port":            "SERVER_PORT",
-		"server.readtimeout":     "SERVER_READTIMEOUT",
-		"server.writetimeout":    "SERVER_WRITETIMEOUT",
-		"server.idletimeout":     "SERVER_IDLETIMEOUT",
-		"server.shutdowntimeout": "SERVER_SHUTDOWNTIMEOUT",
-		"server.maxheaderbytes":  "SERVER_MAXHEADERBYTES",
-		"logging.level":          "LOGGING_LEVEL",
-		"ratelimit.enabled":      "RATELIMIT_ENABLED",
-		"ratelimit.requests":     "RATELIMIT_REQUESTS",
-		"ratelimit.window":       "RATELIMIT_WINDOW",
-		"migrations.directory":   "MIGRATIONS_DIRECTORY",
-		"migrations.timeout":     "MIGRATIONS_TIMEOUT",
-		"migrations.locktimeout": "MIGRATIONS_LOCKTIMEOUT",
+		"app.name":                      "APP_NAME",
+		"app.version":                   "APP_VERSION",
+		"app.environment":               "APP_ENVIRONMENT",
+		"app.debug":                     "APP_DEBUG",
+		"database.host":                 "DATABASE_HOST",
+		"database.port":                 "DATABASE_PORT",
+		"database.user":                 "DATABASE_USER",
+		"database.password":             "DATABASE_PASSWORD",
+		"database.name":                 "DATABASE_NAME",
+		"database.sslmode":              "DATABASE_SSLMODE",
+		"jwt.secret":                    "JWT_SECRET",
+		"jwt.access_token_ttl":          "JWT_ACCESS_TOKEN_TTL",
+		"jwt.refresh_token_ttl":         "JWT_REFRESH_TOKEN_TTL",
+		"jwt.ttlhours":                  "JWT_TTLHOURS",
+		"server.port":                   "SERVER_PORT",
+		"server.readtimeout":            "SERVER_READTIMEOUT",
+		"server.writetimeout":           "SERVER_WRITETIMEOUT",
+		"server.idletimeout":            "SERVER_IDLETIMEOUT",
+		"server.shutdowntimeout":        "SERVER_SHUTDOWNTIMEOUT",
+		"server.maxheaderbytes":         "SERVER_MAXHEADERBYTES",
+		"logging.level":                 "LOGGING_LEVEL",
+		"ratelimit.enabled":             "RATELIMIT_ENABLED",
+		"ratelimit.requests":            "RATELIMIT_REQUESTS",
+		"ratelimit.window":              "RATELIMIT_WINDOW",
+		"migrations.directory":          "MIGRATIONS_DIRECTORY",
+		"migrations.timeout":            "MIGRATIONS_TIMEOUT",
+		"migrations.locktimeout":        "MIGRATIONS_LOCKTIMEOUT",
+		"health.timeout":                "HEALTH_TIMEOUT",
+		"health.database_check_enabled": "HEALTH_DATABASE_CHECK_ENABLED",
 	}
-
 	for key, env := range envBindings {
 		_ = v.BindEnv(key, env)
 	}
 }
 
-// GetLogLevel converts string log level to slog.Level
 func (l *LoggingConfig) GetLogLevel() slog.Level {
 	switch strings.ToLower(l.Level) {
 	case "debug":
@@ -191,21 +190,19 @@ func (l *LoggingConfig) GetLogLevel() slog.Level {
 	}
 }
 
-// GetSkipPaths returns the appropriate skip paths based on environment
 func GetSkipPaths(env string) []string {
 	switch env {
 	case "production":
-		return []string{"/health", "/metrics", "/debug", "/pprof"}
+		return []string{"/health", "/health/live", "/health/ready", "/metrics", "/debug", "/pprof"}
 	case "development":
-		return []string{"/health"}
+		return []string{"/health", "/health/live", "/health/ready"}
 	case "test":
-		return []string{"/health"}
+		return []string{"/health", "/health/live", "/health/ready"}
 	default:
-		return []string{"/health"}
+		return []string{"/health", "/health/live", "/health/ready"}
 	}
 }
 
-// GetConfigPath returns the default config path (kept for compatibility)
 func GetConfigPath() string {
 	paths := []string{
 		"configs/config.yaml",
@@ -223,7 +220,6 @@ func GetConfigPath() string {
 	return "configs/config.yaml"
 }
 
-// LogSafeConfig logs the configuration while redacting sensitive information.
 func (c *Config) LogSafeConfig(logger *slog.Logger) {
 	logger.Info("Loaded Configuration:")
 	logger.Info("App", "Name", c.App.Name, "Environment", c.App.Environment, "Debug", c.App.Debug)

@@ -23,7 +23,46 @@
 							"path": [
 								"health"
 							]
-						}
+						},
+						"description": "Basic health check endpoint that returns application status and uptime"
+					},
+					"response": []
+				},
+				{
+					"name": "Liveness Probe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/live",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health",
+								"live"
+							]
+						},
+						"description": "Kubernetes-style liveness probe to check if application is alive (not deadlocked)"
+					},
+					"response": []
+				},
+				{
+					"name": "Readiness Probe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/ready",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health",
+								"ready"
+							]
+						},
+						"description": "Kubernetes-style readiness probe to check if application and dependencies (database) are ready to serve traffic"
 					},
 					"response": []
 				}

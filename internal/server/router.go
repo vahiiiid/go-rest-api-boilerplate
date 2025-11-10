@@ -1,22 +1,22 @@
 package server
 
 import (
-	"net/http"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"gorm.io/gorm"
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/health"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/user"
 )
 
 // SetupRouter creates and configures the Gin router
-func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *config.Config) *gin.Engine {
+func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *config.Config, db *gorm.DB) *gin.Engine {
 	router := gin.New()
 
 	if cfg.App.Environment == "production" {
@@ -39,12 +39,17 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 	corsConfig.AllowHeaders = append(corsConfig.AllowHeaders, "Authorization")
 	router.Use(cors.New(corsConfig))
 
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "ok",
-			"message": "Server is running",
-		})
-	})
+	var checkers []health.Checker
+	if cfg.Health.DatabaseCheckEnabled {
+		dbChecker := health.NewDatabaseChecker(db)
+		checkers = append(checkers, dbChecker)
+	}
+	healthService := health.NewService(checkers, cfg.App.Version, cfg.App.Environment)
+	healthHandler := health.NewHandler(healthService)
+
+	router.GET("/health", healthHandler.Health)
+	router.GET("/health/live", healthHandler.Live)
+	router.GET("/health/ready", healthHandler.Ready)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

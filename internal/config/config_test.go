@@ -273,11 +273,11 @@ func TestGetSkipPaths(t *testing.T) {
 		env      string
 		expected []string
 	}{
-		{"production", []string{"/health", "/metrics", "/debug", "/pprof"}},
-		{"development", []string{"/health"}},
-		{"test", []string{"/health"}},
-		{"staging", []string{"/health"}}, // default case
-		{"", []string{"/health"}},        // default case
+		{"production", []string{"/health", "/health/live", "/health/ready", "/metrics", "/debug", "/pprof"}},
+		{"development", []string{"/health", "/health/live", "/health/ready"}},
+		{"test", []string{"/health", "/health/live", "/health/ready"}},
+		{"staging", []string{"/health", "/health/live", "/health/ready"}}, // default case
+		{"", []string{"/health", "/health/live", "/health/ready"}},        // default case
 	}
 
 	for _, tt := range tests {

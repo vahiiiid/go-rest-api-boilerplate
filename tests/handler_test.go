@@ -44,7 +44,7 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
-	router := server.SetupRouter(userHandler, authService, testCfg)
+	router := server.SetupRouter(userHandler, authService, testCfg, database)
 
 	return router
 }
@@ -67,7 +67,7 @@ func setupRateLimitTestRouter(t *testing.T) *gin.Engine {
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
-	return server.SetupRouter(userHandler, authService, testCfg)
+	return server.SetupRouter(userHandler, authService, testCfg, database)
 }
 
 func TestRegisterHandler(t *testing.T) {
@@ -286,8 +286,8 @@ func TestHealthEndpoint(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Fatalf("Failed to unmarshal health response: %v", err)
 	}
-	if status, ok := response["status"].(string); !ok || status != "ok" {
-		t.Error("Expected status 'ok' in health check response")
+	if status, ok := response["status"].(string); !ok || status != "healthy" {
+		t.Errorf("Expected status 'healthy' in health check response, got %v", status)
 	}
 }
 

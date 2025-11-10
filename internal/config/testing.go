@@ -5,6 +5,7 @@ func NewTestConfig() *Config {
 	return &Config{
 		App: AppConfig{
 			Name:        "Test API",
+			Version:     "1.0.0",
 			Environment: "test",
 			Debug:       true,
 		},
@@ -24,6 +25,10 @@ func NewTestConfig() *Config {
 		},
 		Logging: LoggingConfig{
 			Level: "debug",
+		},
+		Health: HealthConfig{
+			Timeout:              5,
+			DatabaseCheckEnabled: true,
 		},
 	}
 }

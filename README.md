@@ -90,7 +90,7 @@ make quick-start
 
 - **API Base URL:** <http://localhost:8080/api/v1>
 - **Swagger UI:** <http://localhost:8080/swagger/index.html>
-- **Health Check:** <http://localhost:8080/health>
+- **Health Checks:** <http://localhost:8080/health> • [/health/live](http://localhost:8080/health/live) • [/health/ready](http://localhost:8080/health/ready)
 
 ---
 
@@ -164,6 +164,16 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Multi-stage builds** — Tiny production images (~20MB)
 
 👉 [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/)
+
+#### 🏥 Production-Grade Health Checks
+
+- **Kubernetes-ready probes** — Liveness (`/health/live`) and readiness (`/health/ready`) endpoints
+- **Database health monitoring** — Response time tracking with pass/warn/fail thresholds
+- **RFC-compliant responses** — Following IETF draft standards for health check format
+- **Zero-downtime deployments** — Smart readiness checks for load balancer integration
+- **Extensible architecture** — Easy to add custom health checkers (Redis, external APIs, etc.)
+
+👉 [Health Checks Guide](https://vahiiiid.github.io/go-rest-api-docs/HEALTH_CHECKS/)
 
 #### 📚 Documentation That Exists (And Helps!)
 
@@ -272,7 +282,7 @@ make docker-up-prod  # Start production containers
 **What's included:**
 
 - ✅ Multi-stage Docker builds (minimal image size)
-- ✅ Health check endpoints
+- ✅ Production-grade health checks (liveness & readiness probes)
 - ✅ Environment-based configuration
 - ✅ No development dependencies
 - ✅ Production logging
@@ -304,6 +314,7 @@ Complete guides covering everything:
 - 💡 [TODO Tutorial](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/) — Step-by-step implementation
 - 🐳 [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/) — Container workflows
 - 🗄️ [Migrations](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/) — Database schema management
+- 🏥 [Health Checks](https://vahiiiid.github.io/go-rest-api-docs/HEALTH_CHECKS/) — Kubernetes probes and monitoring
 - 🧪 [Testing](https://vahiiiid.github.io/go-rest-api-docs/TESTING/) — Writing and running tests
 - ⚠️ [Error Handling](https://vahiiiid.github.io/go-rest-api-docs/ERROR_HANDLING/) — Structured API errors
 - 📚 [Swagger](https://vahiiiid.github.io/go-rest-api-docs/SWAGGER/) — API documentation
