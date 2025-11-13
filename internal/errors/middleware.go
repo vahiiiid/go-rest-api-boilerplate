@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -44,7 +45,7 @@ func ErrorHandler() gin.HandlerFunc {
 					RequestID: reqID,
 				},
 			}
-			c.JSON(500, response)
+			c.JSON(http.StatusInternalServerError, response)
 		}
 	}
 }
