@@ -88,14 +88,21 @@ func TestRegisterHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if accessToken, ok := body["access_token"].(string); !ok || accessToken == "" {
-					t.Error("Expected access_token in response")
+				if success, ok := body["success"].(bool); !ok || !success {
+					t.Error("Expected success to be true in response")
 				}
-				if refreshToken, ok := body["refresh_token"].(string); !ok || refreshToken == "" {
-					t.Error("Expected refresh_token in response")
+				data, ok := body["data"].(map[string]interface{})
+				if !ok {
+					t.Fatal("Expected data object in response")
 				}
-				if userData, ok := body["user"].(map[string]interface{}); !ok {
-					t.Error("Expected user object in response")
+				if accessToken, ok := data["access_token"].(string); !ok || accessToken == "" {
+					t.Error("Expected access_token in response data")
+				}
+				if refreshToken, ok := data["refresh_token"].(string); !ok || refreshToken == "" {
+					t.Error("Expected refresh_token in response data")
+				}
+				if userData, ok := data["user"].(map[string]interface{}); !ok {
+					t.Error("Expected user object in response data")
 				} else {
 					if email, ok := userData["email"].(string); !ok || email != "john@example.com" {
 						t.Errorf("Expected email 'john@example.com', got '%v'", email)
@@ -107,12 +114,19 @@ func TestRegisterHandler(t *testing.T) {
 			name: "duplicate email",
 			payload: map[string]string{
 				"name":     "Jane Doe",
-				"email":    "john@example.com", // Same email as previous test
+				"email":    "john@example.com",
 				"password": "password123",
 			},
 			expectedStatus: http.StatusConflict,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
+				if success, ok := body["success"].(bool); !ok || success {
+					t.Error("Expected success to be false for error response")
+				}
+				errorInfo, ok := body["error"].(map[string]interface{})
+				if !ok {
+					t.Fatal("Expected error object in response")
+				}
+				if errorMsg, ok := errorInfo["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -126,7 +140,14 @@ func TestRegisterHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
+				if success, ok := body["success"].(bool); !ok || success {
+					t.Error("Expected success to be false for error response")
+				}
+				errorInfo, ok := body["error"].(map[string]interface{})
+				if !ok {
+					t.Fatal("Expected error object in response")
+				}
+				if errorMsg, ok := errorInfo["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -138,7 +159,14 @@ func TestRegisterHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
+				if success, ok := body["success"].(bool); !ok || success {
+					t.Error("Expected success to be false for error response")
+				}
+				errorInfo, ok := body["error"].(map[string]interface{})
+				if !ok {
+					t.Fatal("Expected error object in response")
+				}
+				if errorMsg, ok := errorInfo["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -198,11 +226,18 @@ func TestLoginHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if accessToken, ok := body["access_token"].(string); !ok || accessToken == "" {
-					t.Error("Expected access_token in response")
+				if success, ok := body["success"].(bool); !ok || !success {
+					t.Error("Expected success to be true in response")
 				}
-				if refreshToken, ok := body["refresh_token"].(string); !ok || refreshToken == "" {
-					t.Error("Expected refresh_token in response")
+				data, ok := body["data"].(map[string]interface{})
+				if !ok {
+					t.Fatal("Expected data object in response")
+				}
+				if accessToken, ok := data["access_token"].(string); !ok || accessToken == "" {
+					t.Error("Expected access_token in response data")
+				}
+				if refreshToken, ok := data["refresh_token"].(string); !ok || refreshToken == "" {
+					t.Error("Expected refresh_token in response data")
 				}
 			},
 		},
@@ -214,7 +249,14 @@ func TestLoginHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusUnauthorized,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
+				if success, ok := body["success"].(bool); !ok || success {
+					t.Error("Expected success to be false for error response")
+				}
+				errorInfo, ok := body["error"].(map[string]interface{})
+				if !ok {
+					t.Fatal("Expected error object in response")
+				}
+				if errorMsg, ok := errorInfo["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -227,7 +269,14 @@ func TestLoginHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusUnauthorized,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
+				if success, ok := body["success"].(bool); !ok || success {
+					t.Error("Expected success to be false for error response")
+				}
+				errorInfo, ok := body["error"].(map[string]interface{})
+				if !ok {
+					t.Fatal("Expected error object in response")
+				}
+				if errorMsg, ok := errorInfo["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -239,7 +288,14 @@ func TestLoginHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, body map[string]interface{}) {
-				if errorMsg, ok := body["message"].(string); !ok || errorMsg == "" {
+				if success, ok := body["success"].(bool); !ok || success {
+					t.Error("Expected success to be false for error response")
+				}
+				errorInfo, ok := body["error"].(map[string]interface{})
+				if !ok {
+					t.Fatal("Expected error object in response")
+				}
+				if errorMsg, ok := errorInfo["message"].(string); !ok || errorMsg == "" {
 					t.Error("Expected error message in response")
 				}
 			},
@@ -314,7 +370,14 @@ func TestRateLimit_BlocksThenAllows(t *testing.T) {
 	if err := json.Unmarshal(rr.Body.Bytes(), &registerResp); err != nil {
 		t.Fatalf("Failed to unmarshal register response: %v", err)
 	}
-	userResp := registerResp["user"].(map[string]interface{})
+	dataResp, ok := registerResp["data"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("Expected data object in register response")
+	}
+	userResp, ok := dataResp["user"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("Expected user object in register response data")
+	}
 	email := userResp["email"].(string)
 
 	loginBody, _ := json.Marshal(map[string]string{

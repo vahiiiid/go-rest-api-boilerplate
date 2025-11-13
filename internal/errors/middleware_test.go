@@ -61,12 +61,14 @@ func TestErrorHandler_WithAPIError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
+			c.Request = httptest.NewRequest("GET", "/test", nil)
 
 			_ = c.Error(tt.apiError)
 
 			ErrorHandler()(c)
 
 			assert.Equal(t, tt.expectedStatus, w.Code)
+			assert.Contains(t, w.Body.String(), `"success":false`)
 			assert.Contains(t, w.Body.String(), tt.expectedCode)
 			assert.Contains(t, w.Body.String(), tt.apiError.Message)
 		})
@@ -78,6 +80,7 @@ func TestErrorHandler_WithUnknownError(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	unknownErr := errors.New("some unexpected error")
 	_ = c.Error(unknownErr)
@@ -85,6 +88,7 @@ func TestErrorHandler_WithUnknownError(t *testing.T) {
 	ErrorHandler()(c)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Contains(t, w.Body.String(), `"success":false`)
 	assert.Contains(t, w.Body.String(), CodeInternal)
 	assert.Contains(t, w.Body.String(), "Internal server error")
 }
@@ -94,6 +98,7 @@ func TestErrorHandler_WithNoErrors(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	ErrorHandler()(c)
 
@@ -105,6 +110,7 @@ func TestErrorHandler_WithMultipleErrors(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	_ = c.Error(errors.New("first error"))
 	_ = c.Error(NotFound("second error"))
@@ -120,6 +126,7 @@ func TestErrorHandler_RateLimitError(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	rateLimitErr := TooManyRequests(60)
 	_ = c.Error(&rateLimitErr.APIError)
@@ -136,6 +143,7 @@ func TestErrorHandler_ValidationErrorWithDetails(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	details := map[string]string{
 		"email":    "Invalid email format",

@@ -61,13 +61,13 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, AuthResponse{
+	c.JSON(http.StatusOK, apiErrors.Success(AuthResponse{
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
 		TokenType:    tokenPair.TokenType,
 		ExpiresIn:    tokenPair.ExpiresIn,
 		User:         ToUserResponse(user),
-	})
+	}))
 }
 
 // Login godoc
@@ -105,13 +105,13 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, AuthResponse{
+	c.JSON(http.StatusOK, apiErrors.Success(AuthResponse{
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
 		TokenType:    tokenPair.TokenType,
 		ExpiresIn:    tokenPair.ExpiresIn,
 		User:         ToUserResponse(user),
-	})
+	}))
 }
 
 // GetUser godoc
@@ -151,7 +151,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToUserResponse(user))
+	c.JSON(http.StatusOK, apiErrors.Success(ToUserResponse(user)))
 }
 
 // UpdateUser godoc
@@ -205,7 +205,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToUserResponse(user))
+	c.JSON(http.StatusOK, apiErrors.Success(ToUserResponse(user)))
 }
 
 // DeleteUser godoc
@@ -287,12 +287,12 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, auth.TokenPairResponse{
+	c.JSON(http.StatusOK, apiErrors.Success(auth.TokenPairResponse{
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
 		TokenType:    tokenPair.TokenType,
 		ExpiresIn:    tokenPair.ExpiresIn,
-	})
+	}))
 }
 
 // Logout godoc
@@ -331,5 +331,5 @@ func (h *Handler) Logout(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
+	c.JSON(http.StatusOK, apiErrors.Success(gin.H{"message": "Successfully logged out"}))
 }

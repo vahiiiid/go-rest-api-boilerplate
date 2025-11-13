@@ -40,13 +40,16 @@ func TestHandler_RefreshToken(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response auth.TokenPairResponse
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "new-access-token", response.AccessToken)
-				assert.Equal(t, "new-refresh-token", response.RefreshToken)
-				assert.Equal(t, "Bearer", response.TokenType)
-				assert.Equal(t, int64(900), response.ExpiresIn)
+				assert.Equal(t, true, response["success"])
+				data, ok := response["data"].(map[string]interface{})
+				assert.True(t, ok, "data should be a map")
+				assert.Equal(t, "new-access-token", data["access_token"])
+				assert.Equal(t, "new-refresh-token", data["refresh_token"])
+				assert.Equal(t, "Bearer", data["token_type"])
+				assert.Equal(t, float64(900), data["expires_in"])
 			},
 		},
 		{
@@ -55,10 +58,13 @@ func TestHandler_RefreshToken(t *testing.T) {
 			setupMocks:     func(mas *MockAuthService) {},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response apiErrors.APIError
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "VALIDATION_ERROR", response.Code)
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "VALIDATION_ERROR", errorInfo["code"])
 			},
 		},
 		{
@@ -71,11 +77,14 @@ func TestHandler_RefreshToken(t *testing.T) {
 			},
 			expectedStatus: http.StatusUnauthorized,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response apiErrors.APIError
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "UNAUTHORIZED", response.Code)
-				assert.Contains(t, response.Message, "Invalid or expired")
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "UNAUTHORIZED", errorInfo["code"])
+				assert.Contains(t, errorInfo["message"], "Invalid or expired")
 			},
 		},
 		{
@@ -88,11 +97,14 @@ func TestHandler_RefreshToken(t *testing.T) {
 			},
 			expectedStatus: http.StatusUnauthorized,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response apiErrors.APIError
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "UNAUTHORIZED", response.Code)
-				assert.Contains(t, response.Message, "Invalid or expired")
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "UNAUTHORIZED", errorInfo["code"])
+				assert.Contains(t, errorInfo["message"], "Invalid or expired")
 			},
 		},
 		{
@@ -105,11 +117,14 @@ func TestHandler_RefreshToken(t *testing.T) {
 			},
 			expectedStatus: http.StatusForbidden,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response apiErrors.APIError
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "FORBIDDEN", response.Code)
-				assert.Contains(t, response.Message, "Token reuse detected")
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "FORBIDDEN", errorInfo["code"])
+				assert.Contains(t, errorInfo["message"], "Token reuse detected")
 			},
 		},
 		{
@@ -122,11 +137,14 @@ func TestHandler_RefreshToken(t *testing.T) {
 			},
 			expectedStatus: http.StatusUnauthorized,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response apiErrors.APIError
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "UNAUTHORIZED", response.Code)
-				assert.Contains(t, response.Message, "revoked")
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "UNAUTHORIZED", errorInfo["code"])
+				assert.Contains(t, errorInfo["message"], "revoked")
 			},
 		},
 		{
@@ -139,10 +157,13 @@ func TestHandler_RefreshToken(t *testing.T) {
 			},
 			expectedStatus: http.StatusInternalServerError,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response apiErrors.APIError
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "INTERNAL_ERROR", response.Code)
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "INTERNAL_ERROR", errorInfo["code"])
 			},
 		},
 	}
@@ -199,10 +220,13 @@ func TestHandler_Logout(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]string
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Successfully logged out", response["message"])
+				assert.Equal(t, true, response["success"])
+				data, ok := response["data"].(map[string]interface{})
+				assert.True(t, ok, "data should be a map")
+				assert.Equal(t, "Successfully logged out", data["message"])
 			},
 		},
 		{
@@ -215,10 +239,13 @@ func TestHandler_Logout(t *testing.T) {
 			},
 			expectedStatus: http.StatusBadRequest,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response apiErrors.APIError
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "VALIDATION_ERROR", response.Code)
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "VALIDATION_ERROR", errorInfo["code"])
 			},
 		},
 		{
@@ -235,10 +262,13 @@ func TestHandler_Logout(t *testing.T) {
 			},
 			expectedStatus: http.StatusInternalServerError,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response apiErrors.APIError
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "INTERNAL_ERROR", response.Code)
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "INTERNAL_ERROR", errorInfo["code"])
 			},
 		},
 		{
@@ -255,10 +285,13 @@ func TestHandler_Logout(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]string
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Successfully logged out", response["message"])
+				assert.Equal(t, true, response["success"])
+				data, ok := response["data"].(map[string]interface{})
+				assert.True(t, ok, "data should be a map")
+				assert.Equal(t, "Successfully logged out", data["message"])
 			},
 		},
 		{
@@ -268,14 +301,16 @@ func TestHandler_Logout(t *testing.T) {
 			},
 			setupMocks: func(mas *MockAuthService) {},
 			setupContext: func(c *gin.Context) {
-				// No authentication context set
 			},
 			expectedStatus: http.StatusUnauthorized,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response apiErrors.APIError
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "UNAUTHORIZED", response.Code)
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "UNAUTHORIZED", errorInfo["code"])
 			},
 		},
 	}
