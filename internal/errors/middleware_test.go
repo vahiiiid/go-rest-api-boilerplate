@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -184,13 +185,20 @@ func TestErrorHandler_RateLimitError(t *testing.T) {
 	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	rateLimitErr := TooManyRequests(60)
-	_ = c.Error(&rateLimitErr.APIError)
+	_ = c.Error(rateLimitErr)
 
 	ErrorHandler()(c)
 
 	assert.Equal(t, http.StatusTooManyRequests, w.Code)
-	assert.Contains(t, w.Body.String(), CodeTooManyRequests)
-	assert.Contains(t, w.Body.String(), "60")
+
+	var response map[string]interface{}
+	assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
+
+	assert.False(t, response["success"].(bool))
+	errorObj := response["error"].(map[string]interface{})
+	assert.Equal(t, CodeTooManyRequests, errorObj["code"])
+	assert.Contains(t, errorObj["details"], "60")
+	assert.Equal(t, float64(60), errorObj["retry_after"])
 }
 
 func TestErrorHandler_ValidationErrorWithDetails(t *testing.T) {

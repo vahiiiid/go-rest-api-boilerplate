@@ -18,6 +18,23 @@ func ErrorHandler() gin.HandlerFunc {
 			requestID, _ := c.Get("request_id")
 			reqID, _ := requestID.(string)
 
+			if rateLimitErr, ok := err.Err.(*RateLimitError); ok {
+				response := Response{
+					Success: false,
+					Error: &ErrorInfo{
+						Code:       rateLimitErr.Code,
+						Message:    rateLimitErr.Message,
+						Details:    rateLimitErr.Details,
+						Timestamp:  time.Now(),
+						Path:       getRequestPath(c),
+						RequestID:  reqID,
+						RetryAfter: &rateLimitErr.RetryAfter,
+					},
+				}
+				c.JSON(rateLimitErr.Status, response)
+				return
+			}
+
 			if apiErr, ok := err.Err.(*APIError); ok {
 				response := Response{
 					Success: false,

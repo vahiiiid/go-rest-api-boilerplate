@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
 	"golang.org/x/time/rate"
 )
 
@@ -118,13 +119,12 @@ func TestNewRateLimitMiddleware(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create middleware
 			middleware := NewRateLimitMiddleware(tt.window, tt.requests, tt.keyFunc, tt.store)
 			assert.NotNil(t, middleware, "Middleware should not be nil")
 
-			// Setup router
 			router := gin.New()
 			router.Use(middleware)
+			router.Use(apiErrors.ErrorHandler())
 			router.GET("/test", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			})
@@ -157,12 +157,13 @@ func TestNewRateLimitMiddleware(t *testing.T) {
 					assert.NotEmpty(t, w.Header().Get("X-RateLimit-Remaining"), "X-RateLimit-Remaining header should be set")
 					assert.NotEmpty(t, w.Header().Get("X-RateLimit-Reset"), "X-RateLimit-Reset header should be set")
 
-					// Verify response body
 					var response map[string]interface{}
 					assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
-					assert.Equal(t, "Rate limit exceeded", response["message"])
-					assert.Contains(t, response, "message")
-					assert.Contains(t, response, "retry_after")
+
+					assert.False(t, response["success"].(bool))
+					errorObj := response["error"].(map[string]interface{})
+					assert.Equal(t, "Rate limit exceeded", errorObj["message"])
+					assert.Contains(t, errorObj, "retry_after")
 				}
 			}
 
@@ -185,6 +186,7 @@ func TestRateLimitMiddleware_DifferentKeys(t *testing.T) {
 
 	router := gin.New()
 	router.Use(middleware)
+	router.Use(apiErrors.ErrorHandler())
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "success"})
 	})

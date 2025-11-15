@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"math"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -66,7 +65,8 @@ func NewRateLimitMiddleware(
 			c.Header("X-RateLimit-Remaining", "0")
 			c.Header("X-RateLimit-Reset", strconv.FormatInt(resetAt, 10))
 
-			c.AbortWithStatusJSON(http.StatusTooManyRequests, apiErrors.TooManyRequests(ra))
+			_ = c.Error(apiErrors.TooManyRequests(ra))
+			c.Abort()
 			return
 		}
 

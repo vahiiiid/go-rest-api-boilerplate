@@ -12,12 +12,13 @@ type Response struct {
 
 // ErrorInfo contains detailed error information
 type ErrorInfo struct {
-	Code      string      `json:"code"`
-	Message   string      `json:"message"`
-	Details   interface{} `json:"details,omitempty"`
-	Timestamp time.Time   `json:"timestamp"`
-	Path      string      `json:"path,omitempty"`
-	RequestID string      `json:"request_id,omitempty"`
+	Code       string      `json:"code"`
+	Message    string      `json:"message"`
+	Details    interface{} `json:"details,omitempty"`
+	Timestamp  time.Time   `json:"timestamp"`
+	Path       string      `json:"path,omitempty"`
+	RequestID  string      `json:"request_id,omitempty"`
+	RetryAfter *int        `json:"retry_after,omitempty"`
 }
 
 // Meta contains response metadata for pagination and tracking
