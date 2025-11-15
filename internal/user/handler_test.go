@@ -101,9 +101,12 @@ func TestHandler_Register(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Contains(t, response, "access_token")
-				assert.Contains(t, response, "refresh_token")
-				assert.Contains(t, response, "user")
+				assert.Equal(t, true, response["success"])
+				data, ok := response["data"].(map[string]interface{})
+				assert.True(t, ok, "data should be a map")
+				assert.Contains(t, data, "access_token")
+				assert.Contains(t, data, "refresh_token")
+				assert.Contains(t, data, "user")
 			},
 		},
 		{
@@ -116,7 +119,10 @@ func TestHandler_Register(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Contains(t, "VALIDATION_ERROR", response["code"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "VALIDATION_ERROR", errorInfo["code"])
 			},
 		},
 		{
@@ -131,7 +137,10 @@ func TestHandler_Register(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Contains(t, "VALIDATION_ERROR", response["code"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "VALIDATION_ERROR", errorInfo["code"])
 			},
 		},
 		{
@@ -149,7 +158,10 @@ func TestHandler_Register(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Email already exists", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "Email already exists", errorInfo["message"])
 			},
 		},
 		{
@@ -167,7 +179,10 @@ func TestHandler_Register(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "database connection error", response["details"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "database connection error", errorInfo["details"])
 			},
 		},
 		{
@@ -191,7 +206,10 @@ func TestHandler_Register(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "token generation failed", response["details"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "token generation failed", errorInfo["details"])
 			},
 		},
 		{
@@ -204,8 +222,11 @@ func TestHandler_Register(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "VALIDATION_ERROR", response["code"])
-				assert.Equal(t, "Validation failed", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "VALIDATION_ERROR", errorInfo["code"])
+				assert.Equal(t, "Validation failed", errorInfo["message"])
 			},
 		},
 	}
@@ -273,9 +294,12 @@ func TestHandler_GetUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, float64(1), response["id"])
-				assert.Equal(t, "John Doe", response["name"])
-				assert.Equal(t, "john@example.com", response["email"])
+				assert.Equal(t, true, response["success"])
+				data, ok := response["data"].(map[string]interface{})
+				assert.True(t, ok, "data should be a map")
+				assert.Equal(t, float64(1), data["id"])
+				assert.Equal(t, "John Doe", data["name"])
+				assert.Equal(t, "john@example.com", data["email"])
 			},
 		},
 		{
@@ -292,8 +316,11 @@ func TestHandler_GetUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, response["code"], "VALIDATION_ERROR")
-				assert.Equal(t, "Invalid user ID", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "VALIDATION_ERROR", errorInfo["code"])
+				assert.Equal(t, "Invalid user ID", errorInfo["message"])
 			},
 		},
 		{
@@ -308,7 +335,10 @@ func TestHandler_GetUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Forbidden user ID", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "Forbidden user ID", errorInfo["message"])
 			},
 		},
 		{
@@ -325,7 +355,10 @@ func TestHandler_GetUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Forbidden user ID", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "Forbidden user ID", errorInfo["message"])
 			},
 		},
 		{
@@ -343,7 +376,10 @@ func TestHandler_GetUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "User not found", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "User not found", errorInfo["message"])
 			},
 		},
 		{
@@ -361,14 +397,16 @@ func TestHandler_GetUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "database connection error", response["details"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "database connection error", errorInfo["details"])
 			},
 		},
 		{
 			name:   "zero user ID",
 			userID: "0",
 			setupMocks: func(ms *MockService, mas *MockAuthService) {
-				// No mocks needed for authorization failure
 			},
 			setupContext: func(c *gin.Context) {
 				claims := &auth.Claims{UserID: 1}
@@ -379,7 +417,10 @@ func TestHandler_GetUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Forbidden user ID", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "Forbidden user ID", errorInfo["message"])
 			},
 		},
 	}
@@ -447,10 +488,13 @@ func TestHandler_Login(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "mock-access-token", response["access_token"])
-				assert.Equal(t, "mock-refresh-token", response["refresh_token"])
+				assert.Equal(t, true, response["success"])
+				data, ok := response["data"].(map[string]interface{})
+				assert.True(t, ok, "data should be a map")
+				assert.Equal(t, "mock-access-token", data["access_token"])
+				assert.Equal(t, "mock-refresh-token", data["refresh_token"])
 
-				user := response["user"].(map[string]interface{})
+				user := data["user"].(map[string]interface{})
 				assert.Equal(t, float64(1), user["id"])
 				assert.Equal(t, "John Doe", user["name"])
 				assert.Equal(t, "john@example.com", user["email"])
@@ -470,7 +514,10 @@ func TestHandler_Login(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Invalid email or password", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "Invalid email or password", errorInfo["message"])
 			},
 		},
 		{
@@ -487,7 +534,10 @@ func TestHandler_Login(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "failed to authenticate user", response["details"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "failed to authenticate user", errorInfo["details"])
 			},
 		},
 		{
@@ -510,7 +560,10 @@ func TestHandler_Login(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "failed to generate token", response["details"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "failed to generate token", errorInfo["details"])
 			},
 		},
 		{
@@ -522,8 +575,11 @@ func TestHandler_Login(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "VALIDATION_ERROR", response["code"])
-				assert.Equal(t, "Invalid request data format", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "VALIDATION_ERROR", errorInfo["code"])
+				assert.Equal(t, "Invalid request data format", errorInfo["message"])
 			},
 		},
 	}
@@ -597,12 +653,15 @@ func TestHandler_UpdateUser(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response UserResponse
+				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, uint(1), response.ID)
-				assert.Equal(t, "John Updated", response.Name)
-				assert.Equal(t, "john.updated@example.com", response.Email)
+				assert.Equal(t, true, response["success"])
+				data, ok := response["data"].(map[string]interface{})
+				assert.True(t, ok, "data should be a map")
+				assert.Equal(t, float64(1), data["id"])
+				assert.Equal(t, "John Updated", data["name"])
+				assert.Equal(t, "john.updated@example.com", data["email"])
 			},
 		},
 		{
@@ -616,7 +675,10 @@ func TestHandler_UpdateUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Invalid user ID", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "Invalid user ID", errorInfo["message"])
 			},
 		},
 		{
@@ -627,7 +689,7 @@ func TestHandler_UpdateUser(t *testing.T) {
 			},
 			setupMocks: func(ms *MockService, mas *MockAuthService) {},
 			setupContext: func(c *gin.Context) {
-				claims := &auth.Claims{UserID: 1} // Different user ID
+				claims := &auth.Claims{UserID: 1}
 				c.Set(auth.KeyUser, claims)
 			},
 			expectedStatus: http.StatusForbidden,
@@ -635,7 +697,10 @@ func TestHandler_UpdateUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Forbidden user ID", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "Forbidden user ID", errorInfo["message"])
 			},
 		},
 		{
@@ -657,7 +722,10 @@ func TestHandler_UpdateUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "User not found", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "User not found", errorInfo["message"])
 			},
 		},
 		{
@@ -679,7 +747,10 @@ func TestHandler_UpdateUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Email already exists", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "Email already exists", errorInfo["message"])
 			},
 		},
 		{
@@ -701,7 +772,10 @@ func TestHandler_UpdateUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "failed to update user", response["details"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "failed to update user", errorInfo["details"])
 			},
 		},
 		{
@@ -718,8 +792,11 @@ func TestHandler_UpdateUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "VALIDATION_ERROR", response["code"])
-				assert.Equal(t, "Invalid request data format", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "VALIDATION_ERROR", errorInfo["code"])
+				assert.Equal(t, "Invalid request data format", errorInfo["message"])
 			},
 		},
 	}
@@ -799,7 +876,10 @@ func TestHandler_DeleteUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Invalid user ID", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "Invalid user ID", errorInfo["message"])
 			},
 		},
 		{
@@ -807,7 +887,7 @@ func TestHandler_DeleteUser(t *testing.T) {
 			userID:     "2",
 			setupMocks: func(ms *MockService, mas *MockAuthService) {},
 			setupContext: func(c *gin.Context) {
-				claims := &auth.Claims{UserID: 1} // Different user ID
+				claims := &auth.Claims{UserID: 1}
 				c.Set(auth.KeyUser, claims)
 			},
 			expectedStatus: http.StatusForbidden,
@@ -815,7 +895,10 @@ func TestHandler_DeleteUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "Forbidden user ID", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "Forbidden user ID", errorInfo["message"])
 			},
 		},
 		{
@@ -833,7 +916,10 @@ func TestHandler_DeleteUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "User not found", response["message"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "User not found", errorInfo["message"])
 			},
 		},
 		{
@@ -851,7 +937,10 @@ func TestHandler_DeleteUser(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, "failed to delete user", response["details"])
+				assert.Equal(t, false, response["success"])
+				errorInfo, ok := response["error"].(map[string]interface{})
+				assert.True(t, ok, "error should be a map")
+				assert.Equal(t, "failed to delete user", errorInfo["details"])
 			},
 		},
 	}

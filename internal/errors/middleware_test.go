@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +10,61 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestGetRequestPath(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tests := []struct {
+		name     string
+		setupCtx func() *gin.Context
+		expected string
+	}{
+		{
+			name: "normal request with path",
+			setupCtx: func() *gin.Context {
+				c, _ := gin.CreateTestContext(httptest.NewRecorder())
+				c.Request = httptest.NewRequest("GET", "/api/users", nil)
+				return c
+			},
+			expected: "/api/users",
+		},
+		{
+			name: "request with query parameters",
+			setupCtx: func() *gin.Context {
+				c, _ := gin.CreateTestContext(httptest.NewRecorder())
+				c.Request = httptest.NewRequest("GET", "/api/users?page=1&limit=10", nil)
+				return c
+			},
+			expected: "/api/users",
+		},
+		{
+			name: "nil request",
+			setupCtx: func() *gin.Context {
+				c, _ := gin.CreateTestContext(httptest.NewRecorder())
+				c.Request = nil
+				return c
+			},
+			expected: "",
+		},
+		{
+			name: "nil request URL",
+			setupCtx: func() *gin.Context {
+				c, _ := gin.CreateTestContext(httptest.NewRecorder())
+				c.Request = &http.Request{URL: nil}
+				return c
+			},
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := tt.setupCtx()
+			result := getRequestPath(c)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
 
 func TestErrorHandler_WithAPIError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -61,12 +117,14 @@ func TestErrorHandler_WithAPIError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
+			c.Request = httptest.NewRequest("GET", "/test", nil)
 
 			_ = c.Error(tt.apiError)
 
 			ErrorHandler()(c)
 
 			assert.Equal(t, tt.expectedStatus, w.Code)
+			assert.Contains(t, w.Body.String(), `"success":false`)
 			assert.Contains(t, w.Body.String(), tt.expectedCode)
 			assert.Contains(t, w.Body.String(), tt.apiError.Message)
 		})
@@ -78,6 +136,7 @@ func TestErrorHandler_WithUnknownError(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	unknownErr := errors.New("some unexpected error")
 	_ = c.Error(unknownErr)
@@ -85,6 +144,7 @@ func TestErrorHandler_WithUnknownError(t *testing.T) {
 	ErrorHandler()(c)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Contains(t, w.Body.String(), `"success":false`)
 	assert.Contains(t, w.Body.String(), CodeInternal)
 	assert.Contains(t, w.Body.String(), "Internal server error")
 }
@@ -94,6 +154,7 @@ func TestErrorHandler_WithNoErrors(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	ErrorHandler()(c)
 
@@ -105,6 +166,7 @@ func TestErrorHandler_WithMultipleErrors(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	_ = c.Error(errors.New("first error"))
 	_ = c.Error(NotFound("second error"))
@@ -120,15 +182,23 @@ func TestErrorHandler_RateLimitError(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	rateLimitErr := TooManyRequests(60)
-	_ = c.Error(&rateLimitErr.APIError)
+	_ = c.Error(rateLimitErr)
 
 	ErrorHandler()(c)
 
 	assert.Equal(t, http.StatusTooManyRequests, w.Code)
-	assert.Contains(t, w.Body.String(), CodeTooManyRequests)
-	assert.Contains(t, w.Body.String(), "60")
+
+	var response map[string]interface{}
+	assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
+
+	assert.False(t, response["success"].(bool))
+	errorObj := response["error"].(map[string]interface{})
+	assert.Equal(t, CodeTooManyRequests, errorObj["code"])
+	assert.Contains(t, errorObj["details"], "60")
+	assert.Equal(t, float64(60), errorObj["retry_after"])
 }
 
 func TestErrorHandler_ValidationErrorWithDetails(t *testing.T) {
@@ -136,6 +206,7 @@ func TestErrorHandler_ValidationErrorWithDetails(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/test", nil)
 
 	details := map[string]string{
 		"email":    "Invalid email format",

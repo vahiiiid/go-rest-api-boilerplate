@@ -33,10 +33,10 @@ func NewHandler(userService Service, authService auth.Service) *Handler {
 // @Accept json
 // @Produce json
 // @Param request body RegisterRequest true "Registration request"
-// @Success 200 {object} AuthResponse
-// @Failure 400 {object} errors.APIError "Validation error"
-// @Failure 409 {object} errors.APIError "Email already exists"
-// @Failure 500 {object} errors.APIError "Failed to register user or Failed to generate token"
+// @Success 200 {object} errors.Response{success=bool,data=AuthResponse} "Success response with user data and tokens"
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Validation error"
+// @Failure 409 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Email already exists"
+// @Failure 500 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Failed to register user or generate token"
 // @Router /api/v1/auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
 	var req RegisterRequest
@@ -61,13 +61,13 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, AuthResponse{
+	c.JSON(http.StatusOK, apiErrors.Success(AuthResponse{
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
 		TokenType:    tokenPair.TokenType,
 		ExpiresIn:    tokenPair.ExpiresIn,
 		User:         ToUserResponse(user),
-	})
+	}))
 }
 
 // Login godoc
@@ -77,10 +77,10 @@ func (h *Handler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body LoginRequest true "Login request"
-// @Success 200 {object} AuthResponse
-// @Failure 400 {object} errors.APIError "Validation error"
-// @Failure 401 {object} errors.APIError "Invalid email or password"
-// @Failure 500 {object} errors.APIError "Failed to authenticate user or Failed to generate token"
+// @Success 200 {object} errors.Response{success=bool,data=AuthResponse} "Success response with user data and tokens"
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Validation error"
+// @Failure 401 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Invalid email or password"
+// @Failure 500 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Failed to authenticate user or generate token"
 // @Router /api/v1/auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	var req LoginRequest
@@ -105,13 +105,13 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, AuthResponse{
+	c.JSON(http.StatusOK, apiErrors.Success(AuthResponse{
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
 		TokenType:    tokenPair.TokenType,
 		ExpiresIn:    tokenPair.ExpiresIn,
 		User:         ToUserResponse(user),
-	})
+	}))
 }
 
 // GetUser godoc
@@ -122,12 +122,12 @@ func (h *Handler) Login(c *gin.Context) {
 // @Produce json
 // @Param id path int true "User ID"
 // @Security BearerAuth
-// @Success 200 {object} UserResponse
-// @Failure 400 {object} errors.APIError "Invalid user ID"
-// @Failure 403 {object} errors.APIError "Forbidden user ID"
-// @Failure 404 {object} errors.APIError "User not found"
-// @Failure 429 {object} errors.RateLimitError "Rate limit exceeded"
-// @Failure 500 {object} errors.APIError "Failed to get user"
+// @Success 200 {object} errors.Response{success=bool,data=UserResponse} "Success response with user data"
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Invalid user ID"
+// @Failure 403 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Forbidden user ID"
+// @Failure 404 {object} errors.Response{success=bool,error=errors.ErrorInfo} "User not found"
+// @Failure 429 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Rate limit exceeded"
+// @Failure 500 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Failed to get user"
 // @Router /api/v1/users/{id} [get]
 func (h *Handler) GetUser(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
@@ -151,7 +151,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToUserResponse(user))
+	c.JSON(http.StatusOK, apiErrors.Success(ToUserResponse(user)))
 }
 
 // UpdateUser godoc
@@ -163,13 +163,13 @@ func (h *Handler) GetUser(c *gin.Context) {
 // @Param id path int true "User ID"
 // @Param request body UpdateUserRequest true "Update request"
 // @Security BearerAuth
-// @Success 200 {object} UserResponse
-// @Failure 400 {object} errors.APIError "Invalid user ID or Validation error"
-// @Failure 403 {object} errors.APIError "Forbidden user ID"
-// @Failure 404 {object} errors.APIError "User not found"
-// @Failure 409 {object} errors.APIError "Email already exists"
-// @Failure 429 {object} errors.RateLimitError "Rate limit exceeded"
-// @Failure 500 {object} errors.APIError "Failed to update user"
+// @Success 200 {object} errors.Response{success=bool,data=UserResponse} "Success response with updated user data"
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Invalid user ID or Validation error"
+// @Failure 403 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Forbidden user ID"
+// @Failure 404 {object} errors.Response{success=bool,error=errors.ErrorInfo} "User not found"
+// @Failure 409 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Email already exists"
+// @Failure 429 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Rate limit exceeded"
+// @Failure 500 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Failed to update user"
 // @Router /api/v1/users/{id} [put]
 func (h *Handler) UpdateUser(c *gin.Context) {
 	// Parse ID from URL
@@ -205,7 +205,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToUserResponse(user))
+	c.JSON(http.StatusOK, apiErrors.Success(ToUserResponse(user)))
 }
 
 // DeleteUser godoc
@@ -217,11 +217,11 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 // @Param id path int true "User ID"
 // @Security BearerAuth
 // @Success 204
-// @Failure 400 {object} errors.APIError "Invalid user ID"
-// @Failure 403 {object} errors.APIError "Forbidden user ID"
-// @Failure 404 {object} errors.APIError "User not found"
-// @Failure 429 {object} errors.RateLimitError "Rate limit exceeded"
-// @Failure 500 {object} errors.APIError "Failed to delete user"
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Invalid user ID"
+// @Failure 403 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Forbidden user ID"
+// @Failure 404 {object} errors.Response{success=bool,error=errors.ErrorInfo} "User not found"
+// @Failure 429 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Rate limit exceeded"
+// @Failure 500 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Failed to delete user"
 // @Router /api/v1/users/{id} [delete]
 func (h *Handler) DeleteUser(c *gin.Context) {
 	// Parse ID from URL
@@ -256,11 +256,11 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body auth.RefreshTokenRequest true "Refresh token request"
-// @Success 200 {object} auth.TokenPairResponse
-// @Failure 400 {object} errors.APIError "Validation error"
-// @Failure 401 {object} errors.APIError "Invalid or expired refresh token"
-// @Failure 403 {object} errors.APIError "Token reuse detected - all tokens revoked"
-// @Failure 500 {object} errors.APIError "Failed to refresh token"
+// @Success 200 {object} errors.Response{success=bool,data=auth.TokenPairResponse} "Success response with new token pair"
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Validation error"
+// @Failure 401 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Invalid or expired refresh token"
+// @Failure 403 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Token reuse detected - all tokens revoked"
+// @Failure 500 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Failed to refresh token"
 // @Router /api/v1/auth/refresh [post]
 func (h *Handler) RefreshToken(c *gin.Context) {
 	var req auth.RefreshTokenRequest
@@ -287,12 +287,12 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, auth.TokenPairResponse{
+	c.JSON(http.StatusOK, apiErrors.Success(auth.TokenPairResponse{
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
 		TokenType:    tokenPair.TokenType,
 		ExpiresIn:    tokenPair.ExpiresIn,
-	})
+	}))
 }
 
 // Logout godoc
@@ -303,11 +303,11 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Param request body auth.RefreshTokenRequest true "Refresh token to revoke"
-// @Success 200 {object} map[string]string "Successfully logged out"
-// @Failure 400 {object} errors.APIError "Validation error"
-// @Failure 401 {object} errors.APIError "Unauthorized"
-// @Failure 403 {object} errors.APIError "Token does not belong to user"
-// @Failure 500 {object} errors.APIError "Failed to logout"
+// @Success 200 {object} errors.Response{success=bool,data=object} "Successfully logged out"
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Validation error"
+// @Failure 401 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Unauthorized"
+// @Failure 403 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Token does not belong to user"
+// @Failure 500 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Failed to logout"
 // @Router /api/v1/auth/logout [post]
 func (h *Handler) Logout(c *gin.Context) {
 	userID := contextutil.GetUserID(c)
@@ -331,5 +331,5 @@ func (h *Handler) Logout(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
+	c.JSON(http.StatusOK, apiErrors.Success(gin.H{"message": "Successfully logged out"}))
 }

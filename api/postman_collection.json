@@ -80,11 +80,11 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('token', jsonData.access_token);",
-									"    pm.collectionVariables.set('refresh_token', jsonData.refresh_token);",
-									"    pm.collectionVariables.set('id', jsonData.user.id);",
-									"    pm.collectionVariables.set('email', jsonData.user.email);",
-									"    pm.collectionVariables.set('name', jsonData.user.name);",
+									"    pm.collectionVariables.set('token', jsonData.data.access_token);",
+									"    pm.collectionVariables.set('refresh_token', jsonData.data.refresh_token);",
+									"    pm.collectionVariables.set('id', jsonData.data.user.id);",
+									"    pm.collectionVariables.set('email', jsonData.data.user.email);",
+									"    pm.collectionVariables.set('name', jsonData.data.user.name);",
 									"}"
 								],
 								"type": "text/javascript",
@@ -129,11 +129,11 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('token', jsonData.access_token);",
-									"    pm.collectionVariables.set('refresh_token', jsonData.refresh_token);",
-									"    pm.collectionVariables.set('id', jsonData.user.id);",
-									"    pm.collectionVariables.set('email', jsonData.user.email);",
-									"    pm.collectionVariables.set('name', jsonData.user.name);",
+									"    pm.collectionVariables.set('token', jsonData.data.access_token);",
+									"    pm.collectionVariables.set('refresh_token', jsonData.data.refresh_token);",
+									"    pm.collectionVariables.set('id', jsonData.data.user.id);",
+									"    pm.collectionVariables.set('email', jsonData.data.user.email);",
+									"    pm.collectionVariables.set('name', jsonData.data.user.name);",
 									"",
 									"}"
 								],
@@ -179,8 +179,8 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('token', jsonData.access_token);",
-									"    pm.collectionVariables.set('refresh_token', jsonData.refresh_token);",
+									"    pm.collectionVariables.set('token', jsonData.data.access_token);",
+									"    pm.collectionVariables.set('refresh_token', jsonData.data.refresh_token);",
 									"}"
 								],
 								"type": "text/javascript",
