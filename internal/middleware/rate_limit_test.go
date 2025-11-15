@@ -10,8 +10,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
 	"golang.org/x/time/rate"
+
+	apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
 )
 
 func init() {
