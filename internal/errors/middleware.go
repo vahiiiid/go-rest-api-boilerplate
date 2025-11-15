@@ -7,6 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func getRequestPath(c *gin.Context) string {
+	if c.Request == nil || c.Request.URL == nil {
+		return ""
+	}
+	return c.Request.URL.Path
+}
+
 // ErrorHandler returns a Gin middleware that handles errors added to the context via c.Error().
 // It converts APIError types to appropriate JSON responses and wraps unknown errors as internal server errors.
 func ErrorHandler() gin.HandlerFunc {
@@ -26,7 +33,7 @@ func ErrorHandler() gin.HandlerFunc {
 						Message:   apiErr.Message,
 						Details:   apiErr.Details,
 						Timestamp: time.Now(),
-						Path:      c.Request.URL.Path,
+						Path:      getRequestPath(c),
 						RequestID: reqID,
 					},
 				}
@@ -41,7 +48,7 @@ func ErrorHandler() gin.HandlerFunc {
 					Message:   "Internal server error",
 					Details:   err.Err.Error(),
 					Timestamp: time.Now(),
-					Path:      c.Request.URL.Path,
+					Path:      getRequestPath(c),
 					RequestID: reqID,
 				},
 			}
