@@ -10,6 +10,61 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGetRequestPath(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tests := []struct {
+		name     string
+		setupCtx func() *gin.Context
+		expected string
+	}{
+		{
+			name: "normal request with path",
+			setupCtx: func() *gin.Context {
+				c, _ := gin.CreateTestContext(httptest.NewRecorder())
+				c.Request = httptest.NewRequest("GET", "/api/users", nil)
+				return c
+			},
+			expected: "/api/users",
+		},
+		{
+			name: "request with query parameters",
+			setupCtx: func() *gin.Context {
+				c, _ := gin.CreateTestContext(httptest.NewRecorder())
+				c.Request = httptest.NewRequest("GET", "/api/users?page=1&limit=10", nil)
+				return c
+			},
+			expected: "/api/users",
+		},
+		{
+			name: "nil request",
+			setupCtx: func() *gin.Context {
+				c, _ := gin.CreateTestContext(httptest.NewRecorder())
+				c.Request = nil
+				return c
+			},
+			expected: "",
+		},
+		{
+			name: "nil request URL",
+			setupCtx: func() *gin.Context {
+				c, _ := gin.CreateTestContext(httptest.NewRecorder())
+				c.Request = &http.Request{URL: nil}
+				return c
+			},
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := tt.setupCtx()
+			result := getRequestPath(c)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
 func TestErrorHandler_WithAPIError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
