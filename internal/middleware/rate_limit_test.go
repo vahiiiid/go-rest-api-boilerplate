@@ -123,8 +123,8 @@ func TestNewRateLimitMiddleware(t *testing.T) {
 			assert.NotNil(t, middleware, "Middleware should not be nil")
 
 			router := gin.New()
-			router.Use(middleware)
 			router.Use(apiErrors.ErrorHandler())
+			router.Use(middleware)
 			router.GET("/test", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			})
@@ -185,8 +185,8 @@ func TestRateLimitMiddleware_DifferentKeys(t *testing.T) {
 	middleware := NewRateLimitMiddleware(time.Second, 1, keyFunc, NewMockStorage())
 
 	router := gin.New()
-	router.Use(middleware)
 	router.Use(apiErrors.ErrorHandler())
+	router.Use(middleware)
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "success"})
 	})
