@@ -10,6 +10,7 @@ import (
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/auth"
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/contextutil"
 	apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
+	"github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
 )
 
 // Handler handles user-related HTTP requests
@@ -332,4 +333,88 @@ func (h *Handler) Logout(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, apiErrors.Success(gin.H{"message": "Successfully logged out"}))
+}
+
+// GetMe godoc
+// @Summary Get current user
+// @Description Get the currently authenticated user's information with roles
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} errors.Response{success=bool,data=UserResponse} "Success response with current user data"
+// @Failure 401 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Unauthorized"
+// @Failure 500 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Failed to get user"
+// @Router /api/v1/auth/me [get]
+func (h *Handler) GetMe(c *gin.Context) {
+	userID := contextutil.GetUserID(c)
+	if userID == 0 {
+		_ = c.Error(apiErrors.Unauthorized("User not authenticated"))
+		return
+	}
+
+	user, err := h.userService.GetUserByID(c.Request.Context(), userID)
+	if err != nil {
+		if errors.Is(err, ErrUserNotFound) {
+			_ = c.Error(apiErrors.NotFound("User not found"))
+			return
+		}
+		_ = c.Error(apiErrors.InternalServerError(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, apiErrors.Success(ToUserResponse(user)))
+}
+
+// ListUsers godoc
+// @Summary List all users (Admin only)
+// @Description Get paginated list of all users with optional filtering (requires admin role)
+// @Tags admin
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number" default(1)
+// @Param per_page query int false "Items per page (max 100)" default(20)
+// @Param role query string false "Filter by role (user or admin)"
+// @Param search query string false "Search by name or email"
+// @Param sort query string false "Sort by field (created_at, updated_at, name, email)" default(created_at)
+// @Param order query string false "Sort order (asc or desc)" default(desc)
+// @Success 200 {object} errors.Response{success=bool,data=UserListResponse} "Success response with paginated user list"
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Invalid parameters"
+// @Failure 403 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Admin access required"
+// @Failure 500 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Failed to list users"
+// @Router /api/v1/admin/users [get]
+func (h *Handler) ListUsers(c *gin.Context) {
+	pagination := middleware.ParsePaginationParams(c)
+	filters := ParseUserFilters(c)
+
+	users, total, err := h.userService.ListUsers(c.Request.Context(), filters, pagination.Page, pagination.PerPage)
+	if err != nil {
+		if errors.Is(err, ErrInvalidRole) {
+			_ = c.Error(apiErrors.BadRequest("Invalid role filter"))
+			return
+		}
+		_ = c.Error(apiErrors.InternalServerError(err))
+		return
+	}
+
+	userResponses := make([]UserResponse, len(users))
+	for i, user := range users {
+		userResponses[i] = ToUserResponse(&user)
+	}
+
+	totalPages := int(total) / pagination.PerPage
+	if int(total)%pagination.PerPage > 0 {
+		totalPages++
+	}
+
+	response := UserListResponse{
+		Users:      userResponses,
+		Total:      total,
+		Page:       pagination.Page,
+		PerPage:    pagination.PerPage,
+		TotalPages: totalPages,
+	}
+
+	c.JSON(http.StatusOK, apiErrors.Success(response))
 }

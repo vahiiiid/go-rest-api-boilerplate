@@ -29,6 +29,30 @@ func setupTestDB(t *testing.T) *gorm.DB {
 		);
 		CREATE INDEX idx_users_email ON users(email);
 		CREATE INDEX idx_users_deleted_at ON users(deleted_at);
+
+		CREATE TABLE roles (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT UNIQUE NOT NULL,
+			description TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX idx_roles_name ON roles(name);
+
+		CREATE TABLE user_roles (
+			user_id INTEGER NOT NULL,
+			role_id INTEGER NOT NULL,
+			assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (user_id, role_id),
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+			FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+		);
+		CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
+		CREATE INDEX idx_user_roles_role_id ON user_roles(role_id);
+
+		INSERT INTO roles (id, name, description) VALUES 
+			(1, 'user', 'Standard user role with basic permissions'),
+			(2, 'admin', 'Administrator role with full system access');
 	`)
 	require.NoError(t, err)
 
