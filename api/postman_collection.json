@@ -248,12 +248,95 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get Current User (Me)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get current authenticated user's profile with roles (no ID needed)"
+					},
+					"response": []
 				}
 			]
 		},
 		{
 			"name": "Users",
 			"item": [
+				{
+					"name": "List All Users (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users?page=1&per_page=20&role=&search=&sort=created_at&order=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"description": "Items per page (default: 20, max: 100)"
+								},
+								{
+									"key": "role",
+									"value": "",
+									"description": "Filter by role (user or admin)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by name or email"
+								},
+								{
+									"key": "sort",
+									"value": "created_at",
+									"description": "Sort by field (created_at, updated_at, name, email)"
+								},
+								{
+									"key": "order",
+									"value": "desc",
+									"description": "Sort order (asc or desc)"
+								}
+							]
+						},
+						"description": "Get paginated list of all users with filtering (requires admin role). Returns 403 for non-admin users."
+					},
+					"response": []
+				},
 				{
 					"name": "Get User by ID",
 					"request": {
@@ -275,7 +358,8 @@
 								"users",
 								"{{id}}"
 							]
-						}
+						},
+						"description": "Get user by ID. Admin users can view any user, regular users can only view their own profile. Returns 403 if non-admin tries to access another user."
 					},
 					"response": []
 				},

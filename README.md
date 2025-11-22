@@ -38,6 +38,7 @@ make quick-start  # ← One command. 90 seconds. You're building features.
 
 ✅ **Clean Architecture** — Handler → Service → Repository (GO industry standard)  
 ✅ **Security & JWT Auth** — OAuth 2.0 BCP compliant with refresh token rotation, rate limiting, CORS  
+✅ **Role-Based Access Control** — Many-to-many RBAC with JWT integration and secure admin CLI  
 ✅ **Database Migrations** — PostgreSQL with version control & rollback  
 ✅ **Comprehensive Tests** — Unit + integration with CI/CD pipeline  
 ✅ **Interactive Docs** — Auto-generated Swagger + Postman collection  
@@ -93,6 +94,13 @@ make quick-start
 - **Swagger UI:** <http://localhost:8080/swagger/index.html>
 - **Health Checks:** <http://localhost:8080/health> • [/health/live](http://localhost:8080/health/live) • [/health/ready](http://localhost:8080/health/ready)
 
+**Create Admin User:**
+
+```bash
+make create-admin              # Interactive: prompts for email, name, password
+make promote-admin ID=1        # Promote existing user to admin by ID
+```
+
 ---
 
 ## ✨ See It In Action
@@ -135,6 +143,17 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Rate limiting** — Token-bucket protection against abuse built-in
 
 👉 [Authentication Guide](https://vahiiiid.github.io/go-rest-api-docs/AUTHENTICATION/) | [Context Helpers](https://vahiiiid.github.io/go-rest-api-docs/CONTEXT_HELPERS/)
+
+#### 🔑 Role-Based Access Control (RBAC)
+
+- **Many-to-many architecture** — Flexible roles system with extensible permissions
+- **Secure admin CLI** — Interactive admin creation with strong password enforcement (no defaults in code)
+- **JWT-integrated authorization** — Roles embedded in tokens for server-side validation
+- **Protected endpoints** — Middleware-based access control (RequireRole, RequireAdmin)
+- **Three-endpoint pattern** — `/auth/me` (current user), `/users/:id` (specific), `/users` (admin list)
+- **Paginated user management** — Admin-only user listing with filtering and search
+
+👉 [RBAC Guide](https://vahiiiid.github.io/go-rest-api-docs/RBAC/)
 
 #### 🗄️ Database Setup That Doesn't Fight You
 

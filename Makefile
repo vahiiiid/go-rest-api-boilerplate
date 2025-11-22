@@ -323,6 +323,43 @@ else
 	fi
 endif
 
+## create-admin: Create new admin user (interactive)
+create-admin:
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD_INTERACTIVE) go run cmd/createadmin/main.go
+else
+	@if command -v go >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		go run cmd/createadmin/main.go; \
+	else \
+		echo "❌ Error: Docker container not running and Go not installed"; \
+		echo "Please run: make up"; \
+		exit 1; \
+	fi
+endif
+
+## promote-admin: Promote existing user to admin by ID
+promote-admin:
+ifndef ID
+	@echo "❌ Error: User ID is required"
+	@echo "Usage: make promote-admin ID=123"
+	@exit 1
+endif
+ifdef CONTAINER_RUNNING
+	@echo "$(ENV_MSG)"
+	@$(EXEC_CMD) go run cmd/createadmin/main.go --user-id=$(ID)
+else
+	@if command -v go >/dev/null 2>&1; then \
+		echo "$(ENV_MSG)"; \
+		go run cmd/createadmin/main.go --user-id=$(ID); \
+	else \
+		echo "❌ Error: Docker container not running and Go not installed"; \
+		echo "Please run: make up"; \
+		exit 1; \
+	fi
+endif
+
 ## build-binary: Build Go binary directly on host (requires Go)
 build-binary:
 	@if ! command -v go >/dev/null 2>&1; then \

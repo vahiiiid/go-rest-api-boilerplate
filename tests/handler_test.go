@@ -25,8 +25,38 @@ import (
 func createTestSchema(t *testing.T, database *gorm.DB) {
 	t.Helper()
 
-	err := database.AutoMigrate(&user.User{}, &auth.RefreshToken{})
+	err := database.AutoMigrate(&user.User{}, &user.Role{}, &auth.RefreshToken{})
 	assert.NoError(t, err)
+
+	// Drop the auto-created user_roles table (created by GORM for many2many)
+	// and recreate it with our custom schema including assigned_at column
+	database.Exec("DROP TABLE IF EXISTS user_roles")
+	
+	// Manually create the user_roles junction table with assigned_at column
+	err = database.Exec(`
+		CREATE TABLE user_roles (
+			user_id INTEGER NOT NULL,
+			role_id INTEGER NOT NULL,
+			assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (user_id, role_id),
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+			FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+		)
+	`).Error
+	assert.NoError(t, err)
+
+	// Seed role data - use FirstOrCreate to avoid duplicate errors
+	roles := []user.Role{
+		{ID: 1, Name: "user", Description: "Standard user role with basic permissions"},
+		{ID: 2, Name: "admin", Description: "Administrator role with full system access"},
+	}
+	for _, role := range roles {
+		var existingRole user.Role
+		result := database.Where("name = ?", role.Name).FirstOrCreate(&existingRole, &role)
+		if result.Error != nil {
+			t.Fatalf("Failed to create role %s: %v", role.Name, result.Error)
+		}
+	}
 }
 
 func setupTestRouter(t *testing.T) *gin.Engine {
@@ -183,6 +213,7 @@ func TestRegisterHandler(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			if w.Code != tt.expectedStatus {
+				t.Logf("Response body: %s", w.Body.String())
 				t.Errorf("Expected status %d, got %d", tt.expectedStatus, w.Code)
 			}
 
@@ -363,6 +394,7 @@ func TestRateLimit_BlocksThenAllows(t *testing.T) {
 	rr := httptest.NewRecorder()
 	r.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
+		t.Logf("Response body: %s", rr.Body.String())
 		t.Fatalf("register expected 200, got %d", rr.Code)
 	}
 

@@ -16,6 +16,8 @@ var (
 	ErrEmailExists = errors.New("email already exists")
 	// ErrInvalidCredentials is returned when credentials are invalid
 	ErrInvalidCredentials = errors.New("invalid credentials")
+	// ErrInvalidRole is returned when role is invalid
+	ErrInvalidRole = errors.New("invalid role")
 )
 
 // Service defines user service interface
@@ -25,6 +27,8 @@ type Service interface {
 	GetUserByID(ctx context.Context, id uint) (*User, error)
 	UpdateUser(ctx context.Context, id uint, req UpdateUserRequest) (*User, error)
 	DeleteUser(ctx context.Context, id uint) error
+	ListUsers(ctx context.Context, filters UserFilterParams, page, perPage int) ([]User, int64, error)
+	PromoteToAdmin(ctx context.Context, userID uint) error
 }
 
 type service struct {
@@ -61,6 +65,15 @@ func (s *service) RegisterUser(ctx context.Context, req RegisterRequest) (*User,
 
 	if err := s.repo.Create(ctx, user); err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	if err := s.repo.AssignRole(ctx, user.ID, RoleUser); err != nil {
+		return nil, fmt.Errorf("failed to assign default role: %w", err)
+	}
+
+	user, err = s.repo.FindByID(ctx, user.ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to reload user: %w", err)
 	}
 
 	return user, nil
@@ -134,6 +147,41 @@ func (s *service) DeleteUser(ctx context.Context, id uint) error {
 		}
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
+	return nil
+}
+
+// ListUsers retrieves paginated list of users with filtering
+func (s *service) ListUsers(ctx context.Context, filters UserFilterParams, page, perPage int) ([]User, int64, error) {
+	if filters.Role != "" && filters.Role != RoleUser && filters.Role != RoleAdmin {
+		return nil, 0, ErrInvalidRole
+	}
+
+	users, total, err := s.repo.ListAllUsers(ctx, filters, page, perPage)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to list users: %w", err)
+	}
+
+	return users, total, nil
+}
+
+// PromoteToAdmin promotes a user to admin role
+func (s *service) PromoteToAdmin(ctx context.Context, userID uint) error {
+	user, err := s.repo.FindByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("failed to find user: %w", err)
+	}
+	if user == nil {
+		return ErrUserNotFound
+	}
+
+	if user.HasRole(RoleAdmin) {
+		return nil
+	}
+
+	if err := s.repo.AssignRole(ctx, userID, RoleAdmin); err != nil {
+		return fmt.Errorf("failed to assign admin role: %w", err)
+	}
+
 	return nil
 }
 

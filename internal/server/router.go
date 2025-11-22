@@ -85,11 +85,13 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 			authGroup.POST("/login", userHandler.Login)
 			authGroup.POST("/refresh", userHandler.RefreshToken)
 			authGroup.POST("/logout", auth.AuthMiddleware(authService), userHandler.Logout)
+			authGroup.GET("/me", auth.AuthMiddleware(authService), userHandler.GetMe)
 		}
 
 		usersGroup := v1.Group("/users")
 		usersGroup.Use(auth.AuthMiddleware(authService))
 		{
+			usersGroup.GET("", middleware.RequireAdmin(), userHandler.ListUsers)
 			usersGroup.GET("/:id", userHandler.GetUser)
 			usersGroup.PUT("/:id", userHandler.UpdateUser)
 			usersGroup.DELETE("/:id", userHandler.DeleteUser)

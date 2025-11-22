@@ -48,6 +48,19 @@ func (m *MockService) DeleteUser(ctx context.Context, id uint) error {
 	return args.Error(0)
 }
 
+func (m *MockService) ListUsers(ctx context.Context, filters UserFilterParams, page, perPage int) ([]User, int64, error) {
+	args := m.Called(ctx, filters, page, perPage)
+	if args.Get(0) == nil {
+		return nil, args.Get(1).(int64), args.Error(2)
+	}
+	return args.Get(0).([]User), args.Get(1).(int64), args.Error(2)
+}
+
+func (m *MockService) PromoteToAdmin(ctx context.Context, userID uint) error {
+	args := m.Called(ctx, userID)
+	return args.Error(0)
+}
+
 // MockRepository is a mock implementation of the user repository for testing services
 type MockRepository struct {
 	mock.Mock
@@ -82,4 +95,38 @@ func (m *MockRepository) Update(ctx context.Context, user *User) error {
 func (m *MockRepository) Delete(ctx context.Context, id uint) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
+}
+
+func (m *MockRepository) ListAllUsers(ctx context.Context, filters UserFilterParams, page, perPage int) ([]User, int64, error) {
+	args := m.Called(ctx, filters, page, perPage)
+	if args.Get(0) == nil {
+		return nil, args.Get(1).(int64), args.Error(2)
+	}
+	return args.Get(0).([]User), args.Get(1).(int64), args.Error(2)
+}
+
+func (m *MockRepository) AssignRole(ctx context.Context, userID uint, roleName string) error {
+	args := m.Called(ctx, userID, roleName)
+	return args.Error(0)
+}
+
+func (m *MockRepository) RemoveRole(ctx context.Context, userID uint, roleName string) error {
+	args := m.Called(ctx, userID, roleName)
+	return args.Error(0)
+}
+
+func (m *MockRepository) FindRoleByName(ctx context.Context, roleName string) (*Role, error) {
+	args := m.Called(ctx, roleName)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*Role), args.Error(1)
+}
+
+func (m *MockRepository) GetUserRoles(ctx context.Context, userID uint) ([]Role, error) {
+	args := m.Called(ctx, userID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]Role), args.Error(1)
 }
