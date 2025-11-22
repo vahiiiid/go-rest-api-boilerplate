@@ -9,7 +9,9 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"syscall"
 
+	"golang.org/x/term"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -120,14 +122,39 @@ func createNewAdmin(ctx context.Context, service user.Service) {
 
 func readPassword(prompt string) string {
 	fmt.Print(prompt)
-	reader := bufio.NewReader(os.Stdin)
-	password, _ := reader.ReadString('\n')
-	return strings.TrimSpace(password)
+	bytePassword, err := term.ReadPassword(syscall.Stdin)
+	fmt.Println() // Print newline after password input
+	if err != nil {
+		log.Fatalf("Failed to read password: %v", err)
+	}
+	return strings.TrimSpace(string(bytePassword))
 }
 
 func validatePassword(password string) error {
 	if len(password) < 8 {
 		return fmt.Errorf("password must be at least 8 characters long")
 	}
+
+	// Enforce strong password policy for admin accounts
+	var (
+		hasUpper   = regexp.MustCompile(`[A-Z]`).MatchString(password)
+		hasLower   = regexp.MustCompile(`[a-z]`).MatchString(password)
+		hasDigit   = regexp.MustCompile(`[0-9]`).MatchString(password)
+		hasSpecial = regexp.MustCompile(`[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]`).MatchString(password)
+	)
+
+	if !hasUpper {
+		return fmt.Errorf("password must contain at least one uppercase letter")
+	}
+	if !hasLower {
+		return fmt.Errorf("password must contain at least one lowercase letter")
+	}
+	if !hasDigit {
+		return fmt.Errorf("password must contain at least one digit")
+	}
+	if !hasSpecial {
+		return fmt.Errorf("password must contain at least one special character")
+	}
+
 	return nil
 }

@@ -88,13 +88,24 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 			authGroup.GET("/me", auth.AuthMiddleware(authService), userHandler.GetMe)
 		}
 
+		// User endpoints - authenticated users can access their own resources
 		usersGroup := v1.Group("/users")
 		usersGroup.Use(auth.AuthMiddleware(authService))
 		{
-			usersGroup.GET("", middleware.RequireAdmin(), userHandler.ListUsers)
 			usersGroup.GET("/:id", userHandler.GetUser)
 			usersGroup.PUT("/:id", userHandler.UpdateUser)
 			usersGroup.DELETE("/:id", userHandler.DeleteUser)
+		}
+
+		// Admin endpoints - admin role required, following REST best practices
+		adminGroup := v1.Group("/admin")
+		adminGroup.Use(auth.AuthMiddleware(authService), middleware.RequireAdmin())
+		{
+			// User management endpoints
+			adminGroup.GET("/users", userHandler.ListUsers)
+			adminGroup.GET("/users/:id", userHandler.GetUser)
+			adminGroup.PUT("/users/:id", userHandler.UpdateUser)
+			adminGroup.DELETE("/users/:id", userHandler.DeleteUser)
 		}
 	}
 

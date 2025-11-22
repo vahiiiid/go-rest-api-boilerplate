@@ -281,7 +281,7 @@
 			"name": "Users",
 			"item": [
 				{
-					"name": "List All Users (Admin Only)",
+					"name": "Get User by ID",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -291,13 +291,105 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/users?page=1&per_page=20&role=&search=&sort=created_at&order=desc",
+							"raw": "{{base_url}}/api/v1/users/{{id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"v1",
+								"users",
+								"{{id}}"
+							]
+						},
+						"description": "Get user by ID. Users can only view their own profile."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"updated_{{name}}\",\n  \"email\": \"updated_{{email}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{id}}"
+							]
+						},
+						"description": "Update user profile. Users can only update their own profile."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{id}}"
+							]
+						},
+						"description": "Delete user account. Users can only delete their own account."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "List All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users?page=1&per_page=20&role=&search=&sort=created_at&order=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
 								"users"
 							],
 							"query": [
@@ -338,7 +430,7 @@
 					"response": []
 				},
 				{
-					"name": "Get User by ID",
+					"name": "Get Any User by ID",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -348,23 +440,24 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/{{id}}",
+							"raw": "{{base_url}}/api/v1/admin/users/{{id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"v1",
+								"admin",
 								"users",
 								"{{id}}"
 							]
 						},
-						"description": "Get user by ID. Admin users can view any user, regular users can only view their own profile. Returns 403 if non-admin tries to access another user."
+						"description": "Get any user by ID (admin only). Admins can view any user profile."
 					},
 					"response": []
 				},
 				{
-					"name": "Update User",
+					"name": "Update Any User",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -379,25 +472,27 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"updated_{{name}}\",\n  \"email\": \"updated_{{email}}\"\n}"
+							"raw": "{\n  \"name\": \"admin_updated_name\",\n  \"email\": \"admin_updated_email@example.com\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/{{id}}",
+							"raw": "{{base_url}}/api/v1/admin/users/{{id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"v1",
+								"admin",
 								"users",
 								"{{id}}"
 							]
-						}
+						},
+						"description": "Update any user profile (admin only). Admins can update any user account."
 					},
 					"response": []
 				},
 				{
-					"name": "Delete User",
+					"name": "Delete Any User",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -407,17 +502,19 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/{{id}}",
+							"raw": "{{base_url}}/api/v1/admin/users/{{id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"v1",
+								"admin",
 								"users",
 								"{{id}}"
 							]
-						}
+						},
+						"description": "Delete any user account (admin only). Admins can delete any user."
 					},
 					"response": []
 				}

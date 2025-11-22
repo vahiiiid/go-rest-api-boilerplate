@@ -1,6 +1,9 @@
 package user
 
 import (
+	"strings"
+	"unicode/utf8"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,7 +22,16 @@ func ParseUserFilters(c *gin.Context) UserFilterParams {
 		role = ""
 	}
 
+	// Sanitize search parameter: limit length and strip dangerous characters
 	search := c.Query("search")
+	if search != "" {
+		// Limit search length to prevent DoS
+		if utf8.RuneCountInString(search) > 100 {
+			search = string([]rune(search)[:100])
+		}
+		// Trim whitespace
+		search = strings.TrimSpace(search)
+	}
 
 	sort := c.DefaultQuery("sort", "created_at")
 	validSorts := map[string]bool{

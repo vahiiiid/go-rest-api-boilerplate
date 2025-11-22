@@ -29,11 +29,42 @@ func (testUser) TableName() string {
 	return "users"
 }
 
+type testRole struct {
+	ID          uint   `gorm:"primaryKey"`
+	Name        string `gorm:"uniqueIndex;not null"`
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+func (testRole) TableName() string {
+	return "roles"
+}
+
+type testUserRole struct {
+	UserID uint `gorm:"primaryKey"`
+	RoleID uint `gorm:"primaryKey"`
+}
+
+func (testUserRole) TableName() string {
+	return "user_roles"
+}
+
 func setupServiceTest(t *testing.T) (*service, *gorm.DB) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	require.NoError(t, err)
 
-	err = db.AutoMigrate(&RefreshToken{}, &testUser{})
+	err = db.AutoMigrate(&RefreshToken{}, &testUser{}, &testRole{}, &testUserRole{})
+	require.NoError(t, err)
+
+	testRoleData := &testRole{
+		ID:          1,
+		Name:        "user",
+		Description: "Standard user",
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	err = db.Create(testRoleData).Error
 	require.NoError(t, err)
 
 	testUserData := &testUser{
@@ -45,6 +76,13 @@ func setupServiceTest(t *testing.T) (*service, *gorm.DB) {
 		UpdatedAt:    time.Now(),
 	}
 	err = db.Create(testUserData).Error
+	require.NoError(t, err)
+
+	testUserRoleData := &testUserRole{
+		UserID: 1,
+		RoleID: 1,
+	}
+	err = db.Create(testUserRoleData).Error
 	require.NoError(t, err)
 
 	cfg := &config.JWTConfig{
@@ -389,7 +427,35 @@ func TestService_GenerateTokenPair_DatabaseError(t *testing.T) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	require.NoError(t, err)
 
-	err = db.AutoMigrate(&RefreshToken{}, &testUser{})
+	err = db.AutoMigrate(&RefreshToken{}, &testUser{}, &testRole{}, &testUserRole{})
+	require.NoError(t, err)
+
+	testRoleData := &testRole{
+		ID:          1,
+		Name:        "user",
+		Description: "Standard user",
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	err = db.Create(testRoleData).Error
+	require.NoError(t, err)
+
+	testUserData := &testUser{
+		ID:           1,
+		Name:         "Test User",
+		Email:        "test@example.com",
+		PasswordHash: "hash",
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+	err = db.Create(testUserData).Error
+	require.NoError(t, err)
+
+	testUserRoleData := &testUserRole{
+		UserID: 1,
+		RoleID: 1,
+	}
+	err = db.Create(testUserRoleData).Error
 	require.NoError(t, err)
 
 	svc := &service{
@@ -425,7 +491,35 @@ func TestService_GenerateTokenPair_InvalidSecret(t *testing.T) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	require.NoError(t, err)
 
-	err = db.AutoMigrate(&RefreshToken{})
+	err = db.AutoMigrate(&RefreshToken{}, &testUser{}, &testRole{}, &testUserRole{})
+	require.NoError(t, err)
+
+	testRoleData := &testRole{
+		ID:          1,
+		Name:        "user",
+		Description: "Standard user",
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	err = db.Create(testRoleData).Error
+	require.NoError(t, err)
+
+	testUserData := &testUser{
+		ID:           1,
+		Name:         "Test User",
+		Email:        "test@example.com",
+		PasswordHash: "hash",
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+	err = db.Create(testUserData).Error
+	require.NoError(t, err)
+
+	testUserRoleData := &testUserRole{
+		UserID: 1,
+		RoleID: 1,
+	}
+	err = db.Create(testUserRoleData).Error
 	require.NoError(t, err)
 
 	svc := &service{

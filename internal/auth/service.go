@@ -126,9 +126,10 @@ func (s *service) GenerateToken(userID uint, email string, name string) (string,
 			Joins("JOIN user_roles ON user_roles.role_id = roles.id").
 			Where("user_roles.user_id = ?", userID).
 			Find(&roleNames).Error
-		if err == nil {
-			roles = roleNames
+		if err != nil {
+			return "", fmt.Errorf("failed to fetch user roles: %w", err)
 		}
+		roles = roleNames
 	}
 
 	claims := jwt.MapClaims{

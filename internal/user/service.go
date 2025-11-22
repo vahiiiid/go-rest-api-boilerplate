@@ -63,14 +63,24 @@ func (s *service) RegisterUser(ctx context.Context, req RegisterRequest) (*User,
 		PasswordHash: hashedPassword,
 	}
 
-	if err := s.repo.Create(ctx, user); err != nil {
-		return nil, fmt.Errorf("failed to create user: %w", err)
+	// Use transaction to ensure atomic user creation and role assignment
+	err = s.repo.Transaction(ctx, func(txCtx context.Context) error {
+		if err := s.repo.Create(txCtx, user); err != nil {
+			return fmt.Errorf("failed to create user: %w", err)
+		}
+
+		if err := s.repo.AssignRole(txCtx, user.ID, RoleUser); err != nil {
+			return fmt.Errorf("failed to assign default role: %w", err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
-	if err := s.repo.AssignRole(ctx, user.ID, RoleUser); err != nil {
-		return nil, fmt.Errorf("failed to assign default role: %w", err)
-	}
-
+	// Reload user with roles after successful transaction
 	user, err = s.repo.FindByID(ctx, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to reload user: %w", err)
@@ -152,6 +162,17 @@ func (s *service) DeleteUser(ctx context.Context, id uint) error {
 
 // ListUsers retrieves paginated list of users with filtering
 func (s *service) ListUsers(ctx context.Context, filters UserFilterParams, page, perPage int) ([]User, int64, error) {
+	// Validate pagination parameters
+	if page < 1 {
+		return nil, 0, fmt.Errorf("page must be >= 1")
+	}
+	if perPage < 1 {
+		return nil, 0, fmt.Errorf("perPage must be >= 1")
+	}
+	if perPage > 100 {
+		return nil, 0, fmt.Errorf("perPage must be <= 100")
+	}
+
 	if filters.Role != "" && filters.Role != RoleUser && filters.Role != RoleAdmin {
 		return nil, 0, ErrInvalidRole
 	}

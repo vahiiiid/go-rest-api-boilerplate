@@ -369,7 +369,7 @@ func (h *Handler) GetMe(c *gin.Context) {
 // ListUsers godoc
 // @Summary List all users (Admin only)
 // @Description Get paginated list of all users with optional filtering (requires admin role)
-// @Tags users
+// @Tags admin
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -383,7 +383,7 @@ func (h *Handler) GetMe(c *gin.Context) {
 // @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Invalid parameters"
 // @Failure 403 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Admin access required"
 // @Failure 500 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Failed to list users"
-// @Router /api/v1/users [get]
+// @Router /api/v1/admin/users [get]
 func (h *Handler) ListUsers(c *gin.Context) {
 	pagination := middleware.ParsePaginationParams(c)
 	filters := ParseUserFilters(c)

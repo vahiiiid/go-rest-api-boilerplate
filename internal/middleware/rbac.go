@@ -19,7 +19,9 @@ func RequireRole(role string) gin.HandlerFunc {
 		}
 		c.Next()
 	}
-} // RequireAdmin returns a middleware that checks if the user is an admin
+}
+
+// RequireAdmin returns a middleware that checks if the user is an admin
 func RequireAdmin() gin.HandlerFunc {
 	return RequireRole("admin")
 }

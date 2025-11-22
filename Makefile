@@ -348,11 +348,11 @@ ifndef ID
 endif
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD) go run cmd/createadmin/main.go --user-id=$(ID)
+	@$(EXEC_CMD) go run cmd/createadmin/main.go --promote=$(ID)
 else
 	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
-		go run cmd/createadmin/main.go --user-id=$(ID); \
+		go run cmd/createadmin/main.go --promote=$(ID); \
 	else \
 		echo "❌ Error: Docker container not running and Go not installed"; \
 		echo "Please run: make up"; \

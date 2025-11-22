@@ -130,3 +130,8 @@ func (m *MockRepository) GetUserRoles(ctx context.Context, userID uint) ([]Role,
 	}
 	return args.Get(0).([]Role), args.Error(1)
 }
+
+func (m *MockRepository) Transaction(ctx context.Context, fn func(context.Context) error) error {
+	// Execute the transaction function directly for testing
+	return fn(ctx)
+}

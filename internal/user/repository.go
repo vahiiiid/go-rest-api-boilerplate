@@ -20,6 +20,7 @@ type Repository interface {
 	RemoveRole(ctx context.Context, userID uint, roleName string) error
 	FindRoleByName(ctx context.Context, name string) (*Role, error)
 	GetUserRoles(ctx context.Context, userID uint) ([]Role, error)
+	Transaction(ctx context.Context, fn func(context.Context) error) error
 }
 
 type repository struct {
@@ -110,9 +111,11 @@ func (r *repository) ListAllUsers(ctx context.Context, filters UserFilterParams,
 	}
 
 	offset := (page - 1) * perPage
-	orderClause := filters.Sort + " " + filters.Order
+	// Qualify column names with table prefix to avoid ambiguity when JOINing
+	orderClause := "users." + filters.Sort + " " + filters.Order
 
-	if err := query.Order(orderClause).Limit(perPage).Offset(offset).Find(&users).Error; err != nil {
+	// Use Distinct to avoid duplicate users when filtering by role with JOINs
+	if err := query.Distinct("users.*").Order(orderClause).Limit(perPage).Offset(offset).Find(&users).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -187,4 +190,17 @@ func (r *repository) GetUserRoles(ctx context.Context, userID uint) ([]Role, err
 		return nil, err
 	}
 	return roles, nil
+}
+
+// Transaction executes a function within a database transaction
+func (r *repository) Transaction(ctx context.Context, fn func(context.Context) error) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Temporarily replace the db with transaction
+		originalDB := r.db
+		r.db = tx
+		defer func() {
+			r.db = originalDB
+		}()
+		return fn(ctx)
+	})
 }
