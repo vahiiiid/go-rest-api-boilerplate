@@ -31,7 +31,7 @@ func createTestSchema(t *testing.T, database *gorm.DB) {
 	// Drop the auto-created user_roles table (created by GORM for many2many)
 	// and recreate it with our custom schema including assigned_at column
 	database.Exec("DROP TABLE IF EXISTS user_roles")
-	
+
 	// Manually create the user_roles junction table with assigned_at column
 	err = database.Exec(`
 		CREATE TABLE user_roles (

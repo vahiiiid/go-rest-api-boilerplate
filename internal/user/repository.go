@@ -134,7 +134,7 @@ func (r *repository) AssignRole(ctx context.Context, userID uint, roleName strin
 	r.db.WithContext(ctx).Table("user_roles").
 		Where("user_id = ? AND role_id = ?", userID, role.ID).
 		Count(&count)
-	
+
 	if count > 0 {
 		return nil // Already assigned
 	}
