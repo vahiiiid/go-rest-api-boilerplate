@@ -116,7 +116,8 @@ func (r *repository) ListAllUsers(ctx context.Context, filters UserFilterParams,
 		query = query.Where("users.name LIKE ? OR users.email LIKE ?", searchPattern, searchPattern)
 	}
 
-	if err := query.Count(&total).Error; err != nil {
+	// Use Distinct on count to avoid inflated totals when JOINing
+	if err := query.Distinct("users.id").Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
