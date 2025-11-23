@@ -547,3 +547,85 @@ func TestRepository_Transaction(t *testing.T) {
 		}
 	})
 }
+
+func TestRepository_FindByEmail_Error(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	t.Run("returns error when email is empty", func(t *testing.T) {
+		user, err := repo.FindByEmail(context.Background(), "")
+		assert.NoError(t, err)
+		assert.Nil(t, user)
+	})
+}
+
+func TestRepository_FindByID_Error(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	t.Run("returns nil when ID is 0", func(t *testing.T) {
+		user, err := repo.FindByID(context.Background(), 0)
+		assert.NoError(t, err)
+		assert.Nil(t, user)
+	})
+}
+
+func TestRepository_Update_Error(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	t.Run("successfully updates with empty password hash", func(t *testing.T) {
+		user := &User{
+			Name:         "John Doe",
+			Email:        "john@example.com",
+			PasswordHash: "hashed_password",
+		}
+		err := repo.Create(context.Background(), user)
+		require.NoError(t, err)
+
+		user.Name = "Updated Name"
+		user.PasswordHash = ""
+		err = repo.Update(context.Background(), user)
+		assert.NoError(t, err)
+
+		updatedUser, err := repo.FindByID(context.Background(), user.ID)
+		assert.NoError(t, err)
+		assert.Equal(t, "Updated Name", updatedUser.Name)
+	})
+}
+
+func TestRepository_ListAllUsers_ErrorCases(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	user1 := &User{Name: "Alice", Email: "alice@example.com", PasswordHash: "hash"}
+	err := repo.Create(context.Background(), user1)
+	require.NoError(t, err)
+
+	t.Run("search with empty string", func(t *testing.T) {
+		filters := UserFilterParams{Search: "", Sort: "created_at", Order: "desc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+		assert.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, int64(1), total)
+	})
+
+	t.Run("role filter with empty string", func(t *testing.T) {
+		filters := UserFilterParams{Role: "", Sort: "created_at", Order: "desc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+		assert.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, int64(1), total)
+	})
+}
+
+func TestRepository_GetUserRoles_EmptyResult(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	t.Run("user with ID 0", func(t *testing.T) {
+		roles, err := repo.GetUserRoles(context.Background(), 0)
+		assert.NoError(t, err)
+		assert.Empty(t, roles)
+	})
+}

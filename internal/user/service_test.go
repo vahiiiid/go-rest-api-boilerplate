@@ -650,3 +650,221 @@ func TestService_PromoteToAdmin(t *testing.T) {
 		})
 	}
 }
+
+func TestService_RegisterUser_ErrorPaths(t *testing.T) {
+	tests := []struct {
+		name        string
+		request     RegisterRequest
+		setupMock   func(*MockRepository)
+		expectedErr string
+	}{
+		{
+			name: "error assigning default role",
+			request: RegisterRequest{
+				Name:     "John Doe",
+				Email:    "john@example.com",
+				Password: "password123",
+			},
+			setupMock: func(m *MockRepository) {
+				m.On("FindByEmail", mock.Anything, "john@example.com").Return(nil, nil)
+				m.On("Create", mock.Anything, mock.AnythingOfType("*user.User")).Run(func(args mock.Arguments) {
+					user := args.Get(1).(*User)
+					user.ID = 1
+				}).Return(nil)
+				m.On("AssignRole", mock.Anything, uint(1), RoleUser).Return(errors.New("role assignment error"))
+			},
+			expectedErr: "failed to assign default role",
+		},
+		{
+			name: "error reloading user after creation",
+			request: RegisterRequest{
+				Name:     "John Doe",
+				Email:    "john@example.com",
+				Password: "password123",
+			},
+			setupMock: func(m *MockRepository) {
+				m.On("FindByEmail", mock.Anything, "john@example.com").Return(nil, nil)
+				m.On("Create", mock.Anything, mock.AnythingOfType("*user.User")).Run(func(args mock.Arguments) {
+					user := args.Get(1).(*User)
+					user.ID = 1
+				}).Return(nil)
+				m.On("AssignRole", mock.Anything, uint(1), RoleUser).Return(nil)
+				m.On("FindByID", mock.Anything, uint(1)).Return(nil, errors.New("reload error"))
+			},
+			expectedErr: "failed to reload user",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockRepo := &MockRepository{}
+			tt.setupMock(mockRepo)
+
+			service := NewService(mockRepo)
+			user, err := service.RegisterUser(context.Background(), tt.request)
+
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), tt.expectedErr)
+			assert.Nil(t, user)
+
+			mockRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestService_ListUsers_PaginationErrors(t *testing.T) {
+	tests := []struct {
+		name        string
+		filters     UserFilterParams
+		page        int
+		perPage     int
+		expectedErr string
+	}{
+		{
+			name:        "page less than 1",
+			filters:     UserFilterParams{Sort: "created_at", Order: "desc"},
+			page:        0,
+			perPage:     20,
+			expectedErr: "page must be >= 1",
+		},
+		{
+			name:        "perPage less than 1",
+			filters:     UserFilterParams{Sort: "created_at", Order: "desc"},
+			page:        1,
+			perPage:     0,
+			expectedErr: "perPage must be >= 1",
+		},
+		{
+			name:        "perPage greater than 100",
+			filters:     UserFilterParams{Sort: "created_at", Order: "desc"},
+			page:        1,
+			perPage:     101,
+			expectedErr: "perPage must be <= 100",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockRepo := &MockRepository{}
+			service := NewService(mockRepo)
+
+			users, total, err := service.ListUsers(context.Background(), tt.filters, tt.page, tt.perPage)
+
+			assert.Error(t, err)
+			assert.Equal(t, tt.expectedErr, err.Error())
+			assert.Nil(t, users)
+			assert.Equal(t, int64(0), total)
+
+			mockRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestService_ListUsers_RepositoryError(t *testing.T) {
+	mockRepo := &MockRepository{}
+	filters := UserFilterParams{Sort: "created_at", Order: "desc"}
+	mockRepo.On("ListAllUsers", mock.Anything, filters, 1, 20).Return(nil, int64(0), errors.New("database error"))
+
+	service := NewService(mockRepo)
+	users, total, err := service.ListUsers(context.Background(), filters, 1, 20)
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to list users")
+	assert.Nil(t, users)
+	assert.Equal(t, int64(0), total)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestService_UpdateUser_ErrorPaths(t *testing.T) {
+	tests := []struct {
+		name        string
+		userID      uint
+		request     UpdateUserRequest
+		setupMock   func(*MockRepository)
+		expectedErr string
+	}{
+		{
+			name:   "error fetching existing user",
+			userID: 1,
+			request: UpdateUserRequest{
+				Name:  "Updated Name",
+				Email: "updated@example.com",
+			},
+			setupMock: func(m *MockRepository) {
+				m.On("FindByID", mock.Anything, uint(1)).Return(nil, errors.New("database error"))
+			},
+			expectedErr: "database error",
+		},
+		{
+			name:   "user not found",
+			userID: 999,
+			request: UpdateUserRequest{
+				Name:  "Updated Name",
+				Email: "updated@example.com",
+			},
+			setupMock: func(m *MockRepository) {
+				m.On("FindByID", mock.Anything, uint(999)).Return(nil, nil)
+			},
+			expectedErr: "user not found",
+		},
+		{
+			name:   "email already taken by another user",
+			userID: 1,
+			request: UpdateUserRequest{
+				Name:  "Updated Name",
+				Email: "taken@example.com",
+			},
+			setupMock: func(m *MockRepository) {
+				existingUser := &User{ID: 1, Name: "John Doe", Email: "john@example.com"}
+				m.On("FindByID", mock.Anything, uint(1)).Return(existingUser, nil)
+				otherUser := &User{ID: 2, Email: "taken@example.com"}
+				m.On("FindByEmail", mock.Anything, "taken@example.com").Return(otherUser, nil)
+			},
+			expectedErr: "email already exists",
+		},
+		{
+			name:   "error checking email availability",
+			userID: 1,
+			request: UpdateUserRequest{
+				Name:  "Updated Name",
+				Email: "new@example.com",
+			},
+			setupMock: func(m *MockRepository) {
+				existingUser := &User{ID: 1, Name: "John Doe", Email: "john@example.com"}
+				m.On("FindByID", mock.Anything, uint(1)).Return(existingUser, nil)
+				m.On("FindByEmail", mock.Anything, "new@example.com").Return(nil, errors.New("database error"))
+			},
+			expectedErr: "failed to check existing email",
+		},
+		{
+			name:   "error updating user",
+			userID: 1,
+			request: UpdateUserRequest{
+				Name: "Updated Name",
+			},
+			setupMock: func(m *MockRepository) {
+				existingUser := &User{ID: 1, Name: "John Doe", Email: "john@example.com"}
+				m.On("FindByID", mock.Anything, uint(1)).Return(existingUser, nil)
+				m.On("Update", mock.Anything, mock.AnythingOfType("*user.User")).Return(errors.New("update error"))
+			},
+			expectedErr: "update error",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockRepo := &MockRepository{}
+			tt.setupMock(mockRepo)
+
+			service := NewService(mockRepo)
+			user, err := service.UpdateUser(context.Background(), tt.userID, tt.request)
+
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), tt.expectedErr)
+			assert.Nil(t, user)
+
+			mockRepo.AssertExpectations(t)
+		})
+	}
+}
