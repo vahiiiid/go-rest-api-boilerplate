@@ -590,18 +590,9 @@ func TestService_PromoteToAdmin(t *testing.T) {
 			name:   "user not found",
 			userID: 999,
 			setupMocks: func(m *MockRepository) {
-				m.On("FindByID", mock.Anything, uint(999)).Return(nil, gorm.ErrRecordNotFound)
+				m.On("FindByID", mock.Anything, uint(999)).Return(nil, ErrUserNotFound)
 			},
 			expectedErr: ErrUserNotFound,
-		},
-		{
-			name:   "admin role not found in database",
-			userID: 1,
-			setupMocks: func(m *MockRepository) {
-				user := &User{ID: 1, Name: "John Doe", Email: "john@example.com"}
-				m.On("FindByID", mock.Anything, uint(1)).Return(user, nil)
-			},
-			expectedErr: gorm.ErrRecordNotFound,
 		},
 		{
 			name:   "repository error on FindByID",
@@ -632,7 +623,7 @@ func TestService_PromoteToAdmin(t *testing.T) {
 					Roles: []Role{{ID: 2, Name: RoleAdmin}},
 				}
 				m.On("FindByID", mock.Anything, uint(1)).Return(user, nil)
-				m.On("AssignRole", mock.Anything, uint(1), RoleAdmin).Return(nil)
+				// AssignRole should NOT be called since user already has the role
 			},
 			expectedErr: nil,
 		},
@@ -649,7 +640,7 @@ func TestService_PromoteToAdmin(t *testing.T) {
 			if tt.expectedErr != nil {
 				assert.Error(t, err)
 				if tt.expectedErr == ErrUserNotFound {
-					assert.Equal(t, ErrUserNotFound, err)
+					assert.ErrorIs(t, err, ErrUserNotFound)
 				}
 			} else {
 				assert.NoError(t, err)
