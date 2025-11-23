@@ -386,21 +386,50 @@ func TestHasRole(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "authenticated user - role check (not yet implemented)",
+			name: "user has admin role",
 			setup: func(c *gin.Context) {
 				claims := &auth.Claims{
 					UserID: 1,
-					Email:  "test@example.com",
-					Name:   "Test User",
+					Email:  "admin@example.com",
+					Name:   "Admin User",
+					Roles:  []string{"admin", "user"},
 				}
 				c.Set(auth.KeyUser, claims)
 			},
 			role:     "admin",
-			expected: false, // Always false as roles are not yet implemented
+			expected: true,
+		},
+		{
+			name: "user does not have role",
+			setup: func(c *gin.Context) {
+				claims := &auth.Claims{
+					UserID: 1,
+					Email:  "user@example.com",
+					Name:   "Regular User",
+					Roles:  []string{"user"},
+				}
+				c.Set(auth.KeyUser, claims)
+			},
+			role:     "admin",
+			expected: false,
 		},
 		{
 			name:     "unauthenticated user",
-			setup:    func(c *gin.Context) {}, // Don't set anything
+			setup:    func(c *gin.Context) {},
+			role:     "admin",
+			expected: false,
+		},
+		{
+			name: "user with no roles",
+			setup: func(c *gin.Context) {
+				claims := &auth.Claims{
+					UserID: 1,
+					Email:  "user@example.com",
+					Name:   "User",
+					Roles:  []string{},
+				}
+				c.Set(auth.KeyUser, claims)
+			},
 			role:     "admin",
 			expected: false,
 		},
@@ -414,6 +443,130 @@ func TestHasRole(t *testing.T) {
 			tt.setup(c)
 
 			result := HasRole(c, tt.role)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestGetRoles(t *testing.T) {
+	tests := []struct {
+		name     string
+		setup    func(*gin.Context)
+		expected []string
+	}{
+		{
+			name: "user with multiple roles",
+			setup: func(c *gin.Context) {
+				claims := &auth.Claims{
+					UserID: 1,
+					Email:  "admin@example.com",
+					Roles:  []string{"admin", "user", "editor"},
+				}
+				c.Set(auth.KeyUser, claims)
+			},
+			expected: []string{"admin", "user", "editor"},
+		},
+		{
+			name: "user with single role",
+			setup: func(c *gin.Context) {
+				claims := &auth.Claims{
+					UserID: 1,
+					Email:  "user@example.com",
+					Roles:  []string{"user"},
+				}
+				c.Set(auth.KeyUser, claims)
+			},
+			expected: []string{"user"},
+		},
+		{
+			name:     "unauthenticated user",
+			setup:    func(c *gin.Context) {},
+			expected: []string{},
+		},
+		{
+			name: "user with no roles",
+			setup: func(c *gin.Context) {
+				claims := &auth.Claims{
+					UserID: 1,
+					Email:  "user@example.com",
+					Roles:  []string{},
+				}
+				c.Set(auth.KeyUser, claims)
+			},
+			expected: []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+
+			tt.setup(c)
+
+			result := GetRoles(c)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestIsAdmin(t *testing.T) {
+	tests := []struct {
+		name     string
+		setup    func(*gin.Context)
+		expected bool
+	}{
+		{
+			name: "user is admin",
+			setup: func(c *gin.Context) {
+				claims := &auth.Claims{
+					UserID: 1,
+					Email:  "admin@example.com",
+					Roles:  []string{"admin", "user"},
+				}
+				c.Set(auth.KeyUser, claims)
+			},
+			expected: true,
+		},
+		{
+			name: "user is not admin",
+			setup: func(c *gin.Context) {
+				claims := &auth.Claims{
+					UserID: 1,
+					Email:  "user@example.com",
+					Roles:  []string{"user", "editor"},
+				}
+				c.Set(auth.KeyUser, claims)
+			},
+			expected: false,
+		},
+		{
+			name:     "unauthenticated user",
+			setup:    func(c *gin.Context) {},
+			expected: false,
+		},
+		{
+			name: "user with no roles",
+			setup: func(c *gin.Context) {
+				claims := &auth.Claims{
+					UserID: 1,
+					Email:  "user@example.com",
+					Roles:  []string{},
+				}
+				c.Set(auth.KeyUser, claims)
+			},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+
+			tt.setup(c)
+
+			result := IsAdmin(c)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
