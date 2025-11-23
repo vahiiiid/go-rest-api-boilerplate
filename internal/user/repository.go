@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type txKey struct{}
@@ -122,11 +123,26 @@ func (r *repository) ListAllUsers(ctx context.Context, filters UserFilterParams,
 	}
 
 	offset := (page - 1) * perPage
-	// Qualify column names with table prefix to avoid ambiguity when JOINing
-	orderClause := "users." + filters.Sort + " " + filters.Order
+
+	// Defense-in-depth: Validate sort parameters at repository layer
+	validSorts := map[string]bool{
+		"name": true, "email": true, "created_at": true, "updated_at": true,
+	}
+	if !validSorts[filters.Sort] {
+		return nil, 0, errors.New("invalid sort field")
+	}
+	if filters.Order != "asc" && filters.Order != "desc" {
+		return nil, 0, errors.New("invalid sort order")
+	}
+
+	// Use type-safe GORM clause to prevent SQL injection
+	orderColumn := clause.OrderByColumn{
+		Column: clause.Column{Table: "users", Name: filters.Sort},
+		Desc:   filters.Order == "desc",
+	}
 
 	// Use Distinct to avoid duplicate users when filtering by role with JOINs
-	if err := query.Distinct("users.*").Order(orderClause).Limit(perPage).Offset(offset).Find(&users).Error; err != nil {
+	if err := query.Distinct("users.*").Order(orderColumn).Limit(perPage).Offset(offset).Find(&users).Error; err != nil {
 		return nil, 0, err
 	}
 

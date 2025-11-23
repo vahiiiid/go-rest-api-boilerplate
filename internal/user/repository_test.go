@@ -322,6 +322,13 @@ func TestRepository_RemoveRole(t *testing.T) {
 		err := repo.RemoveRole(context.Background(), user.ID, "nonexistent_role")
 		assert.Error(t, err)
 	})
+
+	t.Run("remove role from nonexistent user - succeeds silently", func(t *testing.T) {
+		// This is actually trying to remove admin role, so it finds the role but the user doesn't exist
+		// The DELETE just affects 0 rows, which is not an error in SQL
+		err := repo.RemoveRole(context.Background(), 999999, RoleAdmin)
+		assert.NoError(t, err)
+	})
 }
 
 func TestRepository_GetUserRoles(t *testing.T) {
@@ -461,6 +468,41 @@ func TestRepository_ListAllUsers(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Empty(t, users)
 		assert.Equal(t, int64(0), total)
+	})
+
+	t.Run("invalid sort field", func(t *testing.T) {
+		filters := UserFilterParams{Sort: "invalid_field", Order: "asc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+		assert.Error(t, err)
+		assert.Equal(t, "invalid sort field", err.Error())
+		assert.Nil(t, users)
+		assert.Equal(t, int64(0), total)
+	})
+
+	t.Run("invalid sort order", func(t *testing.T) {
+		filters := UserFilterParams{Sort: "email", Order: "invalid"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+		assert.Error(t, err)
+		assert.Equal(t, "invalid sort order", err.Error())
+		assert.Nil(t, users)
+		assert.Equal(t, int64(0), total)
+	})
+
+	t.Run("sort by name desc", func(t *testing.T) {
+		filters := UserFilterParams{Sort: "name", Order: "desc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 10)
+		assert.NoError(t, err)
+		assert.Len(t, users, 3)
+		assert.Equal(t, int64(3), total)
+		assert.Equal(t, "Charlie User", users[0].Name)
+	})
+
+	t.Run("sort by updated_at asc", func(t *testing.T) {
+		filters := UserFilterParams{Sort: "updated_at", Order: "asc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 10)
+		assert.NoError(t, err)
+		assert.Len(t, users, 3)
+		assert.Equal(t, int64(3), total)
 	})
 }
 
