@@ -9,7 +9,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"syscall"
 
 	"golang.org/x/term"
 	"gorm.io/driver/postgres"
@@ -122,7 +121,7 @@ func createNewAdmin(ctx context.Context, service user.Service) {
 
 func readPassword(prompt string) string {
 	fmt.Print(prompt)
-	bytePassword, err := term.ReadPassword(syscall.Stdin)
+	bytePassword, err := term.ReadPassword(int(os.Stdin.Fd()))
 	fmt.Println() // Print newline after password input
 	if err != nil {
 		log.Fatalf("Failed to read password: %v", err)

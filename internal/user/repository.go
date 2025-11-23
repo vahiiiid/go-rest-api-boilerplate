@@ -143,21 +143,13 @@ func (r *repository) AssignRole(ctx context.Context, userID uint, roleName strin
 		return errors.New("role not found")
 	}
 
-	// Check if association already exists
-	var count int64
-	r.getDB(ctx).WithContext(ctx).Table("user_roles").
-		Where("user_id = ? AND role_id = ?", userID, role.ID).
-		Count(&count)
-
-	if count > 0 {
-		return nil // Already assigned
-	}
-
-	// Use raw SQL that works with both PostgreSQL and SQLite
-	return r.getDB(ctx).WithContext(ctx).Exec(
-		"INSERT INTO user_roles (user_id, role_id, assigned_at) VALUES (?, ?, ?)",
-		userID, role.ID, time.Now(),
-	).Error
+	// Use database-level conflict handling for race-safe, idempotent role assignment
+	// Works with both PostgreSQL and SQLite
+	return r.getDB(ctx).WithContext(ctx).Exec(`
+		INSERT INTO user_roles (user_id, role_id, assigned_at)
+		VALUES (?, ?, ?)
+		ON CONFLICT (user_id, role_id) DO NOTHING
+	`, userID, role.ID, time.Now()).Error
 }
 
 // RemoveRole removes a role from a user
