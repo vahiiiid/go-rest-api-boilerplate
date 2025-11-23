@@ -416,3 +416,246 @@ func TestVerifyPassword(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func TestService_ListUsers(t *testing.T) {
+	tests := []struct {
+		name          string
+		filters       UserFilterParams
+		page          int
+		perPage       int
+		setupMocks    func(*MockRepository)
+		expectedUsers []User
+		expectedTotal int64
+		expectedErr   error
+	}{
+		{
+			name: "successful list with defaults",
+			filters: UserFilterParams{
+				Role:   "",
+				Search: "",
+				Sort:   "created_at",
+				Order:  "desc",
+			},
+			page:    1,
+			perPage: 20,
+			setupMocks: func(m *MockRepository) {
+				users := []User{
+					{ID: 1, Name: "User 1", Email: "user1@example.com"},
+					{ID: 2, Name: "User 2", Email: "user2@example.com"},
+				}
+				m.On("ListAllUsers", mock.Anything, UserFilterParams{Sort: "created_at", Order: "desc"}, 1, 20).
+					Return(users, int64(2), nil)
+			},
+			expectedUsers: []User{
+				{ID: 1, Name: "User 1", Email: "user1@example.com"},
+				{ID: 2, Name: "User 2", Email: "user2@example.com"},
+			},
+			expectedTotal: 2,
+			expectedErr:   nil,
+		},
+		{
+			name: "filter by admin role",
+			filters: UserFilterParams{
+				Role:  RoleAdmin,
+				Sort:  "created_at",
+				Order: "desc",
+			},
+			page:    1,
+			perPage: 20,
+			setupMocks: func(m *MockRepository) {
+				users := []User{
+					{ID: 1, Name: "Admin User", Email: "admin@example.com", Roles: []Role{{Name: RoleAdmin}}},
+				}
+				m.On("ListAllUsers", mock.Anything, UserFilterParams{Role: RoleAdmin, Sort: "created_at", Order: "desc"}, 1, 20).
+					Return(users, int64(1), nil)
+			},
+			expectedUsers: []User{
+				{ID: 1, Name: "Admin User", Email: "admin@example.com", Roles: []Role{{Name: RoleAdmin}}},
+			},
+			expectedTotal: 1,
+			expectedErr:   nil,
+		},
+		{
+			name: "search by name",
+			filters: UserFilterParams{
+				Search: "john",
+				Sort:   "created_at",
+				Order:  "desc",
+			},
+			page:    1,
+			perPage: 20,
+			setupMocks: func(m *MockRepository) {
+				users := []User{
+					{ID: 1, Name: "John Doe", Email: "john@example.com"},
+				}
+				m.On("ListAllUsers", mock.Anything, UserFilterParams{Search: "john", Sort: "created_at", Order: "desc"}, 1, 20).
+					Return(users, int64(1), nil)
+			},
+			expectedUsers: []User{
+				{ID: 1, Name: "John Doe", Email: "john@example.com"},
+			},
+			expectedTotal: 1,
+			expectedErr:   nil,
+		},
+		{
+			name: "invalid role returns error",
+			filters: UserFilterParams{
+				Role:  "invalid_role",
+				Sort:  "created_at",
+				Order: "desc",
+			},
+			page:          1,
+			perPage:       20,
+			setupMocks:    func(m *MockRepository) {},
+			expectedUsers: nil,
+			expectedTotal: 0,
+			expectedErr:   ErrInvalidRole,
+		},
+		{
+			name: "repository error",
+			filters: UserFilterParams{
+				Sort:  "created_at",
+				Order: "desc",
+			},
+			page:    1,
+			perPage: 20,
+			setupMocks: func(m *MockRepository) {
+				m.On("ListAllUsers", mock.Anything, UserFilterParams{Sort: "created_at", Order: "desc"}, 1, 20).
+					Return(nil, int64(0), errors.New("database error"))
+			},
+			expectedUsers: nil,
+			expectedTotal: 0,
+			expectedErr:   errors.New("database error"),
+		},
+		{
+			name: "empty result set",
+			filters: UserFilterParams{
+				Sort:  "created_at",
+				Order: "desc",
+			},
+			page:    1,
+			perPage: 20,
+			setupMocks: func(m *MockRepository) {
+				m.On("ListAllUsers", mock.Anything, UserFilterParams{Sort: "created_at", Order: "desc"}, 1, 20).
+					Return([]User{}, int64(0), nil)
+			},
+			expectedUsers: []User{},
+			expectedTotal: 0,
+			expectedErr:   nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockRepo := new(MockRepository)
+			tt.setupMocks(mockRepo)
+
+			service := NewService(mockRepo)
+			users, total, err := service.ListUsers(context.Background(), tt.filters, tt.page, tt.perPage)
+
+			if tt.expectedErr != nil {
+				assert.Error(t, err)
+				if tt.expectedErr == ErrInvalidRole {
+					assert.Equal(t, ErrInvalidRole, err)
+				}
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedUsers, users)
+				assert.Equal(t, tt.expectedTotal, total)
+			}
+
+			mockRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestService_PromoteToAdmin(t *testing.T) {
+	tests := []struct {
+		name        string
+		userID      uint
+		setupMocks  func(*MockRepository)
+		expectedErr error
+	}{
+		{
+			name:   "successful promotion",
+			userID: 1,
+			setupMocks: func(m *MockRepository) {
+				user := &User{ID: 1, Name: "John Doe", Email: "john@example.com"}
+				m.On("FindByID", mock.Anything, uint(1)).Return(user, nil)
+				m.On("AssignRole", mock.Anything, uint(1), RoleAdmin).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name:   "user not found",
+			userID: 999,
+			setupMocks: func(m *MockRepository) {
+				m.On("FindByID", mock.Anything, uint(999)).Return(nil, gorm.ErrRecordNotFound)
+			},
+			expectedErr: ErrUserNotFound,
+		},
+		{
+			name:   "admin role not found in database",
+			userID: 1,
+			setupMocks: func(m *MockRepository) {
+				user := &User{ID: 1, Name: "John Doe", Email: "john@example.com"}
+				m.On("FindByID", mock.Anything, uint(1)).Return(user, nil)
+			},
+			expectedErr: gorm.ErrRecordNotFound,
+		},
+		{
+			name:   "repository error on FindByID",
+			userID: 1,
+			setupMocks: func(m *MockRepository) {
+				m.On("FindByID", mock.Anything, uint(1)).Return(nil, errors.New("database error"))
+			},
+			expectedErr: errors.New("database error"),
+		},
+		{
+			name:   "repository error on AssignRole",
+			userID: 1,
+			setupMocks: func(m *MockRepository) {
+				user := &User{ID: 1, Name: "John Doe", Email: "john@example.com"}
+				m.On("FindByID", mock.Anything, uint(1)).Return(user, nil)
+				m.On("AssignRole", mock.Anything, uint(1), RoleAdmin).Return(errors.New("database error"))
+			},
+			expectedErr: errors.New("database error"),
+		},
+		{
+			name:   "user already has admin role - idempotent",
+			userID: 1,
+			setupMocks: func(m *MockRepository) {
+				user := &User{
+					ID:    1,
+					Name:  "Admin User",
+					Email: "admin@example.com",
+					Roles: []Role{{ID: 2, Name: RoleAdmin}},
+				}
+				m.On("FindByID", mock.Anything, uint(1)).Return(user, nil)
+				m.On("AssignRole", mock.Anything, uint(1), RoleAdmin).Return(nil)
+			},
+			expectedErr: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockRepo := new(MockRepository)
+			tt.setupMocks(mockRepo)
+
+			service := NewService(mockRepo)
+			err := service.PromoteToAdmin(context.Background(), tt.userID)
+
+			if tt.expectedErr != nil {
+				assert.Error(t, err)
+				if tt.expectedErr == ErrUserNotFound {
+					assert.Equal(t, ErrUserNotFound, err)
+				}
+			} else {
+				assert.NoError(t, err)
+			}
+
+			mockRepo.AssertExpectations(t)
+		})
+	}
+}

@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -228,4 +229,267 @@ func TestRepository_Delete_NonExistentUser(t *testing.T) {
 	// Repository returns an error when no rows are affected (record not found).
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "record not found")
+}
+
+func TestRepository_FindRoleByName(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	t.Run("role found", func(t *testing.T) {
+		role, err := repo.FindRoleByName(context.Background(), RoleAdmin)
+		assert.NoError(t, err)
+		assert.NotNil(t, role)
+		assert.Equal(t, RoleAdmin, role.Name)
+	})
+
+	t.Run("role not found", func(t *testing.T) {
+		role, err := repo.FindRoleByName(context.Background(), "nonexistent_role")
+		assert.Error(t, err)
+		assert.Nil(t, role)
+	})
+}
+
+func TestRepository_AssignRole(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	user := &User{Name: "John Doe", Email: "john@example.com", PasswordHash: "hash"}
+	err := repo.Create(context.Background(), user)
+	require.NoError(t, err)
+
+	t.Run("successful role assignment", func(t *testing.T) {
+		err := repo.AssignRole(context.Background(), user.ID, RoleAdmin)
+		assert.NoError(t, err)
+
+		var count int64
+		db.Table("user_roles").Where("user_id = ?", user.ID).Count(&count)
+		assert.Equal(t, int64(1), count)
+	})
+
+	t.Run("idempotent - assigning same role twice doesn't error", func(t *testing.T) {
+		err := repo.AssignRole(context.Background(), user.ID, RoleAdmin)
+		assert.NoError(t, err)
+
+		var count int64
+		db.Table("user_roles").Where("user_id = ?", user.ID).Count(&count)
+		assert.Equal(t, int64(1), count)
+	})
+
+	t.Run("nonexistent role", func(t *testing.T) {
+		err := repo.AssignRole(context.Background(), user.ID, "nonexistent_role")
+		assert.Error(t, err)
+	})
+
+	t.Run("nonexistent user", func(t *testing.T) {
+		err := repo.AssignRole(context.Background(), 999999, RoleAdmin)
+		assert.Error(t, err)
+	})
+}
+
+func TestRepository_RemoveRole(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	user := &User{Name: "John Doe", Email: "john@example.com", PasswordHash: "hash"}
+	err := repo.Create(context.Background(), user)
+	require.NoError(t, err)
+
+	err = repo.AssignRole(context.Background(), user.ID, RoleAdmin)
+	require.NoError(t, err)
+
+	t.Run("successful role removal", func(t *testing.T) {
+		err := repo.RemoveRole(context.Background(), user.ID, RoleAdmin)
+		assert.NoError(t, err)
+
+		var count int64
+		db.Table("user_roles").Where("user_id = ?", user.ID).Count(&count)
+		assert.Equal(t, int64(0), count)
+	})
+
+	t.Run("removing non-assigned role doesn't error", func(t *testing.T) {
+		err := repo.RemoveRole(context.Background(), user.ID, RoleAdmin)
+		assert.NoError(t, err)
+	})
+
+	t.Run("nonexistent role", func(t *testing.T) {
+		err := repo.RemoveRole(context.Background(), user.ID, "nonexistent_role")
+		assert.Error(t, err)
+	})
+}
+
+func TestRepository_GetUserRoles(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	user := &User{Name: "John Doe", Email: "john@example.com", PasswordHash: "hash"}
+	err := repo.Create(context.Background(), user)
+	require.NoError(t, err)
+
+	t.Run("user with no roles", func(t *testing.T) {
+		roles, err := repo.GetUserRoles(context.Background(), user.ID)
+		assert.NoError(t, err)
+		assert.Empty(t, roles)
+	})
+
+	t.Run("user with single role", func(t *testing.T) {
+		err := repo.AssignRole(context.Background(), user.ID, RoleUser)
+		require.NoError(t, err)
+
+		roles, err := repo.GetUserRoles(context.Background(), user.ID)
+		assert.NoError(t, err)
+		assert.Len(t, roles, 1)
+		assert.Equal(t, RoleUser, roles[0].Name)
+	})
+
+	t.Run("user with multiple roles", func(t *testing.T) {
+		err := repo.AssignRole(context.Background(), user.ID, RoleAdmin)
+		require.NoError(t, err)
+
+		roles, err := repo.GetUserRoles(context.Background(), user.ID)
+		assert.NoError(t, err)
+		assert.Len(t, roles, 2)
+	})
+
+	t.Run("nonexistent user", func(t *testing.T) {
+		roles, err := repo.GetUserRoles(context.Background(), 999999)
+		assert.NoError(t, err)
+		assert.Empty(t, roles)
+	})
+}
+
+func TestRepository_ListAllUsers(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	user1 := &User{Name: "Alice Admin", Email: "alice@example.com", PasswordHash: "hash"}
+	err := repo.Create(context.Background(), user1)
+	require.NoError(t, err)
+	err = repo.AssignRole(context.Background(), user1.ID, RoleAdmin)
+	require.NoError(t, err)
+
+	user2 := &User{Name: "Bob User", Email: "bob@example.com", PasswordHash: "hash"}
+	err = repo.Create(context.Background(), user2)
+	require.NoError(t, err)
+	err = repo.AssignRole(context.Background(), user2.ID, RoleUser)
+	require.NoError(t, err)
+
+	user3 := &User{Name: "Charlie User", Email: "charlie@example.com", PasswordHash: "hash"}
+	err = repo.Create(context.Background(), user3)
+	require.NoError(t, err)
+
+	t.Run("list all users with defaults", func(t *testing.T) {
+		filters := UserFilterParams{Sort: "created_at", Order: "desc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+		assert.NoError(t, err)
+		assert.Len(t, users, 3)
+		assert.Equal(t, int64(3), total)
+	})
+
+	t.Run("filter by admin role", func(t *testing.T) {
+		filters := UserFilterParams{Role: RoleAdmin, Sort: "created_at", Order: "desc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+		assert.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, int64(1), total)
+		assert.Equal(t, "alice@example.com", users[0].Email)
+	})
+
+	t.Run("filter by user role", func(t *testing.T) {
+		filters := UserFilterParams{Role: RoleUser, Sort: "created_at", Order: "desc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+		assert.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, int64(1), total)
+		assert.Equal(t, "bob@example.com", users[0].Email)
+	})
+
+	t.Run("search by name", func(t *testing.T) {
+		filters := UserFilterParams{Search: "alice", Sort: "created_at", Order: "desc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+		assert.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, int64(1), total)
+		assert.Equal(t, "alice@example.com", users[0].Email)
+	})
+
+	t.Run("search by email", func(t *testing.T) {
+		filters := UserFilterParams{Search: "bob@", Sort: "created_at", Order: "desc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+		assert.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, int64(1), total)
+		assert.Equal(t, "bob@example.com", users[0].Email)
+	})
+
+	t.Run("pagination - page 1", func(t *testing.T) {
+		filters := UserFilterParams{Sort: "created_at", Order: "asc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 2)
+		assert.NoError(t, err)
+		assert.Len(t, users, 2)
+		assert.Equal(t, int64(3), total)
+	})
+
+	t.Run("pagination - page 2", func(t *testing.T) {
+		filters := UserFilterParams{Sort: "created_at", Order: "asc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 2, 2)
+		assert.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, int64(3), total)
+	})
+
+	t.Run("sort by email asc", func(t *testing.T) {
+		filters := UserFilterParams{Sort: "email", Order: "asc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 10)
+		assert.NoError(t, err)
+		assert.Len(t, users, 3)
+		assert.Equal(t, int64(3), total)
+		assert.Equal(t, "alice@example.com", users[0].Email)
+		assert.Equal(t, "bob@example.com", users[1].Email)
+		assert.Equal(t, "charlie@example.com", users[2].Email)
+	})
+
+	t.Run("no results for nonexistent search", func(t *testing.T) {
+		filters := UserFilterParams{Search: "nonexistent", Sort: "created_at", Order: "desc"}
+		users, total, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+		assert.NoError(t, err)
+		assert.Empty(t, users)
+		assert.Equal(t, int64(0), total)
+	})
+}
+
+func TestRepository_Transaction(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	t.Run("successful transaction", func(t *testing.T) {
+		var createdUser *User
+		err := repo.Transaction(context.Background(), func(txCtx context.Context) error {
+			user := &User{Name: "John Doe", Email: "john@example.com", PasswordHash: "hash"}
+			if err := repo.Create(txCtx, user); err != nil {
+				return err
+			}
+			createdUser = user
+			return nil
+		})
+		assert.NoError(t, err)
+		assert.NotZero(t, createdUser.ID)
+
+		fetchedUser, err := repo.FindByID(context.Background(), createdUser.ID)
+		assert.NoError(t, err)
+		assert.Equal(t, createdUser.Email, fetchedUser.Email)
+	})
+
+	t.Run("rollback on error", func(t *testing.T) {
+		err := repo.Transaction(context.Background(), func(txCtx context.Context) error {
+			user := &User{Name: "Jane Doe", Email: "jane@example.com", PasswordHash: "hash"}
+			if err := repo.Create(txCtx, user); err != nil {
+				return err
+			}
+			return errors.New("intentional error to trigger rollback")
+		})
+		assert.Error(t, err)
+
+		_, err = repo.FindByEmail(context.Background(), "jane@example.com")
+		assert.Error(t, err)
+	})
 }

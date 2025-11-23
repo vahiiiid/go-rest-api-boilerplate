@@ -973,3 +973,211 @@ func TestHandler_DeleteUser(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_GetMe(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tests := []struct {
+		name           string
+		userID         uint
+		setupMocks     func(*MockService)
+		expectedStatus int
+	}{
+		{
+			name:   "successful get current user",
+			userID: 1,
+			setupMocks: func(ms *MockService) {
+				ms.On("GetUserByID", mock.Anything, uint(1)).Return(&User{
+					ID:    1,
+					Name:  "John Doe",
+					Email: "john@example.com",
+				}, nil)
+			},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:   "user not authenticated",
+			userID: 0,
+			setupMocks: func(ms *MockService) {
+			},
+			expectedStatus: http.StatusUnauthorized,
+		},
+		{
+			name:   "user not found",
+			userID: 999,
+			setupMocks: func(ms *MockService) {
+				ms.On("GetUserByID", mock.Anything, uint(999)).Return(nil, ErrUserNotFound)
+			},
+			expectedStatus: http.StatusNotFound,
+		},
+		{
+			name:   "service error",
+			userID: 1,
+			setupMocks: func(ms *MockService) {
+				ms.On("GetUserByID", mock.Anything, uint(1)).Return(nil, errors.New("database error"))
+			},
+			expectedStatus: http.StatusInternalServerError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockService := new(MockService)
+			mockAuthService := new(MockAuthService)
+			handler := NewHandler(mockService, mockAuthService)
+
+			tt.setupMocks(mockService)
+
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/me", nil)
+			c.Request = req
+
+			if tt.userID > 0 {
+				claims := &auth.Claims{
+					UserID: tt.userID,
+					Email:  "test@example.com",
+				}
+				c.Set(auth.KeyUser, claims)
+			}
+
+			handler.GetMe(c)
+			apiErrors.ErrorHandler()(c)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+			mockService.AssertExpectations(t)
+		})
+	}
+}
+
+func TestHandler_ListUsers(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tests := []struct {
+		name           string
+		queryParams    string
+		setupMocks     func(*MockService)
+		expectedStatus int
+		checkResponse  func(*testing.T, *httptest.ResponseRecorder)
+	}{
+		{
+			name:        "successful list with defaults",
+			queryParams: "",
+			setupMocks: func(ms *MockService) {
+				users := []User{
+					{ID: 1, Name: "User 1", Email: "user1@example.com"},
+					{ID: 2, Name: "User 2", Email: "user2@example.com"},
+				}
+				ms.On("ListUsers", mock.Anything, mock.MatchedBy(func(f UserFilterParams) bool {
+					return f.Sort == "created_at" && f.Order == "desc"
+				}), 1, 20).Return(users, int64(2), nil)
+			},
+			expectedStatus: http.StatusOK,
+			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
+				var response map[string]interface{}
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.True(t, response["success"].(bool))
+				data := response["data"].(map[string]interface{})
+				assert.Equal(t, float64(2), data["total"])
+			},
+		},
+		{
+			name:        "list with role filter",
+			queryParams: "?role=admin&page=1&per_page=10",
+			setupMocks: func(ms *MockService) {
+				users := []User{
+					{ID: 1, Name: "Admin User", Email: "admin@example.com"},
+				}
+				ms.On("ListUsers", mock.Anything, mock.MatchedBy(func(f UserFilterParams) bool {
+					return f.Role == "admin"
+				}), 1, 10).Return(users, int64(1), nil)
+			},
+			expectedStatus: http.StatusOK,
+			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
+				var response map[string]interface{}
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				data := response["data"].(map[string]interface{})
+				assert.Equal(t, float64(1), data["total"])
+			},
+		},
+		{
+			name:        "list with search",
+			queryParams: "?search=john",
+			setupMocks: func(ms *MockService) {
+				users := []User{
+					{ID: 1, Name: "John Doe", Email: "john@example.com"},
+				}
+				ms.On("ListUsers", mock.Anything, mock.MatchedBy(func(f UserFilterParams) bool {
+					return f.Search == "john"
+				}), 1, 20).Return(users, int64(1), nil)
+			},
+			expectedStatus: http.StatusOK,
+			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
+				var response map[string]interface{}
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+			},
+		},
+		{
+			name:        "empty result set",
+			queryParams: "",
+			setupMocks: func(ms *MockService) {
+				ms.On("ListUsers", mock.Anything, mock.Anything, 1, 20).Return([]User{}, int64(0), nil)
+			},
+			expectedStatus: http.StatusOK,
+			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
+				var response map[string]interface{}
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				data := response["data"].(map[string]interface{})
+				assert.Equal(t, float64(0), data["total"])
+			},
+		},
+		{
+			name:        "service error",
+			queryParams: "",
+			setupMocks: func(ms *MockService) {
+				ms.On("ListUsers", mock.Anything, mock.Anything, 1, 20).Return(nil, int64(0), errors.New("database error"))
+			},
+			expectedStatus: http.StatusInternalServerError,
+			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
+			},
+		},
+		{
+			name:        "invalid role filter",
+			queryParams: "",
+			setupMocks: func(ms *MockService) {
+				ms.On("ListUsers", mock.Anything, mock.Anything, 1, 20).Return(nil, int64(0), ErrInvalidRole)
+			},
+			expectedStatus: http.StatusBadRequest,
+			checkResponse: func(t *testing.T, w *httptest.ResponseRecorder) {
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockService := new(MockService)
+			mockAuthService := new(MockAuthService)
+			handler := NewHandler(mockService, mockAuthService)
+
+			tt.setupMocks(mockService)
+
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/users"+tt.queryParams, nil)
+			c.Request = req
+
+			handler.ListUsers(c)
+			apiErrors.ErrorHandler()(c)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+			if tt.checkResponse != nil {
+				tt.checkResponse(t, w)
+			}
+			mockService.AssertExpectations(t)
+		})
+	}
+}
