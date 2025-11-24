@@ -87,6 +87,14 @@ func createNewAdmin(ctx context.Context, service user.Service) {
 		log.Fatal("Name cannot be empty")
 	}
 
+	fmt.Println("\nPassword requirements:")
+	fmt.Println("  • Minimum 8 characters")
+	fmt.Println("  • At least one uppercase letter (A-Z)")
+	fmt.Println("  • At least one lowercase letter (a-z)")
+	fmt.Println("  • At least one digit (0-9)")
+	fmt.Println("  • At least one special character (!@#$%^&*()_+-=[]{}...)")
+	fmt.Println()
+
 	password := readPassword("Enter admin password: ")
 	if err := validatePassword(password); err != nil {
 		log.Fatalf("Invalid password: %v", err)
@@ -121,7 +129,21 @@ func createNewAdmin(ctx context.Context, service user.Service) {
 
 func readPassword(prompt string) string {
 	fmt.Print(prompt)
-	bytePassword, err := term.ReadPassword(int(os.Stdin.Fd()))
+
+	// Check if stdin is a terminal
+	fd := int(os.Stdin.Fd())
+	if !term.IsTerminal(fd) {
+		// Fallback to regular input if not a terminal
+		reader := bufio.NewReader(os.Stdin)
+		password, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatalf("Failed to read password: %v", err)
+		}
+		return strings.TrimSpace(password)
+	}
+
+	// Use secure password reading if terminal is available
+	bytePassword, err := term.ReadPassword(fd)
 	fmt.Println() // Print newline after password input
 	if err != nil {
 		log.Fatalf("Failed to read password: %v", err)

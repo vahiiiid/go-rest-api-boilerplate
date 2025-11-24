@@ -43,7 +43,11 @@ help:
 	@echo "  make generate-jwt-secret  - Generate and set JWT secret in .env"
 	@echo "  make check-env            - Check required environment variables"
 	@echo ""
-	@echo "�️  Database Commands:"
+	@echo "👤 Admin Management:"
+	@echo "  make create-admin         - Create new admin user (interactive)"
+	@echo "  make promote-admin ID=<n> - Promote existing user to admin"
+	@echo ""
+	@echo "📊️  Database Commands:"
 	@echo "  make migrate-create NAME=<name>  - Create new migration"
 	@echo "  make migrate-up                  - Apply all pending migrations"
 	@echo "  make migrate-down                - Rollback last migration (or STEPS=N for N migrations)"
@@ -327,7 +331,7 @@ endif
 create-admin:
 ifdef CONTAINER_RUNNING
 	@echo "$(ENV_MSG)"
-	@$(EXEC_CMD_INTERACTIVE) go run cmd/createadmin/main.go
+	@docker exec -it $(CONTAINER_NAME) go run cmd/createadmin/main.go
 else
 	@if command -v go >/dev/null 2>&1; then \
 		echo "$(ENV_MSG)"; \
