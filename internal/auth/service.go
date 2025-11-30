@@ -118,10 +118,26 @@ func (s *service) GenerateToken(userID uint, email string, name string) (string,
 	now := time.Now()
 	expirationTime := now.Add(s.accessTokenTTL)
 
+	var roles []string
+	if s.db != nil {
+		var roleNames []string
+		err := s.db.Table("roles").
+			Select("roles.name").
+			Joins("JOIN user_roles ON user_roles.role_id = roles.id").
+			Where("user_roles.user_id = ?", userID).
+			Find(&roleNames).Error
+		if err != nil {
+			// WHY: Security-critical - token with empty roles bypasses authorization
+			return "", fmt.Errorf("failed to fetch user roles: %w", err)
+		}
+		roles = roleNames
+	}
+
 	claims := jwt.MapClaims{
 		"sub":   fmt.Sprintf("%d", userID),
 		"email": email,
 		"name":  name,
+		"roles": roles,
 		"exp":   expirationTime.Unix(),
 		"iat":   now.Unix(),
 	}
@@ -173,10 +189,20 @@ func (s *service) ValidateToken(tokenString string) (*Claims, error) {
 	email, _ := claims["email"].(string)
 	name, _ := claims["name"].(string)
 
+	var roles []string
+	if rolesInterface, ok := claims["roles"].([]interface{}); ok {
+		for _, role := range rolesInterface {
+			if roleStr, ok := role.(string); ok {
+				roles = append(roles, roleStr)
+			}
+		}
+	}
+
 	return &Claims{
 		UserID: uint(userID),
 		Email:  email,
 		Name:   name,
+		Roles:  roles,
 	}, nil
 }
 

@@ -2,9 +2,10 @@ package auth
 
 // Claims represents JWT token claims
 type Claims struct {
-	UserID uint   `json:"user_id"`
-	Email  string `json:"email"`
-	Name   string `json:"name"`
+	UserID uint     `json:"user_id"`
+	Email  string   `json:"email"`
+	Name   string   `json:"name"`
+	Roles  []string `json:"roles"`
 }
 
 // TokenResponse represents token response (deprecated: use TokenPairResponse)

@@ -1,6 +1,8 @@
 package db
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -13,6 +15,29 @@ import (
 
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 )
+
+// customLogger wraps the default logger to ignore ErrRecordNotFound
+type customLogger struct {
+	logger.Interface
+}
+
+func (l customLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
+	// Don't log "record not found" errors as they are expected in many cases
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return
+	}
+	l.Interface.Trace(ctx, begin, fc, err)
+}
+
+func (l customLogger) Error(ctx context.Context, msg string, data ...interface{}) {
+	// Don't log "record not found" errors as they are expected in many cases
+	if len(data) > 0 {
+		if err, ok := data[0].(error); ok && errors.Is(err, gorm.ErrRecordNotFound) {
+			return
+		}
+	}
+	l.Interface.Error(ctx, msg, data...)
+}
 
 // Config holds database configuration
 type Config struct {
@@ -30,7 +55,7 @@ func NewPostgresDB(cfg Config) (*gorm.DB, error) {
 		cfg.Host, cfg.User, cfg.Password, cfg.Name, cfg.Port, cfg.SSLMode)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: customLogger{logger.Default.LogMode(logger.Info)},
 		NowFunc: func() time.Time {
 			return time.Now().UTC()
 		},
@@ -58,7 +83,7 @@ func NewPostgresDBFromDatabaseConfig(cfg config.DatabaseConfig) (*gorm.DB, error
 		cfg.Host, cfg.User, cfg.Password, cfg.Name, cfg.Port, cfg.SSLMode)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: customLogger{logger.Default.LogMode(logger.Info)},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to postgres database: %w", err)
