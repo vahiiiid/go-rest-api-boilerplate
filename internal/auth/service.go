@@ -127,6 +127,7 @@ func (s *service) GenerateToken(userID uint, email string, name string) (string,
 			Where("user_roles.user_id = ?", userID).
 			Find(&roleNames).Error
 		if err != nil {
+			// WHY: Security-critical - token with empty roles bypasses authorization
 			return "", fmt.Errorf("failed to fetch user roles: %w", err)
 		}
 		roles = roleNames

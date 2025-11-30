@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -80,7 +81,8 @@ func (r *repository) FindByID(ctx context.Context, id uint) (*User, error) {
 
 // Update updates a user in the database
 func (r *repository) Update(ctx context.Context, user *User) error {
-	result := r.getDB(ctx).WithContext(ctx).Save(user)
+	// WHY: Save() syncs associations, potentially clearing roles
+	result := r.getDB(ctx).WithContext(ctx).Select("name", "email", "password_hash", "updated_at").Save(user)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -113,11 +115,14 @@ func (r *repository) ListAllUsers(ctx context.Context, filters UserFilterParams,
 	}
 
 	if filters.Search != "" {
-		searchPattern := "%" + filters.Search + "%"
+		// WHY: Escape SQL LIKE wildcards to prevent incorrect matches
+		escapedSearch := strings.ReplaceAll(filters.Search, "%", "\\%")
+		escapedSearch = strings.ReplaceAll(escapedSearch, "_", "\\_")
+		searchPattern := "%" + escapedSearch + "%"
 		query = query.Where("users.name LIKE ? OR users.email LIKE ?", searchPattern, searchPattern)
 	}
 
-	// Use Distinct on count to avoid inflated totals when JOINing
+	// WHY: Count distinct user IDs when using JOINs to avoid inflated totals
 	if err := query.Distinct("users.id").Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -141,7 +146,7 @@ func (r *repository) ListAllUsers(ctx context.Context, filters UserFilterParams,
 		Desc:   filters.Order == "desc",
 	}
 
-	// Use Distinct to avoid duplicate users when filtering by role with JOINs
+	// WHY: Use Distinct with explicit columns to avoid duplicate users with JOINs
 	if err := query.Distinct("users.*").Order(orderColumn).Limit(perPage).Offset(offset).Find(&users).Error; err != nil {
 		return nil, 0, err
 	}
