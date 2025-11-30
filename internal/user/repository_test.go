@@ -629,3 +629,89 @@ func TestRepository_GetUserRoles_EmptyResult(t *testing.T) {
 		assert.Empty(t, roles)
 	})
 }
+
+func TestRepository_AssignRole_RoleNotFound(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	user := &User{
+		Name:         "John Doe",
+		Email:        "john@example.com",
+		PasswordHash: "hashed_password",
+	}
+	err := repo.Create(context.Background(), user)
+	require.NoError(t, err)
+
+	err = repo.AssignRole(context.Background(), user.ID, "nonexistent")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "role not found")
+}
+
+func TestRepository_RemoveRole_RoleNotFound(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	user := &User{
+		Name:         "John Doe",
+		Email:        "john@example.com",
+		PasswordHash: "hashed_password",
+	}
+	err := repo.Create(context.Background(), user)
+	require.NoError(t, err)
+
+	err = repo.RemoveRole(context.Background(), user.ID, "nonexistent")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "role not found")
+}
+
+func TestRepository_ListAllUsers_InvalidSortField(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	filters := UserFilterParams{
+		Sort:  "invalid_field",
+		Order: "asc",
+	}
+
+	_, _, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid sort field")
+}
+
+func TestRepository_ListAllUsers_InvalidSortOrder(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewRepository(db)
+
+	filters := UserFilterParams{
+		Sort:  "name",
+		Order: "invalid_order",
+	}
+
+	_, _, err := repo.ListAllUsers(context.Background(), filters, 1, 20)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid sort order")
+}
+
+func TestRepository_FindRoleByName_Error(t *testing.T) {
+	db := setupTestDB(t)
+	sqlDB, _ := db.DB()
+	_ = sqlDB.Close()
+
+	repo := NewRepository(db)
+
+	role, err := repo.FindRoleByName(context.Background(), "user")
+	assert.Error(t, err)
+	assert.Nil(t, role)
+}
+
+func TestRepository_GetUserRoles_Error(t *testing.T) {
+	db := setupTestDB(t)
+	sqlDB, _ := db.DB()
+	_ = sqlDB.Close()
+
+	repo := NewRepository(db)
+
+	roles, err := repo.GetUserRoles(context.Background(), 1)
+	assert.Error(t, err)
+	assert.Nil(t, roles)
+}
