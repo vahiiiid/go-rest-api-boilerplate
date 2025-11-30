@@ -20,6 +20,71 @@ import (
 
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
+func validateEmail(email string) error {
+	if email == "" {
+		return fmt.Errorf("email cannot be empty")
+	}
+	if !emailRegex.MatchString(email) {
+		return fmt.Errorf("invalid email format")
+	}
+	return nil
+}
+
+func validateName(name string) error {
+	if name == "" {
+		return fmt.Errorf("name cannot be empty")
+	}
+	if len(name) > 255 {
+		return fmt.Errorf("name is too long (max 255 characters)")
+	}
+	return nil
+}
+
+func checkPasswordsMatch(password, confirmPassword string) error {
+	if password != confirmPassword {
+		return fmt.Errorf("passwords do not match")
+	}
+	return nil
+}
+
+func promoteUserToAdmin(ctx context.Context, service user.Service, userID uint) error {
+	existingUser, err := service.GetUserByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("failed to find user: %w", err)
+	}
+
+	if existingUser.IsAdmin() {
+		fmt.Printf("User %s (%s) is already an admin\n", existingUser.Name, existingUser.Email)
+		return nil
+	}
+
+	if err := service.PromoteToAdmin(ctx, userID); err != nil {
+		return fmt.Errorf("failed to promote user: %w", err)
+	}
+
+	fmt.Printf("Successfully promoted %s (%s) to admin\n", existingUser.Name, existingUser.Email)
+	return nil
+}
+
+func registerAndPromoteUser(ctx context.Context, service user.Service, email, password, name string) (*user.User, error) {
+	registerReq := user.RegisterRequest{
+		Email:    email,
+		Password: password,
+		Name:     name,
+	}
+
+	newUser, err := service.RegisterUser(ctx, registerReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	if err := service.PromoteToAdmin(ctx, newUser.ID); err != nil {
+		return nil, fmt.Errorf("failed to promote user to admin: %w", err)
+	}
+
+	return newUser, nil
+}
+
 func main() {
 	promoteID := flag.Int("promote", 0, "Promote existing user ID to admin")
 	flag.Parse()
@@ -51,21 +116,9 @@ func main() {
 }
 
 func promoteExistingUser(ctx context.Context, service user.Service, userID uint) {
-	existingUser, err := service.GetUserByID(ctx, userID)
-	if err != nil {
-		log.Fatalf("Failed to find user: %v", err)
+	if err := promoteUserToAdmin(ctx, service, userID); err != nil {
+		log.Fatalf("Error: %v", err)
 	}
-
-	if existingUser.IsAdmin() {
-		fmt.Printf("User %s (%s) is already an admin\n", existingUser.Name, existingUser.Email)
-		return
-	}
-
-	if err := service.PromoteToAdmin(ctx, userID); err != nil {
-		log.Fatalf("Failed to promote user: %v", err)
-	}
-
-	fmt.Printf("Successfully promoted %s (%s) to admin\n", existingUser.Name, existingUser.Email)
 }
 
 func createNewAdmin(ctx context.Context, service user.Service) {
@@ -75,16 +128,16 @@ func createNewAdmin(ctx context.Context, service user.Service) {
 	email, _ := reader.ReadString('\n')
 	email = strings.TrimSpace(email)
 
-	if !emailRegex.MatchString(email) {
-		log.Fatal("Invalid email format")
+	if err := validateEmail(email); err != nil {
+		log.Fatalf("Invalid email: %v", err)
 	}
 
 	fmt.Print("Enter admin name: ")
 	name, _ := reader.ReadString('\n')
 	name = strings.TrimSpace(name)
 
-	if name == "" {
-		log.Fatal("Name cannot be empty")
+	if err := validateName(name); err != nil {
+		log.Fatalf("Invalid name: %v", err)
 	}
 
 	fmt.Println("\nPassword requirements:")
@@ -101,23 +154,13 @@ func createNewAdmin(ctx context.Context, service user.Service) {
 	}
 
 	confirmPassword := readPassword("Confirm password: ")
-	if password != confirmPassword {
-		log.Fatal("Passwords do not match")
+	if err := checkPasswordsMatch(password, confirmPassword); err != nil {
+		log.Fatalf("Password mismatch: %v", err)
 	}
 
-	registerReq := user.RegisterRequest{
-		Email:    email,
-		Password: password,
-		Name:     name,
-	}
-
-	newUser, err := service.RegisterUser(ctx, registerReq)
+	newUser, err := registerAndPromoteUser(ctx, service, email, password, name)
 	if err != nil {
-		log.Fatalf("Failed to create user: %v", err)
-	}
-
-	if err := service.PromoteToAdmin(ctx, newUser.ID); err != nil {
-		log.Fatalf("Failed to promote user to admin: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	fmt.Printf("\nAdmin user created successfully:\n")
