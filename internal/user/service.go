@@ -85,6 +85,9 @@ func (s *service) RegisterUser(ctx context.Context, req RegisterRequest) (*User,
 	if err != nil {
 		return nil, fmt.Errorf("failed to reload user: %w", err)
 	}
+	if user == nil {
+		return nil, fmt.Errorf("failed to reload user: user not found after creation")
+	}
 
 	return user, nil
 }
