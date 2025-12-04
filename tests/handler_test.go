@@ -47,8 +47,8 @@ func createTestSchema(t *testing.T, database *gorm.DB) {
 
 	// Seed role data - use FirstOrCreate to avoid duplicate errors
 	roles := []user.Role{
-		{ID: 1, Name: "user", Description: "Standard user role with basic permissions"},
-		{ID: 2, Name: "admin", Description: "Administrator role with full system access"},
+		{ID: 1, Name: "user", Description: "Standard user with basic permissions"},
+		{ID: 2, Name: "admin", Description: "Administrator with full system access"},
 	}
 	for _, role := range roles {
 		var existingRole user.Role

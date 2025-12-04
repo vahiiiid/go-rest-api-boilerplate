@@ -52,8 +52,8 @@ func setupTestDB(t *testing.T) *gorm.DB {
 		CREATE INDEX idx_user_roles_role_id ON user_roles(role_id);
 
 		INSERT INTO roles (id, name, description) VALUES 
-			(1, 'user', 'Standard user role with basic permissions'),
-			(2, 'admin', 'Administrator role with full system access');
+			(1, 'user', 'Standard user with basic permissions'),
+			(2, 'admin', 'Administrator with full system access');
 	`)
 	require.NoError(t, err)
 
