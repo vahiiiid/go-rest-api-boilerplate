@@ -232,7 +232,7 @@ make create-admin
 
 ### Technical Stack Updates
 
-- **Go**: 1.24.0
+- **Go**: 1.24
 - **Gin**: v1.9.1
 - **GORM**: v1.25.10
 - **PostgreSQL**: 15
