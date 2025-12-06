@@ -9,6 +9,7 @@ Production-ready in 90 seconds. No headaches, just clean code.
 *GRAB is a Go boilerplate that doesn't waste your time — highly tested, Docker-ready, fully documented, with everything you need.*
 
 [![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![Release](https://img.shields.io/github/v/release/vahiiiid/go-rest-api-boilerplate?color=blue)](https://github.com/vahiiiid/go-rest-api-boilerplate/releases/tag/v2.0.0)
 [![codecov](https://codecov.io/gh/vahiiiid/go-rest-api-boilerplate/graph/badge.svg?branch=main)](https://codecov.io/gh/vahiiiid/go-rest-api-boilerplate)
 [![CI](https://github.com/vahiiiid/go-rest-api-boilerplate/workflows/CI/badge.svg)](https://github.com/vahiiiid/go-rest-api-boilerplate/actions)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
