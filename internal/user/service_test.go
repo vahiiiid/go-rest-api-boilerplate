@@ -693,6 +693,24 @@ func TestService_RegisterUser_ErrorPaths(t *testing.T) {
 			},
 			expectedErr: "failed to reload user",
 		},
+		{
+			name: "nil user returned after successful creation",
+			request: RegisterRequest{
+				Name:     "John Doe",
+				Email:    "john@example.com",
+				Password: "password123",
+			},
+			setupMock: func(m *MockRepository) {
+				m.On("FindByEmail", mock.Anything, "john@example.com").Return(nil, nil)
+				m.On("Create", mock.Anything, mock.AnythingOfType("*user.User")).Run(func(args mock.Arguments) {
+					user := args.Get(1).(*User)
+					user.ID = 1
+				}).Return(nil)
+				m.On("AssignRole", mock.Anything, uint(1), RoleUser).Return(nil)
+				m.On("FindByID", mock.Anything, uint(1)).Return(nil, nil)
+			},
+			expectedErr: "user not found after creation",
+		},
 	}
 
 	for _, tt := range tests {

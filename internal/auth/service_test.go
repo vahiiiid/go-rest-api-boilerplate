@@ -443,3 +443,23 @@ func TestService_ValidateToken(t *testing.T) {
 		assert.Empty(t, validatedClaims.Roles)
 	})
 }
+
+func TestService_GenerateToken_RoleFetchError(t *testing.T) {
+	db := setupTestDB(t)
+	cfg := &config.JWTConfig{
+		Secret:          "test-secret",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+	}
+	service := NewServiceWithRepo(cfg, db)
+
+	sqlDB, err := db.DB()
+	assert.NoError(t, err)
+	err = sqlDB.Close()
+	assert.NoError(t, err)
+
+	token, err := service.GenerateToken(1, "test@example.com", "Test User")
+	assert.Error(t, err)
+	assert.Empty(t, token)
+	assert.Contains(t, err.Error(), "failed to fetch user roles")
+}
