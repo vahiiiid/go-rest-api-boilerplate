@@ -68,6 +68,9 @@ func IsAuthenticated(c *gin.Context) bool {
 
 // CanAccessUser checks if authenticated user can access target user
 func CanAccessUser(c *gin.Context, targetUserID uint) bool {
+	if IsAdmin(c) {
+		return true
+	}
 	authenticatedUserID := GetUserID(c)
 	return authenticatedUserID == targetUserID
 }
@@ -81,13 +84,30 @@ func GetUserName(c *gin.Context) string {
 	return claims.Name
 }
 
-// HasRole checks if user has specific role (for future RBAC)
+// HasRole checks if user has specific role
 func HasRole(c *gin.Context, role string) bool {
 	claims := GetUser(c)
 	if claims == nil {
 		return false
 	}
-	// TODO: Implement role checking logic when roles are added to Claims
-	// For now, return false as roles are not yet implemented
+	for _, r := range claims.Roles {
+		if r == role {
+			return true
+		}
+	}
 	return false
+}
+
+// GetRoles retrieves user roles from context
+func GetRoles(c *gin.Context) []string {
+	claims := GetUser(c)
+	if claims == nil {
+		return []string{}
+	}
+	return claims.Roles
+}
+
+// IsAdmin checks if user has admin role
+func IsAdmin(c *gin.Context) bool {
+	return HasRole(c, "admin")
 }

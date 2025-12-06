@@ -401,4 +401,65 @@ func TestService_ValidateToken(t *testing.T) {
 		assert.Equal(t, "", validatedClaims.Email)
 		assert.Equal(t, "", validatedClaims.Name)
 	})
+
+	t.Run("token with roles array", func(t *testing.T) {
+		claims := jwt.MapClaims{
+			"sub":   "789",
+			"email": "admin@example.com",
+			"name":  "Admin User",
+			"roles": []interface{}{"user", "admin"},
+			"exp":   time.Now().Add(time.Hour).Unix(),
+			"iat":   time.Now().Unix(),
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenString, err := token.SignedString([]byte("test-secret"))
+		assert.NoError(t, err)
+
+		validatedClaims, err := service.ValidateToken(tokenString)
+		assert.NoError(t, err)
+		assert.NotNil(t, validatedClaims)
+		assert.Equal(t, uint(789), validatedClaims.UserID)
+		assert.Equal(t, []string{"user", "admin"}, validatedClaims.Roles)
+	})
+
+	t.Run("token with invalid roles type", func(t *testing.T) {
+		claims := jwt.MapClaims{
+			"sub":   "999",
+			"email": "test@example.com",
+			"name":  "Test User",
+			"roles": []interface{}{123, 456},
+			"exp":   time.Now().Add(time.Hour).Unix(),
+			"iat":   time.Now().Unix(),
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenString, err := token.SignedString([]byte("test-secret"))
+		assert.NoError(t, err)
+
+		validatedClaims, err := service.ValidateToken(tokenString)
+		assert.NoError(t, err)
+		assert.NotNil(t, validatedClaims)
+		assert.Empty(t, validatedClaims.Roles)
+	})
+}
+
+func TestService_GenerateToken_RoleFetchError(t *testing.T) {
+	db := setupTestDB(t)
+	cfg := &config.JWTConfig{
+		Secret:          "test-secret",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+	}
+	service := NewServiceWithRepo(cfg, db)
+
+	sqlDB, err := db.DB()
+	assert.NoError(t, err)
+	err = sqlDB.Close()
+	assert.NoError(t, err)
+
+	token, err := service.GenerateToken(1, "test@example.com", "Test User")
+	assert.Error(t, err)
+	assert.Empty(t, token)
+	assert.Contains(t, err.Error(), "failed to fetch user roles")
 }
