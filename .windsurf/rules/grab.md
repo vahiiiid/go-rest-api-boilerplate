@@ -87,22 +87,27 @@ internal/<domain>/
 
 **Get current user**:
 ```go
-import "go-rest-api-boilerplate/internal/contextutil"
+import "github.com/vahiiiid/go-rest-api-boilerplate/internal/contextutil"
 
 userID := contextutil.GetUserID(c)
 userEmail := contextutil.GetEmail(c)
+userName := contextutil.GetUserName(c)
 userRoles := contextutil.GetRoles(c)
+isAdmin := contextutil.IsAdmin(c)
+hasRole := contextutil.HasRole(c, "moderator")
 ```
 
 **Protect routes**:
 ```go
-// Require authentication
-v1.Use(authMiddleware.RequireAuth()).Group("/todos")
+import "github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
 
-// Require specific role
-v1.Use(authMiddleware.RequireAuth()).
-   Use(rbacMiddleware.RequireRole("admin")).
+// Admin-only route
+v1.Use(middleware.RequireAdmin()).
    POST("/admin/users", handler.CreateUser)
+
+// Specific role required
+v1.Use(middleware.RequireRole("admin")).
+   POST("/admin/reports", handler.CreateReport)
 ```
 
 ---
@@ -110,7 +115,10 @@ v1.Use(authMiddleware.RequireAuth()).
 ## Error Handling
 
 ```go
-import apiErrors "go-rest-api-boilerplate/internal/errors"
+import (
+    "errors"
+    apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
+)
 
 // Validation errors
 if err := c.ShouldBindJSON(&req); err != nil {
@@ -118,10 +126,22 @@ if err := c.ShouldBindJSON(&req); err != nil {
     return
 }
 
-// Standard errors
-_ = c.Error(apiErrors.NotFound("Resource not found"))
-_ = c.Error(apiErrors.Unauthorized("Authentication required"))
-_ = c.Error(apiErrors.Forbidden("Access denied"))
+// Service errors - check specific errors first
+result, err := h.service.GetResource(ctx, id)
+if err != nil {
+    if errors.Is(err, ErrNotFound) {
+        _ = c.Error(apiErrors.NotFound("Resource not found"))
+        return
+    }
+    if errors.Is(err, ErrUnauthorized) {
+        _ = c.Error(apiErrors.Unauthorized("Authentication required"))
+        return
+    }
+    _ = c.Error(apiErrors.InternalServerError(err))
+    return
+}
+
+c.JSON(http.StatusOK, apiErrors.Success(result))
 ```
 
 ---
@@ -168,7 +188,7 @@ make test-verbose      # Verbose output
 // @Produce json
 // @Security BearerAuth
 // @Param request body CreateTodoRequest true "Todo data"
-// @Success 201 {object} TodoResponse
+// @Success 201 {object} errors.Response{success=bool,data=TodoResponse}
 // @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Validation error"
 // @Router /api/v1/todos [post]
 func (h *Handler) CreateTodo(c *gin.Context) {...}

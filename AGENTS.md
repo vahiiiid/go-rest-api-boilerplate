@@ -203,8 +203,8 @@ make swag        # Update Swagger if API changed
        "strconv"
        
        "github.com/gin-gonic/gin"
-       "go-rest-api-boilerplate/internal/contextutil"
-       "go-rest-api-boilerplate/internal/errors"
+       "github.com/vahiiiid/go-rest-api-boilerplate/internal/contextutil"
+       apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
    )
    
    type Handler struct {
@@ -221,7 +221,7 @@ make swag        # Update Swagger if API changed
    // @Produce json
    // @Security BearerAuth
    // @Param request body Create<Entity>Request true "Entity data"
-   // @Success 201 {object} <Entity>Response
+   // @Success 201 {object} errors.Response{success=bool,data=<Entity>Response}
    // @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo}
    // @Router /api/v1/<domain> [post]
    func (h *Handler) Create<Entity>(c *gin.Context) {
@@ -239,7 +239,7 @@ make swag        # Update Swagger if API changed
            return
        }
        
-       c.JSON(http.StatusCreated, result)
+       c.JSON(http.StatusCreated, apiErrors.Success(result))
    }
    ```
 
@@ -283,12 +283,15 @@ make swag        # Update Swagger if API changed
    <domain>Service := <domain>.NewService(<domain>Repo)
    <domain>Handler := <domain>.NewHandler(<domain>Service)
    
-   // Register routes
-   v1.Use(authMiddleware.RequireAuth()).Group("/<domain>").
-       POST("", <domain>Handler.Create<Entity>).
-       GET("/:id", <domain>Handler.Get<Entity>).
-       PUT("/:id", <domain>Handler.Update<Entity>).
-       DELETE("/:id", <domain>Handler.Delete<Entity>)
+   // Register routes (authenticated endpoints)
+   <domain>Group := v1.Group("/<domain>")
+   <domain>Group.Use(auth.AuthMiddleware(authService))
+   {
+       <domain>Group.POST("", <domain>Handler.Create<Entity>)
+       <domain>Group.GET("/:id", <domain>Handler.Get<Entity>)
+       <domain>Group.PUT("/:id", <domain>Handler.Update<Entity>)
+       <domain>Group.DELETE("/:id", <domain>Handler.Delete<Entity>)
+   }
    ```
 
 9. **Write tests** for all layers
@@ -335,12 +338,15 @@ make migrate-force VERSION=<version>           # Force version
 ### Getting Current User
 
 ```go
-import "go-rest-api-boilerplate/internal/contextutil"
+import "github.com/vahiiiid/go-rest-api-boilerplate/internal/contextutil"
 
 func (h *Handler) SomeHandler(c *gin.Context) {
     userID := contextutil.GetUserID(c)
     userEmail := contextutil.GetEmail(c)
+    userName := contextutil.GetUserName(c)
     userRoles := contextutil.GetRoles(c)
+    isAdmin := contextutil.IsAdmin(c)
+    hasRole := contextutil.HasRole(c, "moderator")
     
     // Use user information...
 }
@@ -349,18 +355,20 @@ func (h *Handler) SomeHandler(c *gin.Context) {
 ### Protecting Routes
 
 ```go
-// Require authentication
-v1.Use(authMiddleware.RequireAuth()).Group("/todos")
+import "github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
 
-// Require specific role (admin)
-v1.Use(authMiddleware.RequireAuth()).
-   Use(rbacMiddleware.RequireRole("admin")).
+// Require authentication (handled by auth package middleware)
+// RequireAuth is from auth package, RequireRole/RequireAdmin are from middleware package
+
+// Admin-only route
+v1.Use(middleware.RequireAdmin()).
    POST("/admin/users", userHandler.CreateUser)
 
-// Multiple roles
-v1.Use(authMiddleware.RequireAuth()).
-   Use(rbacMiddleware.RequireRole("admin", "moderator")).
-   GET("/admin/reports", reportHandler.GetReports)
+// Specific role required
+v1.Use(middleware.RequireRole("admin")).
+   POST("/admin/reports", reportHandler.CreateReport)
+
+// Note: RequireRole and RequireAdmin already check authentication internally
 ```
 
 ---
@@ -370,7 +378,10 @@ v1.Use(authMiddleware.RequireAuth()).
 GRAB uses centralized error handling:
 
 ```go
-import apiErrors "go-rest-api-boilerplate/internal/errors"
+import (
+    "errors"
+    apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
+)
 
 // Validation errors (automatic field extraction)
 if err := c.ShouldBindJSON(&req); err != nil {
@@ -383,11 +394,21 @@ _ = c.Error(apiErrors.NotFound("Resource not found"))
 _ = c.Error(apiErrors.Unauthorized("Authentication required"))
 _ = c.Error(apiErrors.Forbidden("Access denied"))
 _ = c.Error(apiErrors.BadRequest("Invalid request data"))
-_ = c.Error(apiErrors.InternalServerError(err))
+_ = c.Error(apiErrors.Conflict("Resource already exists"))
 
-// Service/repository errors
-result, err := h.service.CreateUser(ctx, req)
+// Service/repository errors - check specific errors first
+user, err := h.service.CreateUser(ctx, req)
 if err != nil {
+    // Check for known specific errors first
+    if errors.Is(err, ErrEmailExists) {
+        _ = c.Error(apiErrors.Conflict("Email already exists"))
+        return
+    }
+    if errors.Is(err, ErrUserNotFound) {
+        _ = c.Error(apiErrors.NotFound("User not found"))
+        return
+    }
+    // Wrap unknown errors
     _ = c.Error(apiErrors.InternalServerError(err))
     return
 }

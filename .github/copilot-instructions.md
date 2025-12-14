@@ -204,8 +204,8 @@ import (
     "strconv"
     
     "github.com/gin-gonic/gin"
-    "go-rest-api-boilerplate/internal/contextutil"
-    "go-rest-api-boilerplate/internal/errors"
+    "github.com/vahiiiid/go-rest-api-boilerplate/internal/contextutil"
+    apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
 )
 
 type Handler struct {
@@ -222,7 +222,7 @@ func NewHandler(service Service) *Handler {
 // @Produce json
 // @Security BearerAuth
 // @Param request body CreateTodoRequest true "Todo creation request"
-// @Success 201 {object} TodoResponse
+// @Success 201 {object} errors.Response{success=bool,data=TodoResponse}
 // @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo}
 // @Router /api/v1/todos [post]
 func (h *Handler) CreateTodo(c *gin.Context) {
@@ -240,7 +240,7 @@ func (h *Handler) CreateTodo(c *gin.Context) {
         return
     }
     
-    c.JSON(http.StatusCreated, todo)
+    c.JSON(http.StatusCreated, apiErrors.Success(todo))
 }
 
 // Additional handler methods...
@@ -289,13 +289,16 @@ todoRepo := todo.NewRepository(db)
 todoService := todo.NewService(todoRepo)
 todoHandler := todo.NewHandler(todoService)
 
-// Register todo routes
-v1.Use(authMiddleware.RequireAuth()).Group("/todos").
-    POST("", todoHandler.CreateTodo).
-    GET("", todoHandler.GetUserTodos).
-    GET("/:id", todoHandler.GetTodo).
-    PUT("/:id", todoHandler.UpdateTodo).
-    DELETE("/:id", todoHandler.DeleteTodo)
+// Register todo routes (authenticated endpoints)
+todosGroup := v1.Group("/todos")
+todosGroup.Use(auth.AuthMiddleware(authService))
+{
+    todosGroup.POST("", todoHandler.CreateTodo)
+    todosGroup.GET("", todoHandler.GetUserTodos)
+    todosGroup.GET("/:id", todoHandler.GetTodo)
+    todosGroup.PUT("/:id", todoHandler.UpdateTodo)
+    todosGroup.DELETE("/:id", todoHandler.DeleteTodo)
+}
 ```
 
 9. **Write tests** (`internal/todo/*_test.go`)
@@ -354,25 +357,36 @@ make migrate-down
 
 **Protected Routes** (require valid JWT):
 ```go
-v1.Use(authMiddleware.RequireAuth()).Group("/todos")
+import "github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
+
+// Authentication is typically handled by router setup
+// Use middleware for role-based access control
 ```
 
 **Role-Based Access**:
 ```go
+import "github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
+
 // Admin-only route
-v1.Use(authMiddleware.RequireAuth()).
-   Use(rbacMiddleware.RequireRole("admin")).
+v1.Use(middleware.RequireAdmin()).
    POST("/admin/users", userHandler.CreateUser)
+
+// Specific role required
+v1.Use(middleware.RequireRole("admin")).
+   POST("/admin/reports", userHandler.CreateReport)
 ```
 
 **Getting Current User**:
 ```go
-import "go-rest-api-boilerplate/internal/contextutil"
+import "github.com/vahiiiid/go-rest-api-boilerplate/internal/contextutil"
 
 func (h *Handler) MyHandler(c *gin.Context) {
     userID := contextutil.GetUserID(c)
     userEmail := contextutil.GetEmail(c)
+    userName := contextutil.GetUserName(c)
     userRoles := contextutil.GetRoles(c)
+    isAdmin := contextutil.IsAdmin(c)
+    hasRole := contextutil.HasRole(c, "moderator")
     
     // Use user information...
 }
@@ -385,7 +399,10 @@ func (h *Handler) MyHandler(c *gin.Context) {
 Use the centralized error handling:
 
 ```go
-import apiErrors "go-rest-api-boilerplate/internal/errors"
+import (
+    "errors"
+    apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
+)
 
 // Validation errors
 if err := c.ShouldBindJSON(&req); err != nil {
@@ -393,18 +410,24 @@ if err := c.ShouldBindJSON(&req); err != nil {
     return
 }
 
-// Custom errors
-if todo == nil {
-    _ = c.Error(apiErrors.NotFound("Todo not found"))
-    return
-}
-
-// Service errors
-result, err := h.service.CreateTodo(ctx, userID, req)
+// Service errors - check specific errors first
+todo, err := h.service.CreateTodo(ctx, userID, req)
 if err != nil {
+    // Check for known specific errors first
+    if errors.Is(err, ErrTodoNotFound) {
+        _ = c.Error(apiErrors.NotFound("Todo not found"))
+        return
+    }
+    if errors.Is(err, ErrUnauthorized) {
+        _ = c.Error(apiErrors.Unauthorized("Unauthorized access"))
+        return
+    }
+    // Wrap unknown errors
     _ = c.Error(apiErrors.InternalServerError(err))
     return
 }
+
+c.JSON(http.StatusOK, apiErrors.Success(todo))
 ```
 
 **Available Error Types**:
@@ -412,7 +435,9 @@ if err != nil {
 - `apiErrors.Unauthorized(message)` - 401 Unauthorized
 - `apiErrors.Forbidden(message)` - 403 Forbidden
 - `apiErrors.BadRequest(message)` - 400 Bad Request
+- `apiErrors.Conflict(message)` - 409 Conflict
 - `apiErrors.InternalServerError(err)` - 500 Internal Server Error
+- `apiErrors.TooManyRequests(retryAfter)` - 429 Too Many Requests
 
 ---
 
