@@ -223,20 +223,20 @@ func NewHandler(service Service) *Handler {
 // @Security BearerAuth
 // @Param request body CreateTodoRequest true "Todo creation request"
 // @Success 201 {object} TodoResponse
-// @Failure 400 {object} errors.ErrorResponse
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo}
 // @Router /api/v1/todos [post]
 func (h *Handler) CreateTodo(c *gin.Context) {
     userID := contextutil.GetUserID(c)
     
     var req CreateTodoRequest
     if err := c.ShouldBindJSON(&req); err != nil {
-        errors.HandleValidationError(c, err)
+        _ = c.Error(apiErrors.FromGinValidation(err))
         return
     }
     
     todo, err := h.service.CreateTodo(c.Request.Context(), userID, &req)
     if err != nil {
-        errors.HandleError(c, err)
+        _ = c.Error(apiErrors.InternalServerError(err))
         return
     }
     
@@ -371,8 +371,8 @@ import "go-rest-api-boilerplate/internal/contextutil"
 
 func (h *Handler) MyHandler(c *gin.Context) {
     userID := contextutil.GetUserID(c)
-    userEmail := contextutil.GetUserEmail(c)
-    userRole := contextutil.GetUserRole(c)
+    userEmail := contextutil.GetEmail(c)
+    userRoles := contextutil.GetRoles(c)
     
     // Use user information...
 }
@@ -385,34 +385,34 @@ func (h *Handler) MyHandler(c *gin.Context) {
 Use the centralized error handling:
 
 ```go
-import "go-rest-api-boilerplate/internal/errors"
+import apiErrors "go-rest-api-boilerplate/internal/errors"
 
 // Validation errors
 if err := c.ShouldBindJSON(&req); err != nil {
-    errors.HandleValidationError(c, err)
+    _ = c.Error(apiErrors.FromGinValidation(err))
     return
 }
 
 // Custom errors
 if todo == nil {
-    errors.HandleError(c, errors.ErrNotFound)
+    _ = c.Error(apiErrors.NotFound("Todo not found"))
     return
 }
 
 // Service errors
 result, err := h.service.CreateTodo(ctx, userID, req)
 if err != nil {
-    errors.HandleError(c, err)
+    _ = c.Error(apiErrors.InternalServerError(err))
     return
 }
 ```
 
 **Available Error Types**:
-- `errors.ErrNotFound` - 404 Not Found
-- `errors.ErrUnauthorized` - 401 Unauthorized
-- `errors.ErrForbidden` - 403 Forbidden
-- `errors.ErrBadRequest` - 400 Bad Request
-- `errors.ErrInternalServer` - 500 Internal Server Error
+- `apiErrors.NotFound(message)` - 404 Not Found
+- `apiErrors.Unauthorized(message)` - 401 Unauthorized
+- `apiErrors.Forbidden(message)` - 403 Forbidden
+- `apiErrors.BadRequest(message)` - 400 Bad Request
+- `apiErrors.InternalServerError(err)` - 500 Internal Server Error
 
 ---
 
@@ -502,7 +502,7 @@ open http://localhost:8080/swagger/index.html
 // @Param id path int true "User ID"
 // @Param request body CreateUserRequest true "User creation request"
 // @Success 200 {object} UserResponse
-// @Failure 400 {object} errors.ErrorResponse
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Validation error"
 // @Router /api/v1/users [post]
 ```
 

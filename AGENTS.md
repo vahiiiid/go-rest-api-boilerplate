@@ -222,20 +222,20 @@ make swag        # Update Swagger if API changed
    // @Security BearerAuth
    // @Param request body Create<Entity>Request true "Entity data"
    // @Success 201 {object} <Entity>Response
-   // @Failure 400 {object} errors.ErrorResponse
+   // @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo}
    // @Router /api/v1/<domain> [post]
    func (h *Handler) Create<Entity>(c *gin.Context) {
        userID := contextutil.GetUserID(c)
        
        var req Create<Entity>Request
        if err := c.ShouldBindJSON(&req); err != nil {
-           errors.HandleValidationError(c, err)
+           _ = c.Error(apiErrors.FromGinValidation(err))
            return
        }
        
        result, err := h.service.Create<Entity>(c.Request.Context(), userID, &req)
        if err != nil {
-           errors.HandleError(c, err)
+           _ = c.Error(apiErrors.InternalServerError(err))
            return
        }
        
@@ -339,8 +339,8 @@ import "go-rest-api-boilerplate/internal/contextutil"
 
 func (h *Handler) SomeHandler(c *gin.Context) {
     userID := contextutil.GetUserID(c)
-    userEmail := contextutil.GetUserEmail(c)
-    userRole := contextutil.GetUserRole(c)
+    userEmail := contextutil.GetEmail(c)
+    userRoles := contextutil.GetRoles(c)
     
     // Use user information...
 }
@@ -370,25 +370,25 @@ v1.Use(authMiddleware.RequireAuth()).
 GRAB uses centralized error handling:
 
 ```go
-import "go-rest-api-boilerplate/internal/errors"
+import apiErrors "go-rest-api-boilerplate/internal/errors"
 
 // Validation errors (automatic field extraction)
 if err := c.ShouldBindJSON(&req); err != nil {
-    errors.HandleValidationError(c, err)
+    _ = c.Error(apiErrors.FromGinValidation(err))
     return
 }
 
 // Standard errors
-errors.HandleError(c, errors.ErrNotFound)
-errors.HandleError(c, errors.ErrUnauthorized)
-errors.HandleError(c, errors.ErrForbidden)
-errors.HandleError(c, errors.ErrBadRequest)
-errors.HandleError(c, errors.ErrInternalServer)
+_ = c.Error(apiErrors.NotFound("Resource not found"))
+_ = c.Error(apiErrors.Unauthorized("Authentication required"))
+_ = c.Error(apiErrors.Forbidden("Access denied"))
+_ = c.Error(apiErrors.BadRequest("Invalid request data"))
+_ = c.Error(apiErrors.InternalServerError(err))
 
 // Service/repository errors
 result, err := h.service.CreateUser(ctx, req)
 if err != nil {
-    errors.HandleError(c, err)
+    _ = c.Error(apiErrors.InternalServerError(err))
     return
 }
 ```
@@ -478,8 +478,8 @@ make test-verbose      # Run with verbose output
 // @Security BearerAuth
 // @Param request body CreateUserRequest true "User creation data"
 // @Success 201 {object} UserResponse
-// @Failure 400 {object} errors.ErrorResponse
-// @Failure 401 {object} errors.ErrorResponse
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo}
+// @Failure 401 {object} errors.Response{success=bool,error=errors.ErrorInfo}
 // @Router /api/v1/users [post]
 func (h *Handler) CreateUser(c *gin.Context) {
     // Handler implementation

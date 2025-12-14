@@ -90,8 +90,8 @@ internal/<domain>/
 import "go-rest-api-boilerplate/internal/contextutil"
 
 userID := contextutil.GetUserID(c)
-userEmail := contextutil.GetUserEmail(c)
-userRole := contextutil.GetUserRole(c)
+userEmail := contextutil.GetEmail(c)
+userRoles := contextutil.GetRoles(c)
 ```
 
 **Protect routes**:
@@ -110,18 +110,18 @@ v1.Use(authMiddleware.RequireAuth()).
 ## Error Handling
 
 ```go
-import "go-rest-api-boilerplate/internal/errors"
+import apiErrors "go-rest-api-boilerplate/internal/errors"
 
 // Validation errors
 if err := c.ShouldBindJSON(&req); err != nil {
-    errors.HandleValidationError(c, err)
+    _ = c.Error(apiErrors.FromGinValidation(err))
     return
 }
 
 // Standard errors
-errors.HandleError(c, errors.ErrNotFound)
-errors.HandleError(c, errors.ErrUnauthorized)
-errors.HandleError(c, errors.ErrForbidden)
+_ = c.Error(apiErrors.NotFound("Resource not found"))
+_ = c.Error(apiErrors.Unauthorized("Authentication required"))
+_ = c.Error(apiErrors.Forbidden("Access denied"))
 ```
 
 ---
@@ -169,7 +169,7 @@ make test-verbose      # Verbose output
 // @Security BearerAuth
 // @Param request body CreateTodoRequest true "Todo data"
 // @Success 201 {object} TodoResponse
-// @Failure 400 {object} errors.ErrorResponse
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Validation error"
 // @Router /api/v1/todos [post]
 func (h *Handler) CreateTodo(c *gin.Context) {...}
 ```
