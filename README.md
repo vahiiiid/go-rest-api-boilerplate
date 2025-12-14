@@ -6,7 +6,7 @@
 
 Production-ready in 90 seconds. No headaches, just clean code.
 
-*GRAB is a Go boilerplate that doesn't waste your time — highly tested, Docker-ready, fully documented, with everything you need.*
+*GRAB is a Go boilerplate that doesn't waste your time — highly tested, Docker-ready, fully documented, **AI-assistant optimized**, with everything you need. Built for developers who want to code with AI, not fight it.*
 
 [![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![Release](https://img.shields.io/github/v/release/vahiiiid/go-rest-api-boilerplate?color=blue)](https://github.com/vahiiiid/go-rest-api-boilerplate/releases/tag/v2.0.0)
@@ -25,6 +25,31 @@ Production-ready in 90 seconds. No headaches, just clean code.
 
 ---
 
+## 🤖 AI-Friendly Development
+
+GRAB is designed to work seamlessly with your favorite AI coding assistants:
+
+[![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-optimized-7F52FF?logo=github&logoColor=white)](https://github.com/features/copilot)
+[![Cursor](https://img.shields.io/badge/Cursor-ready-7C3AED?logo=cursor&logoColor=white)](https://cursor.sh/)
+[![Windsurf](https://img.shields.io/badge/Windsurf-supported-00C7B7?logoColor=white)](https://codeium.com/windsurf)
+[![GoLand](https://img.shields.io/badge/GoLand-dual%20AI-087CFA?logo=goland&logoColor=white)](https://www.jetbrains.com/go/)
+[![AGENTS.md](https://img.shields.io/badge/AGENTS.md-compliant-orange?logo=openai&logoColor=white)](AGENTS.md)
+
+**Out-of-the-box AI integration** with comprehensive guidelines for:
+- **GitHub Copilot** (VS Code, GoLand, Visual Studio)
+- **Cursor IDE** (with dedicated `.cursor/rules/`)
+- **Windsurf IDE** (with dedicated `.windsurf/rules/`)
+- **JetBrains AI** (via AGENTS.md standard)
+- Any AI assistant supporting AGENTS.md standard
+
+> **Note**: GoLand users get dual AI support through both GitHub Copilot (via `.github/copilot-instructions.md`) and JetBrains AI (via `AGENTS.md`). No IDE-specific configuration needed.
+
+AI assistants understand GRAB's Clean Architecture, Docker-first workflow, migration patterns, and testing conventions. Get intelligent code completions, accurate refactoring suggestions, and context-aware help.
+
+**📚 Learn More**: [AI-Friendly Development Guide](https://vahiiiid.github.io/go-rest-api-docs/AI_FRIENDLY/)
+
+---
+
 ## 🕒 Why Waste Days on Setup?
 
 You know the pain: Starting a new Go project means days of configuring Docker, wiring up authentication, setting up migrations, writing boilerplate code, and praying your hot-reload actually works.
@@ -38,6 +63,7 @@ make quick-start  # ← One command. 90 seconds. You're building features.
 **This is the real deal.** The production-grade boilerplate you wish you had from day one:
 
 ✅ **Clean Architecture** — Handler → Service → Repository (GO industry standard)  
+✅ **AI-Optimized Guidelines** — Built-in rules for GitHub Copilot, Cursor, Windsurf & AGENTS.md  
 ✅ **Security & JWT Auth** — OAuth 2.0 BCP compliant with refresh token rotation, rate limiting, CORS  
 ✅ **Role-Based Access Control** — Many-to-many RBAC with JWT integration and secure admin CLI  
 ✅ **Database Migrations** — PostgreSQL with version control & rollback  

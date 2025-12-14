@@ -1,0 +1,277 @@
+---
+alwaysApply: true
+---
+
+# GRAB Development Rules for Cursor
+
+**Version**: v2.0.0  
+**Last Updated**: 2025-12-10  
+**Purpose**: Developer guidelines for building APIs with GRAB (Go REST API Boilerplate)
+
+---
+
+## Core Principles
+
+### 1. Clean Architecture
+Every domain follows: **Handler → Service → Repository**
+- No business logic in handlers
+- No HTTP concerns in services
+- Repository only talks to database
+
+### 2. Docker-First Development
+Developers run `make` on host, Makefile detects Docker and executes commands automatically:
+```bash
+make up          # Start containers
+make test        # Run tests (in container if available)
+make lint        # Run linting (in container if available)
+make lint-fix    # Auto-fix linting issues
+make swag        # Generate Swagger docs
+```
+
+### 3. Migration Naming Pattern
+Format: `YYYYMMDDHHMMSS_verb_noun_table`
+
+Examples:
+- `20251025225126_create_users_table`
+- `20251028000000_create_refresh_tokens_table`
+- `20251210120000_add_avatar_to_users_table`
+
+Commands:
+```bash
+make migrate-create NAME=create_todos_table
+make migrate-up
+make migrate-down
+make migrate-status
+```
+
+### 4. Version Checking
+Never hardcode versions. Show how to check:
+```bash
+go version                    # Check Go version
+docker --version              # Check Docker
+make exec-db                  # Enter DB container
+psql --version                # Check PostgreSQL
+```
+
+---
+
+## Domain Structure
+
+```
+internal/<domain>/
+├── model.go       # GORM models
+├── dto.go         # API contracts (request/response)
+├── repository.go  # Database layer
+├── service.go     # Business logic
+├── handler.go     # HTTP handlers (Gin)
+└── *_test.go      # Tests
+```
+
+**Example**: See `internal/user/` for complete reference implementation.
+
+---
+
+## Adding New Entities
+
+1. **Create directory**: `mkdir -p internal/<domain>`
+2. **Define model** with GORM tags
+3. **Create DTOs** for request/response validation
+4. **Implement repository** interface and methods
+5. **Implement service** with business logic
+6. **Create handler** with Swagger annotations
+7. **Generate migration**: `make migrate-create NAME=create_<table>_table`
+8. **Register routes** in `internal/server/router.go`
+9. **Write tests** for all layers
+10. **Run**: `make migrate-up && make test && make lint && make swag`
+
+---
+
+## Authentication & Authorization
+
+**Get current user**:
+```go
+import "github.com/vahiiiid/go-rest-api-boilerplate/internal/contextutil"
+
+userID := contextutil.GetUserID(c)
+userEmail := contextutil.GetEmail(c)
+userName := contextutil.GetUserName(c)
+userRoles := contextutil.GetRoles(c)
+isAdmin := contextutil.IsAdmin(c)
+hasRole := contextutil.HasRole(c, "moderator")
+```
+
+**Protect routes**:
+```go
+import "github.com/vahiiiid/go-rest-api-boilerplate/internal/middleware"
+
+// Admin-only route
+v1.Use(middleware.RequireAdmin()).
+   POST("/admin/users", handler.CreateUser)
+
+// Specific role required
+v1.Use(middleware.RequireRole("admin")).
+   POST("/admin/reports", handler.CreateReport)
+```
+
+---
+
+## Error Handling
+
+```go
+import (
+    "errors"
+    apiErrors "github.com/vahiiiid/go-rest-api-boilerplate/internal/errors"
+)
+
+// Validation errors
+if err := c.ShouldBindJSON(&req); err != nil {
+    _ = c.Error(apiErrors.FromGinValidation(err))
+    return
+}
+
+// Service errors - check specific errors first
+result, err := h.service.GetResource(ctx, id)
+if err != nil {
+    if errors.Is(err, ErrNotFound) {
+        _ = c.Error(apiErrors.NotFound("Resource not found"))
+        return
+    }
+    if errors.Is(err, ErrUnauthorized) {
+        _ = c.Error(apiErrors.Unauthorized("Authentication required"))
+        return
+    }
+    _ = c.Error(apiErrors.InternalServerError(err))
+    return
+}
+
+c.JSON(http.StatusOK, apiErrors.Success(result))
+```
+
+---
+
+## Testing
+
+**Table-driven tests**:
+```go
+tests := []struct {
+    name        string
+    input       interface{}
+    setupMocks  func(*Mock)
+    expectError bool
+    errorType   error
+}{
+    {name: "success", input: validInput, setupMocks: func(m *Mock) {...}},
+    {name: "validation_error", input: invalidInput, expectError: true},
+}
+
+for _, tt := range tests {
+    t.Run(tt.name, func(t *testing.T) {
+        // Test implementation
+    })
+}
+```
+
+**Commands**:
+```bash
+make test              # Run all tests
+make test-coverage     # Generate coverage report
+make test-verbose      # Verbose output
+```
+
+---
+
+## Swagger Documentation
+
+**Annotations**:
+```go
+// @Summary Create todo
+// @Description Create a new todo item
+// @Tags todos
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateTodoRequest true "Todo data"
+// @Success 201 {object} errors.Response{success=bool,data=TodoResponse}
+// @Failure 400 {object} errors.Response{success=bool,error=errors.ErrorInfo} "Validation error"
+// @Router /api/v1/todos [post]
+func (h *Handler) CreateTodo(c *gin.Context) {...}
+```
+
+**Update docs**: `make swag`
+
+---
+
+## Pre-Commit Workflow
+
+```bash
+make lint-fix    # Auto-fix issues
+make lint        # Check remaining issues
+make test        # Run tests
+make swag        # Update Swagger (if API changed)
+```
+
+---
+
+## Out-of-the-Box Features
+
+GRAB includes:
+- ✅ JWT Authentication with refresh tokens
+- ✅ RBAC (Role-Based Access Control)
+- ✅ Database migrations (golang-migrate)
+- ✅ Health checks (`/health`, `/live`, `/ready`)
+- ✅ Rate limiting (token bucket)
+- ✅ Structured logging (JSON)
+- ✅ Standardized API responses
+- ✅ Error handling
+- ✅ Graceful shutdown
+- ✅ Swagger/OpenAPI docs
+- ✅ Context helpers
+
+**Documentation**: https://vahiiiid.github.io/go-rest-api-docs/
+
+---
+
+## Configuration
+
+**Files**: `configs/config.yaml` + environment overrides
+**Env vars**: `DATABASE_PASSWORD`, `JWT_SECRET`, `APP_ENVIRONMENT`
+
+Full guide: https://vahiiiid.github.io/go-rest-api-docs/CONFIGURATION/
+
+---
+
+## Quick Reference
+
+| Task | Command |
+|------|---------|
+| Start development | `make up` |
+| Run tests | `make test` |
+| Lint code | `make lint` |
+| Fix linting | `make lint-fix` |
+| Create migration | `make migrate-create NAME=<name>` |
+| Apply migrations | `make migrate-up` |
+| Update Swagger | `make swag` |
+| View logs | `make logs` |
+| Enter app container | `make exec` |
+| Enter DB container | `make exec-db` |
+| Clean restart | `make down && make up` |
+| Health check | `curl localhost:8080/health` |
+
+---
+
+## Tips for Cursor
+
+- **Reference existing code**: Check `internal/user/` for patterns
+- **Follow Clean Architecture**: Handler → Service → Repository
+- **Use context helpers**: `contextutil.GetUserID(c)` for auth
+- **Minimal comments**: Self-documenting code, comment WHY not WHAT
+- **Test coverage**: Maintain 85%+ coverage
+- **Check Makefile**: All commands in `make help`
+- **Read docs**: https://vahiiiid.github.io/go-rest-api-docs/
+
+---
+
+**Resources**:
+- Documentation: https://vahiiiid.github.io/go-rest-api-docs/
+- Repository: https://github.com/vahiiiid/go-rest-api-boilerplate
+- Issues: https://github.com/vahiiiid/go-rest-api-boilerplate/issues
