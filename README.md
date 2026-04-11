@@ -1,6 +1,6 @@
 <div align="center">
 
-![GRAB Logo](https://vahiiiid.github.io/go-rest-api-docs/images/logo.png)
+[![GRAB Logo](https://grabapi.dev/docs/images/logo.png)](https://grabapi.dev/)
 
 # Go REST API Boilerplate
 
@@ -15,11 +15,11 @@ Production-ready in 90 seconds. No headaches, just clean code.
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vahiiiid/go-rest-api-boilerplate)](https://goreportcard.com/report/github.com/vahiiiid/go-rest-api-boilerplate)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Documentation](https://img.shields.io/badge/docs-read%20the%20docs-brightgreen?logo=readthedocs&logoColor=white)](https://vahiiiid.github.io/go-rest-api-docs/)
+[![Documentation](https://img.shields.io/badge/docs-read%20the%20docs-brightgreen?logo=readthedocs&logoColor=white)](https://grabapi.dev/docs/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![GitHub Stars](https://img.shields.io/github/stars/vahiiiid/go-rest-api-boilerplate?style=social)](https://github.com/vahiiiid/go-rest-api-boilerplate/stargazers)
 
-**[📖 Full Documentation](https://vahiiiid.github.io/go-rest-api-docs/)** • **[🚀 Quick Start](#-quick-start)** • **[✨ Live Demo](#-see-it-in-action)**
+**[🌐 Official Website](https://grabapi.dev/)** • **[📖 Full Documentation](https://grabapi.dev/docs/)** • **[🚀 Quick Start](#-quick-start)** • **[✨ Live Demo](#-see-it-in-action)**
 
 </div>
 
@@ -46,7 +46,7 @@ GRAB is designed to work seamlessly with your favorite AI coding assistants:
 
 AI assistants understand GRAB's Clean Architecture, Docker-first workflow, migration patterns, and testing conventions. Get intelligent code completions, accurate refactoring suggestions, and context-aware help.
 
-**📚 Learn More**: [AI-Friendly Development Guide](https://vahiiiid.github.io/go-rest-api-docs/AI_FRIENDLY/)
+**📚 Learn More**: [AI-Friendly Development Guide](https://grabapi.dev/docs/AI_FRIENDLY/)
 
 ---
 
@@ -77,7 +77,7 @@ make quick-start  # ← One command. 90 seconds. You're building features.
 ✅ **Graceful Shutdown** — Zero-downtime deployments with configurable timeouts  
 ✅ **Hot-Reload (2 seconds!)** — Powered by Air, not magic  
 
-**And that's just scratching the surface.** Check the [full documentation](https://vahiiiid.github.io/go-rest-api-docs/) to see everything GRAB offers.
+**And that's just scratching the surface.** Check the [full documentation](https://grabapi.dev/docs/) to see everything GRAB offers.
 
 ### 🏆 Built Following Go Standards
 
@@ -101,7 +101,7 @@ Get your API running in **under 2 minutes**:
 - [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
 - [Git](https://git-scm.com/downloads)
 
-> **💡 Want to run without Docker?** See the [Manual Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/) in the documentation.
+> **💡 Want to run without Docker?** See the [Manual Setup Guide](https://grabapi.dev/docs/SETUP/) in the documentation.
 
 ### One-Command Setup ⚡
 
@@ -112,7 +112,7 @@ make quick-start
 ```
 
 <div align="center">
-  <img src="https://vahiiiid.github.io/go-rest-api-docs/images/quick-start-light.gif" alt="Quick Start Demo" width="800">
+  <img src="https://grabapi.dev/docs/images/quick-start-light.gif" alt="Quick Start Demo" width="800">
 </div>
 
 **🎉 Done!** Your API is now running at:
@@ -135,7 +135,7 @@ make promote-admin ID=1        # Promote existing user to admin by ID
 ### Interactive Swagger Documentation
 
 <div align="center">
-  <img src="https://vahiiiid.github.io/go-rest-api-docs/images/swagger-ui.png" alt="Swagger UI" width="700">
+  <img src="https://grabapi.dev/docs/images/swagger-ui.png" alt="Swagger UI" width="700">
 </div>
 
 Open [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) to explore and test all endpoints interactively.
@@ -143,15 +143,15 @@ Open [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/in
 ### Or Use Postman
 
 <div align="center">
-  <img src="https://vahiiiid.github.io/go-rest-api-docs/images/postman-collection.png" alt="Postman Collection" width="700">
+  <img src="https://grabapi.dev/docs/images/postman-collection.png" alt="Postman Collection" width="700">
 </div>
 
 Import the pre-configured collection from `api/postman_collection.json` with example requests and tests.
 
 **🚀 Ready to Build?**
 
-- 📖 **[Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)** — Learn how to add models, routes, and handlers
-- 💡 **[TODO List Tutorial](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/)** — Complete step-by-step feature implementation from scratch
+- 📖 **[Development Guide](https://grabapi.dev/docs/DEVELOPMENT_GUIDE/)** — Learn how to add models, routes, and handlers
+- 💡 **[TODO List Tutorial](https://grabapi.dev/docs/TODO_EXAMPLE/)** — Complete step-by-step feature implementation from scratch
 
 ---
 
@@ -169,7 +169,7 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Password security** — Bcrypt hashing with best-practice cost factor
 - **Rate limiting** — Token-bucket protection against abuse built-in
 
-👉 [Authentication Guide](https://vahiiiid.github.io/go-rest-api-docs/AUTHENTICATION/) | [Context Helpers](https://vahiiiid.github.io/go-rest-api-docs/CONTEXT_HELPERS/)
+👉 [Authentication Guide](https://grabapi.dev/docs/AUTHENTICATION/) | [Context Helpers](https://grabapi.dev/docs/CONTEXT_HELPERS/)
 
 #### 🔑 Role-Based Access Control (RBAC)
 
@@ -180,7 +180,7 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Three-endpoint pattern** — `/auth/me` (current user), `/users/:id` (specific), `/users` (admin list)
 - **Paginated user management** — Admin-only user listing with filtering and search
 
-👉 [RBAC Guide](https://vahiiiid.github.io/go-rest-api-docs/RBAC/)
+👉 [RBAC Guide](https://grabapi.dev/docs/RBAC/)
 
 #### 🗄️ Database Setup That Doesn't Fight You
 
@@ -201,7 +201,7 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Transaction support** — BEGIN/COMMIT wrappers for data integrity
 - **Connection pooling** — Configured for performance out of the box
 
-👉 [Migrations Guide](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/)
+👉 [Migrations Guide](https://grabapi.dev/docs/MIGRATIONS_GUIDE/)
 
 #### 🐳 Docker That Saves Your Sanity
 
@@ -210,7 +210,7 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Development & production** — Separate optimized configs
 - **Multi-stage builds** — Tiny production images (~20MB)
 
-👉 [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/)
+👉 [Docker Guide](https://grabapi.dev/docs/DOCKER/)
 
 #### 🏥 Production-Grade Health Checks
 
@@ -220,16 +220,16 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Zero-downtime deployments** — Smart readiness checks for load balancer integration
 - **Extensible architecture** — Easy to add custom health checkers (Redis, external APIs, etc.)
 
-👉 [Health Checks Guide](https://vahiiiid.github.io/go-rest-api-docs/HEALTH_CHECKS/)
+👉 [Health Checks Guide](https://grabapi.dev/docs/HEALTH_CHECKS/)
 
 #### 📚 Documentation That Exists (And Helps!)
 
 - **Auto-generated Swagger** — Interactive API explorer at `/swagger/index.html`
-- **Full documentation site** — Not just README, real guides at [vahiiiid.github.io/go-rest-api-docs](https://vahiiiid.github.io/go-rest-api-docs/)
+- **Full documentation site** — Not just README, real guides at [grabapi.dev/docs](https://grabapi.dev/docs/)
 - **Step-by-step tutorials** — Build a TODO app from scratch
 - **Postman collection** — Import and test immediately
 
-👉 [Full Documentation](https://vahiiiid.github.io/go-rest-api-docs/)
+👉 [Full Documentation](https://grabapi.dev/docs/)
 
 #### 🧪 Tests That Give You Confidence
 
@@ -238,7 +238,7 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Table-driven tests** — Go idiomatic testing patterns
 - **CI/CD ready** — GitHub Actions configured and working
 
-👉 [Testing Guide](https://vahiiiid.github.io/go-rest-api-docs/TESTING/)
+👉 [Testing Guide](https://grabapi.dev/docs/TESTING/)
 
 #### 📦 Standardized API Responses
 
@@ -247,7 +247,7 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Type-safe responses** — Predictable structure for frontend integration
 - **Metadata support** — Pagination, timestamps, request IDs built-in
 
-👉 [API Response Format Guide](https://vahiiiid.github.io/go-rest-api-docs/API_RESPONSE_FORMAT/)
+👉 [API Response Format Guide](https://grabapi.dev/docs/API_RESPONSE_FORMAT/)
 
 #### ⚠️ Error Handling That Makes Sense
 
@@ -257,7 +257,7 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Centralized middleware** — Single error handler for consistent responses
 - **Rate limit errors** — Includes `retry_after` for proper backoff logic
 
-👉 [Error Handling Guide](https://vahiiiid.github.io/go-rest-api-docs/ERROR_HANDLING/)
+👉 [Error Handling Guide](https://grabapi.dev/docs/ERROR_HANDLING/)
 
 #### 🏗️ Architecture That Scales
 
@@ -266,7 +266,7 @@ Most boilerplates give you code. **GRAB gives you a professional development wor
 - **Domain-driven** — Organize by feature, not by layer
 - **Official Go layout** — Follows [golang-standards/project-layout](https://github.com/golang-standards/project-layout)
 
-👉 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/)
+👉 [Development Guide](https://grabapi.dev/docs/DEVELOPMENT_GUIDE/)
 
 ---
 
@@ -311,7 +311,7 @@ go run cmd/migrate/main.go up --timeout=30m --lock-timeout=1m
 
 All environments use SQL migrations for consistency and safety.
 
-👉 **[Complete Migration Guide](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/)**
+👉 **[Complete Migration Guide](https://grabapi.dev/docs/MIGRATIONS_GUIDE/)**
 
 ### Without Docker
 
@@ -322,7 +322,7 @@ make build-binary    # Build binary to bin/server
 make run-binary      # Build and run (requires PostgreSQL on localhost)
 ```
 
-👉 **[Full Setup Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** for native development
+👉 **[Full Setup Guide](https://grabapi.dev/docs/SETUP/)** for native development
 
 ---
 
@@ -354,7 +354,7 @@ Ready for:
 - **Kubernetes** — Self-managed orchestration
 - **Any VPS** — Using Docker Compose
 
-👉 **[Deployment Guide](https://vahiiiid.github.io/go-rest-api-docs/SETUP/)** for step-by-step instructions
+👉 **[Deployment Guide](https://grabapi.dev/docs/SETUP/)** for step-by-step instructions
 
 ---
 
@@ -362,21 +362,21 @@ Ready for:
 
 ### 🌐 Full Documentation Site
 
-**[📚 Read the Docs →](https://vahiiiid.github.io/go-rest-api-docs/)**
+**[📚 Read the Docs →](https://grabapi.dev/docs/)**
 
 Complete guides covering everything:
 
-- 🚀 [Getting Started](https://vahiiiid.github.io/go-rest-api-docs/SETUP/) — Installation and configuration
-- 💻 [Development Guide](https://vahiiiid.github.io/go-rest-api-docs/DEVELOPMENT_GUIDE/) — Building features
-- 💡 [TODO Tutorial](https://vahiiiid.github.io/go-rest-api-docs/TODO_EXAMPLE/) — Step-by-step implementation
-- 🐳 [Docker Guide](https://vahiiiid.github.io/go-rest-api-docs/DOCKER/) — Container workflows
-- 🗄️ [Migrations](https://vahiiiid.github.io/go-rest-api-docs/MIGRATIONS_GUIDE/) — Database schema management
-- 🏥 [Health Checks](https://vahiiiid.github.io/go-rest-api-docs/HEALTH_CHECKS/) — Kubernetes probes and monitoring
-- 🧪 [Testing](https://vahiiiid.github.io/go-rest-api-docs/TESTING/) — Writing and running tests
-- 📦 [API Response Format](https://vahiiiid.github.io/go-rest-api-docs/API_RESPONSE_FORMAT/) — Standardized response envelope
-- ⚠️ [Error Handling](https://vahiiiid.github.io/go-rest-api-docs/ERROR_HANDLING/) — Structured API errors
-- 📚 [Swagger](https://vahiiiid.github.io/go-rest-api-docs/SWAGGER/) — API documentation
-- ⚙️ [Configuration](https://vahiiiid.github.io/go-rest-api-docs/CONFIGURATION/) — Environment setup
+- 🚀 [Getting Started](https://grabapi.dev/docs/SETUP/) — Installation and configuration
+- 💻 [Development Guide](https://grabapi.dev/docs/DEVELOPMENT_GUIDE/) — Building features
+- 💡 [TODO Tutorial](https://grabapi.dev/docs/TODO_EXAMPLE/) — Step-by-step implementation
+- 🐳 [Docker Guide](https://grabapi.dev/docs/DOCKER/) — Container workflows
+- 🗄️ [Migrations](https://grabapi.dev/docs/MIGRATIONS_GUIDE/) — Database schema management
+- 🏥 [Health Checks](https://grabapi.dev/docs/HEALTH_CHECKS/) — Kubernetes probes and monitoring
+- 🧪 [Testing](https://grabapi.dev/docs/TESTING/) — Writing and running tests
+- 📦 [API Response Format](https://grabapi.dev/docs/API_RESPONSE_FORMAT/) — Standardized response envelope
+- ⚠️ [Error Handling](https://grabapi.dev/docs/ERROR_HANDLING/) — Structured API errors
+- 📚 [Swagger](https://grabapi.dev/docs/SWAGGER/) — API documentation
+- ⚙️ [Configuration](https://grabapi.dev/docs/CONFIGURATION/) — Environment setup
 
 ### 🤝 Contributing to Documentation
 
@@ -431,7 +431,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 💬 Support & Community
 
-- 📖 [Read the Documentation](https://vahiiiid.github.io/go-rest-api-docs/)
+- 🌐 [Official Website](https://grabapi.dev/)
+- 📖 [Read the Documentation](https://grabapi.dev/docs/)
 - 🐛 [Report Bugs](https://github.com/vahiiiid/go-rest-api-boilerplate/issues)
 - 💬 [Ask Questions](https://github.com/vahiiiid/go-rest-api-boilerplate/discussions)
 - ⭐ [Star this repo](https://github.com/vahiiiid/go-rest-api-boilerplate) if you find it helpful!
@@ -442,6 +443,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for the Go community**
 
-[⭐ Star](https://github.com/vahiiiid/go-rest-api-boilerplate) • [📖 Docs](https://vahiiiid.github.io/go-rest-api-docs/) • [🐛 Issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) • [💬 Discussions](https://github.com/vahiiiid/go-rest-api-boilerplate/discussions)
+[🌐 Website](https://grabapi.dev/) • [⭐ Star](https://github.com/vahiiiid/go-rest-api-boilerplate) • [📖 Docs](https://grabapi.dev/docs/) • [🐛 Issues](https://github.com/vahiiiid/go-rest-api-boilerplate/issues) • [💬 Discussions](https://github.com/vahiiiid/go-rest-api-boilerplate/discussions)
 
 </div>
