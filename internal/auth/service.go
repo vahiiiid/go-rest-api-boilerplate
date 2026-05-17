@@ -59,7 +59,7 @@ type service struct {
 func NewService(cfg *config.JWTConfig) Service {
 	jwtSecret := cfg.Secret
 	if jwtSecret == "" {
-		jwtSecret = "default-secret-change-in-production"
+		panic("JWT secret is not configured: set JWT_SECRET environment variable or jwt.secret in config. Generate with: make generate-jwt-secret")
 	}
 
 	accessTokenTTL := cfg.AccessTokenTTL
@@ -87,7 +87,7 @@ func NewService(cfg *config.JWTConfig) Service {
 func NewServiceWithRepo(cfg *config.JWTConfig, db *gorm.DB) Service {
 	jwtSecret := cfg.Secret
 	if jwtSecret == "" {
-		jwtSecret = "default-secret-change-in-production"
+		panic("JWT secret is not configured: set JWT_SECRET environment variable or jwt.secret in config. Generate with: make generate-jwt-secret")
 	}
 
 	accessTokenTTL := cfg.AccessTokenTTL

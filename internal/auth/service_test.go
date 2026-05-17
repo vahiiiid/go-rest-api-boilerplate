@@ -13,9 +13,10 @@ import (
 
 func TestNewService(t *testing.T) {
 	tests := []struct {
-		name     string
-		cfg      *config.JWTConfig
-		expected struct {
+		name        string
+		cfg         *config.JWTConfig
+		shouldPanic bool
+		expected    struct {
 			secret string
 			ttl    time.Duration
 		}
@@ -35,18 +36,12 @@ func TestNewService(t *testing.T) {
 			},
 		},
 		{
-			name: "with empty secret defaults to default",
+			name: "with empty secret panics",
 			cfg: &config.JWTConfig{
 				Secret:   "",
 				TTLHours: 12,
 			},
-			expected: struct {
-				secret string
-				ttl    time.Duration
-			}{
-				secret: "default-secret-change-in-production",
-				ttl:    12 * time.Hour,
-			},
+			shouldPanic: true,
 		},
 		{
 			name: "with zero TTL defaults to 24 hours",
@@ -66,6 +61,12 @@ func TestNewService(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.shouldPanic {
+				assert.Panics(t, func() {
+					NewService(tt.cfg)
+				}, "expected panic for empty JWT secret")
+				return
+			}
 			authService := NewService(tt.cfg)
 			assert.NotNil(t, authService)
 			assert.Implements(t, (*Service)(nil), authService)
@@ -86,6 +87,7 @@ func TestNewServiceWithRepo(t *testing.T) {
 	tests := []struct {
 		name               string
 		cfg                *config.JWTConfig
+		shouldPanic        bool
 		expectedSecret     string
 		expectedAccessTTL  time.Duration
 		expectedRefreshTTL time.Duration
@@ -102,15 +104,13 @@ func TestNewServiceWithRepo(t *testing.T) {
 			expectedRefreshTTL: 14 * 24 * time.Hour,
 		},
 		{
-			name: "with empty secret defaults to default",
+			name:        "with empty secret panics",
 			cfg: &config.JWTConfig{
 				Secret:          "",
 				AccessTokenTTL:  15 * time.Minute,
 				RefreshTokenTTL: 7 * 24 * time.Hour,
 			},
-			expectedSecret:     "default-secret-change-in-production",
-			expectedAccessTTL:  15 * time.Minute,
-			expectedRefreshTTL: 7 * 24 * time.Hour,
+			shouldPanic: true,
 		},
 		{
 			name: "with zero AccessTokenTTL defaults to 15 minutes",
@@ -162,6 +162,13 @@ func TestNewServiceWithRepo(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.shouldPanic {
+				db := setupTestDB(t)
+				assert.Panics(t, func() {
+					NewServiceWithRepo(tt.cfg, db)
+				}, "expected panic for empty JWT secret")
+				return
+			}
 			db := setupTestDB(t)
 			authService := NewServiceWithRepo(tt.cfg, db)
 
