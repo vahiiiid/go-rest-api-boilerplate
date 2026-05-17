@@ -103,6 +103,12 @@ func LoadConfig(configPath string) (*Config, error) {
 		v.AddConfigPath("configs")
 		v.AddConfigPath(".")
 		v.AddConfigPath("./configs")
+		// Also search relative to the executable so the binary works from any CWD
+		if execPath, err := os.Executable(); err == nil {
+			execDir := filepath.Dir(execPath)
+			v.AddConfigPath(filepath.Join(execDir, "configs"))
+			v.AddConfigPath(execDir)
+		}
 
 		if err := v.ReadInConfig(); err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
