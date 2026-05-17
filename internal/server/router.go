@@ -53,6 +53,8 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	router.GET("/docs-scalar", scalarHandler)
+
 	rlCfg := cfg.Ratelimit
 	if rlCfg.Enabled {
 		router.Use(
