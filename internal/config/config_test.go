@@ -826,3 +826,61 @@ func TestValidate_JWTSecret(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadConfig_ExePathFallback(t *testing.T) {
+	// Build a temp directory that mimics a project layout:
+	//   <projectRoot>/configs/config.yaml
+	// The "binary" lives at <projectRoot>/bin/server (faked via executablePath).
+	// The working directory is set to a completely different temp dir.
+	// LoadConfig("") should still find config.yaml via the exe-path fallback.
+
+	projectRoot := t.TempDir()
+	configsDir := filepath.Join(projectRoot, "configs")
+	if err := os.Mkdir(configsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	createTempConfigFile(t, configsDir, "config.yaml", `
+app:
+  environment: "development"
+database:
+  host: "localhost"
+jwt:
+  secret: "hKLmNpQrStUvWxYzABCDEFGHIJKLMNOP"
+migrations:
+  directory: "./migrations"
+`)
+
+	// Fake binary lives inside the project root.
+	fakeExe := filepath.Join(projectRoot, "bin", "server")
+
+	// Override the injectable var so LoadConfig uses our fake path.
+	original := executablePath
+	executablePath = func() (string, error) { return fakeExe, nil }
+	t.Cleanup(func() { executablePath = original })
+
+	// Change CWD to a dir that has no configs/ — forces the fallback to be used.
+	otherDir := t.TempDir()
+	oldWd, _ := os.Getwd()
+	if err := os.Chdir(otherDir); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(oldWd) })
+
+	viper.Reset()
+	t.Setenv("APP_ENVIRONMENT", "development")
+	// Do NOT set JWT_SECRET env var — let it come from the config file.
+
+	cfg, err := LoadConfig("")
+	assert.NoError(t, err)
+	assert.NotNil(t, cfg)
+	assert.Equal(t, "localhost", cfg.Database.Host)
+
+	// migrations.directory should have been resolved to an absolute path
+	// rooted at projectRoot, not left as the raw "./migrations" string.
+	assert.True(t, filepath.IsAbs(cfg.Migrations.Directory),
+		"expected an absolute migrations path, got %q", cfg.Migrations.Directory)
+	assert.Equal(t,
+		filepath.Join(projectRoot, "migrations"),
+		cfg.Migrations.Directory,
+	)
+}
