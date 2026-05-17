@@ -1,0 +1,25 @@
+# Enforce LF line endings for all text files (prevents Windows CRLF issues in containers)
+* text=auto eol=lf
+
+# Shell scripts must always use LF — CRLF breaks bash shebang in Linux containers
+*.sh text eol=lf
+
+# Config and data files
+*.yaml text eol=lf
+*.yml  text eol=lf
+*.toml text eol=lf
+*.sql  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+
+# Makefile requires LF — tabs are significant
+Makefile text eol=lf
+
+# Go source files
+*.go text eol=lf
+
+# Binary files — no line-ending conversion
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary

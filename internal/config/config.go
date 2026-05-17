@@ -11,6 +11,9 @@ import (
 	"github.com/spf13/viper"
 )
 
+// executablePath is a package-level variable so tests can override it.
+var executablePath = os.Executable
+
 type Config struct {
 	App        AppConfig        `mapstructure:"app" yaml:"app"`
 	Database   DatabaseConfig   `mapstructure:"database" yaml:"database"`
@@ -85,6 +88,11 @@ func LoadConfig(configPath string) (*Config, error) {
 
 	bindEnvVariables(v)
 
+	// baseConfigFile records the path of the successfully loaded base config file.
+	// It must be captured before any subsequent SetConfigName call, which clears
+	// viper's internal configFile field (and therefore ConfigFileUsed()).
+	var baseConfigFile string
+
 	if configPath != "" {
 		v.SetConfigFile(configPath)
 		if err := v.ReadInConfig(); err != nil {
@@ -92,6 +100,7 @@ func LoadConfig(configPath string) (*Config, error) {
 				return nil, fmt.Errorf("failed to read config file: %w", err)
 			}
 		}
+		baseConfigFile = v.ConfigFileUsed()
 	} else {
 		env := v.GetString("APP_ENVIRONMENT")
 		if env == "" {
@@ -103,12 +112,24 @@ func LoadConfig(configPath string) (*Config, error) {
 		v.AddConfigPath("configs")
 		v.AddConfigPath(".")
 		v.AddConfigPath("./configs")
+		// Also search relative to the executable so the binary works from any CWD.
+		// Check both the binary's directory and one level up (e.g. binary at <project>/bin/server).
+		if execPath, err := executablePath(); err == nil {
+			execDir := filepath.Dir(execPath)
+			v.AddConfigPath(filepath.Join(execDir, "configs"))
+			v.AddConfigPath(execDir)
+			parentDir := filepath.Dir(execDir)
+			v.AddConfigPath(filepath.Join(parentDir, "configs"))
+			v.AddConfigPath(parentDir)
+		}
 
 		if err := v.ReadInConfig(); err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 				return nil, fmt.Errorf("failed to read base config file: %w", err)
 			}
 		}
+		// Capture before SetConfigName, which clears viper's internal configFile.
+		baseConfigFile = v.ConfigFileUsed()
 
 		v.SetConfigName(fmt.Sprintf("config.%s", env))
 		if err := v.MergeInConfig(); err != nil {
@@ -129,6 +150,16 @@ func LoadConfig(configPath string) (*Config, error) {
 		} else if e := v.GetString("ENV"); e != "" {
 			cfg.App.Environment = e
 		}
+	}
+
+	// If migrations.directory is relative, resolve it against the project root
+	// so it still points to the right place when the binary runs from any CWD.
+	if !filepath.IsAbs(cfg.Migrations.Directory) && baseConfigFile != "" {
+		projectRoot := filepath.Dir(baseConfigFile)
+		if filepath.Base(projectRoot) == "configs" {
+			projectRoot = filepath.Dir(projectRoot)
+		}
+		cfg.Migrations.Directory = filepath.Join(projectRoot, cfg.Migrations.Directory)
 	}
 
 	if err := cfg.Validate(); err != nil {
