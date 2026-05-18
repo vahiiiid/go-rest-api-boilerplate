@@ -11,12 +11,46 @@ import (
 	"github.com/vahiiiid/go-rest-api-boilerplate/internal/config"
 )
 
-func TestNewService(t *testing.T) {
+func TestValidateConfig(t *testing.T) {
 	tests := []struct {
 		name        string
 		cfg         *config.JWTConfig
-		shouldPanic bool
-		expected    struct {
+		expectError bool
+	}{
+		{
+			name: "with secret set",
+			cfg: &config.JWTConfig{
+				Secret: "test-secret",
+			},
+			expectError: false,
+		},
+		{
+			name: "with empty secret returns error",
+			cfg: &config.JWTConfig{
+				Secret: "",
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ValidateConfig(tt.cfg)
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), "JWT_SECRET")
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestNewService(t *testing.T) {
+	tests := []struct {
+		name     string
+		cfg      *config.JWTConfig
+		expected struct {
 			secret string
 			ttl    time.Duration
 		}
@@ -36,14 +70,6 @@ func TestNewService(t *testing.T) {
 			},
 		},
 		{
-			name: "with empty secret panics",
-			cfg: &config.JWTConfig{
-				Secret:   "",
-				TTLHours: 12,
-			},
-			shouldPanic: true,
-		},
-		{
 			name: "with zero TTL defaults to 24 hours",
 			cfg: &config.JWTConfig{
 				Secret:   "test-secret",
@@ -61,12 +87,6 @@ func TestNewService(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.shouldPanic {
-				assert.Panics(t, func() {
-					NewService(tt.cfg)
-				}, "expected panic for empty JWT secret")
-				return
-			}
 			authService := NewService(tt.cfg)
 			assert.NotNil(t, authService)
 			assert.Implements(t, (*Service)(nil), authService)
@@ -87,7 +107,6 @@ func TestNewServiceWithRepo(t *testing.T) {
 	tests := []struct {
 		name               string
 		cfg                *config.JWTConfig
-		shouldPanic        bool
 		expectedSecret     string
 		expectedAccessTTL  time.Duration
 		expectedRefreshTTL time.Duration
@@ -102,15 +121,6 @@ func TestNewServiceWithRepo(t *testing.T) {
 			expectedSecret:     "test-secret-123",
 			expectedAccessTTL:  30 * time.Minute,
 			expectedRefreshTTL: 14 * 24 * time.Hour,
-		},
-		{
-			name:        "with empty secret panics",
-			cfg: &config.JWTConfig{
-				Secret:          "",
-				AccessTokenTTL:  15 * time.Minute,
-				RefreshTokenTTL: 7 * 24 * time.Hour,
-			},
-			shouldPanic: true,
 		},
 		{
 			name: "with zero AccessTokenTTL defaults to 15 minutes",
@@ -162,13 +172,6 @@ func TestNewServiceWithRepo(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.shouldPanic {
-				db := setupTestDB(t)
-				assert.Panics(t, func() {
-					NewServiceWithRepo(tt.cfg, db)
-				}, "expected panic for empty JWT secret")
-				return
-			}
 			db := setupTestDB(t)
 			authService := NewServiceWithRepo(tt.cfg, db)
 

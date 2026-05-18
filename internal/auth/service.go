@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -55,11 +56,20 @@ type service struct {
 	db               *gorm.DB
 }
 
+// ValidateConfig validates the JWT configuration and returns an error if required fields are missing.
+func ValidateConfig(cfg *config.JWTConfig) error {
+	if cfg.Secret == "" {
+		return fmt.Errorf("fatal: JWT_SECRET is not set. Generate one with: make generate-jwt-secret")
+	}
+	return nil
+}
+
 // NewService creates a new authentication service using typed config
 func NewService(cfg *config.JWTConfig) Service {
 	jwtSecret := cfg.Secret
-	if jwtSecret == "" {
-		panic("JWT secret is not configured: set JWT_SECRET environment variable or jwt.secret in config. Generate with: make generate-jwt-secret")
+	if err := ValidateConfig(cfg); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
 	}
 
 	accessTokenTTL := cfg.AccessTokenTTL
@@ -86,8 +96,9 @@ func NewService(cfg *config.JWTConfig) Service {
 // NewServiceWithRepo creates a new authentication service with refresh token repository
 func NewServiceWithRepo(cfg *config.JWTConfig, db *gorm.DB) Service {
 	jwtSecret := cfg.Secret
-	if jwtSecret == "" {
-		panic("JWT secret is not configured: set JWT_SECRET environment variable or jwt.secret in config. Generate with: make generate-jwt-secret")
+	if err := ValidateConfig(cfg); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
 	}
 
 	accessTokenTTL := cfg.AccessTokenTTL
