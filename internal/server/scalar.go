@@ -10,7 +10,7 @@ import (
 
 func scalarHandler(ctx *gin.Context) {
 	htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{
-		SpecURL: "./api/docs/swagger.json",
+		SpecURL: "/swagger/doc.json",
 		CustomOptions: scalar.CustomOptions{
 			PageTitle: "Afghanistan Base Project Structure",
 		},
