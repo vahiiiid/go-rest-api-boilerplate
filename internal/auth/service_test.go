@@ -48,12 +48,8 @@ func TestValidateConfig(t *testing.T) {
 
 func TestNewService(t *testing.T) {
 	tests := []struct {
-		name     string
-		cfg      *config.JWTConfig
-		expected struct {
-			secret string
-			ttl    time.Duration
-		}
+		name string
+		cfg  *config.JWTConfig
 	}{
 		{
 			name: "with provided config",
@@ -61,26 +57,12 @@ func TestNewService(t *testing.T) {
 				Secret:   "test-secret",
 				TTLHours: 48,
 			},
-			expected: struct {
-				secret string
-				ttl    time.Duration
-			}{
-				secret: "test-secret",
-				ttl:    48 * time.Hour,
-			},
 		},
 		{
 			name: "with zero TTL defaults to 24 hours",
 			cfg: &config.JWTConfig{
 				Secret:   "test-secret",
 				TTLHours: 0,
-			},
-			expected: struct {
-				secret string
-				ttl    time.Duration
-			}{
-				secret: "test-secret",
-				ttl:    24 * time.Hour,
 			},
 		},
 	}

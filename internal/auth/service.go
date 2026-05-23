@@ -66,11 +66,11 @@ func ValidateConfig(cfg *config.JWTConfig) error {
 
 // NewService creates a new authentication service using typed config
 func NewService(cfg *config.JWTConfig) Service {
-	jwtSecret := cfg.Secret
 	if err := ValidateConfig(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
 	}
+	jwtSecret := cfg.Secret
 
 	accessTokenTTL := cfg.AccessTokenTTL
 	if accessTokenTTL == 0 {
@@ -95,11 +95,11 @@ func NewService(cfg *config.JWTConfig) Service {
 
 // NewServiceWithRepo creates a new authentication service with refresh token repository
 func NewServiceWithRepo(cfg *config.JWTConfig, db *gorm.DB) Service {
-	jwtSecret := cfg.Secret
 	if err := ValidateConfig(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
 	}
+	jwtSecret := cfg.Secret
 
 	accessTokenTTL := cfg.AccessTokenTTL
 	if accessTokenTTL == 0 {
