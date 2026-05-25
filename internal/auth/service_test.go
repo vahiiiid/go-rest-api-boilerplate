@@ -13,23 +13,39 @@ import (
 
 func TestValidateConfig(t *testing.T) {
 	tests := []struct {
-		name        string
-		cfg         *config.JWTConfig
-		expectError bool
+		name          string
+		cfg           *config.JWTConfig
+		expectError   bool
+		errorContains string
 	}{
 		{
 			name: "with secret set",
 			cfg: &config.JWTConfig{
-				Secret: "test-secret",
+				Secret: "test-secret-for-unit-testing-123",
 			},
 			expectError: false,
+		},
+		{
+			name:          "with nil config returns error",
+			cfg:           nil,
+			expectError:   true,
+			errorContains: "nil",
 		},
 		{
 			name: "with empty secret returns error",
 			cfg: &config.JWTConfig{
 				Secret: "",
 			},
-			expectError: true,
+			expectError:   true,
+			errorContains: "JWT_SECRET",
+		},
+		{
+			name: "with short secret returns error",
+			cfg: &config.JWTConfig{
+				Secret: "short-secret",
+			},
+			expectError:   true,
+			errorContains: "32",
 		},
 	}
 
@@ -38,7 +54,9 @@ func TestValidateConfig(t *testing.T) {
 			err := ValidateConfig(tt.cfg)
 			if tt.expectError {
 				assert.Error(t, err)
-				assert.Contains(t, err.Error(), "JWT_SECRET")
+				if tt.errorContains != "" {
+					assert.Contains(t, err.Error(), tt.errorContains)
+				}
 			} else {
 				assert.NoError(t, err)
 			}
@@ -56,19 +74,19 @@ func TestNewService(t *testing.T) {
 		{
 			name: "with provided config",
 			cfg: &config.JWTConfig{
-				Secret:   "test-secret",
+				Secret:   "test-secret-for-unit-testing-123",
 				TTLHours: 48,
 			},
-			expectedSecret:    "test-secret",
+			expectedSecret:    "test-secret-for-unit-testing-123",
 			expectedAccessTTL: 48 * time.Hour,
 		},
 		{
 			name: "with zero TTL defaults to 15 minutes",
 			cfg: &config.JWTConfig{
-				Secret:   "test-secret",
+				Secret:   "test-secret-for-unit-testing-123",
 				TTLHours: 0,
 			},
-			expectedSecret:    "test-secret",
+			expectedSecret:    "test-secret-for-unit-testing-123",
 			expectedAccessTTL: 15 * time.Minute,
 		},
 	}
@@ -97,57 +115,57 @@ func TestNewServiceWithRepo(t *testing.T) {
 		{
 			name: "with all config values provided",
 			cfg: &config.JWTConfig{
-				Secret:          "test-secret-123",
+				Secret:          "test-secret-for-unit-testing-123",
 				AccessTokenTTL:  30 * time.Minute,
 				RefreshTokenTTL: 14 * 24 * time.Hour,
 			},
-			expectedSecret:     "test-secret-123",
+			expectedSecret:     "test-secret-for-unit-testing-123",
 			expectedAccessTTL:  30 * time.Minute,
 			expectedRefreshTTL: 14 * 24 * time.Hour,
 		},
 		{
 			name: "with zero AccessTokenTTL defaults to 15 minutes",
 			cfg: &config.JWTConfig{
-				Secret:          "test-secret",
+				Secret:          "test-secret-for-unit-testing-123",
 				AccessTokenTTL:  0,
 				RefreshTokenTTL: 7 * 24 * time.Hour,
 			},
-			expectedSecret:     "test-secret",
+			expectedSecret:     "test-secret-for-unit-testing-123",
 			expectedAccessTTL:  15 * time.Minute,
 			expectedRefreshTTL: 7 * 24 * time.Hour,
 		},
 		{
 			name: "with zero RefreshTokenTTL defaults to 168 hours (7 days)",
 			cfg: &config.JWTConfig{
-				Secret:          "test-secret",
+				Secret:          "test-secret-for-unit-testing-123",
 				AccessTokenTTL:  15 * time.Minute,
 				RefreshTokenTTL: 0,
 			},
-			expectedSecret:     "test-secret",
+			expectedSecret:     "test-secret-for-unit-testing-123",
 			expectedAccessTTL:  15 * time.Minute,
 			expectedRefreshTTL: 168 * time.Hour,
 		},
 		{
 			name: "with zero AccessTokenTTL but TTLHours set (deprecated field)",
 			cfg: &config.JWTConfig{
-				Secret:          "test-secret",
+				Secret:          "test-secret-for-unit-testing-123",
 				AccessTokenTTL:  0,
 				TTLHours:        2,
 				RefreshTokenTTL: 7 * 24 * time.Hour,
 			},
-			expectedSecret:     "test-secret",
+			expectedSecret:     "test-secret-for-unit-testing-123",
 			expectedAccessTTL:  2 * time.Hour,
 			expectedRefreshTTL: 7 * 24 * time.Hour,
 		},
 		{
 			name: "with zero AccessTokenTTL and zero TTLHours defaults to 15 minutes",
 			cfg: &config.JWTConfig{
-				Secret:          "test-secret",
+				Secret:          "test-secret-for-unit-testing-123",
 				AccessTokenTTL:  0,
 				TTLHours:        0,
 				RefreshTokenTTL: 7 * 24 * time.Hour,
 			},
-			expectedSecret:     "test-secret",
+			expectedSecret:     "test-secret-for-unit-testing-123",
 			expectedAccessTTL:  15 * time.Minute,
 			expectedRefreshTTL: 7 * 24 * time.Hour,
 		},
@@ -174,7 +192,7 @@ func TestNewServiceWithRepo(t *testing.T) {
 
 func TestService_GenerateToken(t *testing.T) {
 	cfg := &config.JWTConfig{
-		Secret:   "test-secret",
+		Secret:   "test-secret-for-unit-testing-123",
 		TTLHours: 24,
 	}
 	service := NewService(cfg)
@@ -214,7 +232,7 @@ func TestService_GenerateToken(t *testing.T) {
 
 			// Verify token can be parsed
 			parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-				return []byte("test-secret"), nil
+				return []byte("test-secret-for-unit-testing-123"), nil
 			})
 
 			assert.NoError(t, err)
@@ -244,7 +262,7 @@ func TestService_GenerateToken(t *testing.T) {
 
 func TestService_ValidateToken(t *testing.T) {
 	cfg := &config.JWTConfig{
-		Secret:   "test-secret",
+		Secret:   "test-secret-for-unit-testing-123",
 		TTLHours: 24,
 	}
 	service := NewService(cfg)
@@ -273,7 +291,7 @@ func TestService_ValidateToken(t *testing.T) {
 	t.Run("token with wrong signature", func(t *testing.T) {
 		// Create token with different secret
 		wrongService := NewService(&config.JWTConfig{
-			Secret:   "wrong-secret",
+			Secret:   "wrong-secret-for-unit-testing-00",
 			TTLHours: 24,
 		})
 		token, err := wrongService.GenerateToken(123, "test@example.com", "Test User")
@@ -289,7 +307,7 @@ func TestService_ValidateToken(t *testing.T) {
 	t.Run("expired token", func(t *testing.T) {
 		// Create service with very short TTL
 		shortTTLService := NewService(&config.JWTConfig{
-			Secret:   "test-secret",
+			Secret:   "test-secret-for-unit-testing-123",
 			TTLHours: 0, // This will default to 24, but we'll create token manually
 		})
 
@@ -306,7 +324,7 @@ func TestService_ValidateToken(t *testing.T) {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, err := token.SignedString([]byte("test-secret"))
+		tokenString, err := token.SignedString([]byte("test-secret-for-unit-testing-123"))
 		assert.NoError(t, err)
 
 		// Try to validate expired token
@@ -327,7 +345,7 @@ func TestService_ValidateToken(t *testing.T) {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, err := token.SignedString([]byte("test-secret"))
+		tokenString, err := token.SignedString([]byte("test-secret-for-unit-testing-123"))
 		assert.NoError(t, err)
 
 		validatedClaims, err := service.ValidateToken(tokenString)
@@ -346,7 +364,7 @@ func TestService_ValidateToken(t *testing.T) {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, err := token.SignedString([]byte("test-secret"))
+		tokenString, err := token.SignedString([]byte("test-secret-for-unit-testing-123"))
 		assert.NoError(t, err)
 
 		validatedClaims, err := service.ValidateToken(tokenString)
@@ -384,7 +402,7 @@ func TestService_ValidateToken(t *testing.T) {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, err := token.SignedString([]byte("test-secret"))
+		tokenString, err := token.SignedString([]byte("test-secret-for-unit-testing-123"))
 		assert.NoError(t, err)
 
 		validatedClaims, err := service.ValidateToken(tokenString)
@@ -406,7 +424,7 @@ func TestService_ValidateToken(t *testing.T) {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, err := token.SignedString([]byte("test-secret"))
+		tokenString, err := token.SignedString([]byte("test-secret-for-unit-testing-123"))
 		assert.NoError(t, err)
 
 		validatedClaims, err := service.ValidateToken(tokenString)
@@ -427,7 +445,7 @@ func TestService_ValidateToken(t *testing.T) {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, err := token.SignedString([]byte("test-secret"))
+		tokenString, err := token.SignedString([]byte("test-secret-for-unit-testing-123"))
 		assert.NoError(t, err)
 
 		validatedClaims, err := service.ValidateToken(tokenString)
@@ -440,7 +458,7 @@ func TestService_ValidateToken(t *testing.T) {
 func TestService_GenerateToken_RoleFetchError(t *testing.T) {
 	db := setupTestDB(t)
 	cfg := &config.JWTConfig{
-		Secret:          "test-secret",
+		Secret:          "test-secret-for-unit-testing-123",
 		AccessTokenTTL:  15 * time.Minute,
 		RefreshTokenTTL: 7 * 24 * time.Hour,
 	}

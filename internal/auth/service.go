@@ -57,8 +57,14 @@ type service struct {
 
 // ValidateConfig validates the JWT configuration and returns an error if required fields are missing.
 func ValidateConfig(cfg *config.JWTConfig) error {
+	if cfg == nil {
+		return fmt.Errorf("fatal: JWT configuration is nil")
+	}
 	if cfg.Secret == "" {
 		return fmt.Errorf("fatal: JWT_SECRET is not set. Generate one with: make generate-jwt-secret")
+	}
+	if len(cfg.Secret) < 32 {
+		return fmt.Errorf("fatal: JWT_SECRET must be at least 32 characters (current: %d). Generate one with: make generate-jwt-secret", len(cfg.Secret))
 	}
 	return nil
 }
@@ -66,7 +72,7 @@ func ValidateConfig(cfg *config.JWTConfig) error {
 // NewService creates a new authentication service using typed config
 func NewService(cfg *config.JWTConfig) Service {
 	if err := ValidateConfig(cfg); err != nil {
-		panic("auth: JWT_SECRET is not set — ensure config.Validate() is called before constructing the auth service")
+		panic(err.Error())
 	}
 	jwtSecret := cfg.Secret
 
@@ -94,7 +100,7 @@ func NewService(cfg *config.JWTConfig) Service {
 // NewServiceWithRepo creates a new authentication service with refresh token repository
 func NewServiceWithRepo(cfg *config.JWTConfig, db *gorm.DB) Service {
 	if err := ValidateConfig(cfg); err != nil {
-		panic("auth: JWT_SECRET is not set — ensure config.Validate() is called before constructing the auth service")
+		panic(err.Error())
 	}
 	jwtSecret := cfg.Secret
 
