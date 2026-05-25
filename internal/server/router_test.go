@@ -23,7 +23,7 @@ func TestSetupRouter_HealthEndpoint(t *testing.T) {
 	mockUserHandler := &user.Handler{}
 
 	cfg := &config.JWTConfig{
-		Secret:   "test-secret",
+		Secret:   "test-secret-for-unit-testing-123",
 		TTLHours: 24,
 	}
 	mockAuthService := auth.NewService(cfg)
