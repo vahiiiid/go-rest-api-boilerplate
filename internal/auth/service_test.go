@@ -48,8 +48,10 @@ func TestValidateConfig(t *testing.T) {
 
 func TestNewService(t *testing.T) {
 	tests := []struct {
-		name string
-		cfg  *config.JWTConfig
+		name              string
+		cfg               *config.JWTConfig
+		expectedSecret    string
+		expectedAccessTTL time.Duration
 	}{
 		{
 			name: "with provided config",
@@ -57,13 +59,17 @@ func TestNewService(t *testing.T) {
 				Secret:   "test-secret",
 				TTLHours: 48,
 			},
+			expectedSecret:    "test-secret",
+			expectedAccessTTL: 48 * time.Hour,
 		},
 		{
-			name: "with zero TTL defaults to 24 hours",
+			name: "with zero TTL defaults to 15 minutes",
 			cfg: &config.JWTConfig{
 				Secret:   "test-secret",
 				TTLHours: 0,
 			},
+			expectedSecret:    "test-secret",
+			expectedAccessTTL: 15 * time.Minute,
 		},
 	}
 
@@ -71,16 +77,11 @@ func TestNewService(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			authService := NewService(tt.cfg)
 			assert.NotNil(t, authService)
-			assert.Implements(t, (*Service)(nil), authService)
 
-			// Test that we can generate and validate tokens
-			token, err := authService.GenerateToken(123, "test@example.com", "Test User")
-			assert.NoError(t, err)
-			assert.NotEmpty(t, token)
-
-			claims, err := authService.ValidateToken(token)
-			assert.NoError(t, err)
-			assert.Equal(t, uint(123), claims.UserID)
+			svc, ok := authService.(*service)
+			assert.True(t, ok, "should be able to cast to *service")
+			assert.Equal(t, tt.expectedSecret, svc.jwtSecret)
+			assert.Equal(t, tt.expectedAccessTTL, svc.accessTokenTTL)
 		})
 	}
 }

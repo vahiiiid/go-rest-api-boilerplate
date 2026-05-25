@@ -64,12 +64,6 @@ func run() error {
 
 	cfg.LogSafeConfig(logger)
 
-	// Validate critical security configuration before starting
-	if err := auth.ValidateConfig(&cfg.JWT); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
-	}
-
 	database, err := db.NewPostgresDBFromDatabaseConfig(cfg.Database)
 	if err != nil {
 		logger.Error("Failed to connect to database", "error", err)

@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"time"
 
@@ -67,8 +66,7 @@ func ValidateConfig(cfg *config.JWTConfig) error {
 // NewService creates a new authentication service using typed config
 func NewService(cfg *config.JWTConfig) Service {
 	if err := ValidateConfig(cfg); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
+		panic("auth: JWT_SECRET is not set — ensure config.Validate() is called before constructing the auth service")
 	}
 	jwtSecret := cfg.Secret
 
@@ -96,8 +94,7 @@ func NewService(cfg *config.JWTConfig) Service {
 // NewServiceWithRepo creates a new authentication service with refresh token repository
 func NewServiceWithRepo(cfg *config.JWTConfig, db *gorm.DB) Service {
 	if err := ValidateConfig(cfg); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
+		panic("auth: JWT_SECRET is not set — ensure config.Validate() is called before constructing the auth service")
 	}
 	jwtSecret := cfg.Secret
 
