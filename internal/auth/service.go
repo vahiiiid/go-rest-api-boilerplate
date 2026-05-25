@@ -72,7 +72,7 @@ func ValidateConfig(cfg *config.JWTConfig) error {
 // NewService creates a new authentication service using typed config
 func NewService(cfg *config.JWTConfig) Service {
 	if err := ValidateConfig(cfg); err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 	jwtSecret := cfg.Secret
 
@@ -100,7 +100,7 @@ func NewService(cfg *config.JWTConfig) Service {
 // NewServiceWithRepo creates a new authentication service with refresh token repository
 func NewServiceWithRepo(cfg *config.JWTConfig, db *gorm.DB) Service {
 	if err := ValidateConfig(cfg); err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 	jwtSecret := cfg.Secret
 

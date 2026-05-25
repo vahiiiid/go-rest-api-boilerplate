@@ -104,6 +104,16 @@ func TestNewService(t *testing.T) {
 	}
 }
 
+func TestNewService_PanicsOnInvalidConfig(t *testing.T) {
+	assert.Panics(t, func() { NewService(nil) }, "nil cfg should panic")
+	assert.Panics(t, func() {
+		NewService(&config.JWTConfig{Secret: ""})
+	}, "empty secret should panic")
+	assert.Panics(t, func() {
+		NewService(&config.JWTConfig{Secret: "short"})
+	}, "short secret should panic")
+}
+
 func TestNewServiceWithRepo(t *testing.T) {
 	tests := []struct {
 		name               string
@@ -188,6 +198,17 @@ func TestNewServiceWithRepo(t *testing.T) {
 			assert.NotNil(t, svc.db)
 		})
 	}
+}
+
+func TestNewServiceWithRepo_PanicsOnInvalidConfig(t *testing.T) {
+	db := setupTestDB(t)
+	assert.Panics(t, func() { NewServiceWithRepo(nil, db) }, "nil cfg should panic")
+	assert.Panics(t, func() {
+		NewServiceWithRepo(&config.JWTConfig{Secret: ""}, db)
+	}, "empty secret should panic")
+	assert.Panics(t, func() {
+		NewServiceWithRepo(&config.JWTConfig{Secret: "short"}, db)
+	}, "short secret should panic")
 }
 
 func TestService_GenerateToken(t *testing.T) {
@@ -308,7 +329,7 @@ func TestService_ValidateToken(t *testing.T) {
 		// Create service with very short TTL
 		shortTTLService := NewService(&config.JWTConfig{
 			Secret:   "test-secret-for-unit-testing-123",
-			TTLHours: 0, // This will default to 24, but we'll create token manually
+			TTLHours: 0, // This will default to 15 minutes, but we'll create token manually
 		})
 
 		// Create an expired token manually
