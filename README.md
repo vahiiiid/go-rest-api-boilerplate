@@ -29,18 +29,22 @@ Production-ready in 90 seconds. No headaches, just clean code.
 
 GRAB is designed to work seamlessly with your favorite AI coding assistants:
 
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-D97757?logo=anthropic&logoColor=white)](CLAUDE.md)
 [![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-optimized-7F52FF?logo=github&logoColor=white)](https://github.com/features/copilot)
 [![Cursor](https://img.shields.io/badge/Cursor-ready-7C3AED?logo=cursor&logoColor=white)](https://cursor.sh/)
 [![Windsurf](https://img.shields.io/badge/Windsurf-supported-00C7B7?logoColor=white)](https://codeium.com/windsurf)
 [![GoLand](https://img.shields.io/badge/GoLand-dual%20AI-087CFA?logo=goland&logoColor=white)](https://www.jetbrains.com/go/)
-[![AGENTS.md](https://img.shields.io/badge/AGENTS.md-compliant-orange?logo=openai&logoColor=white)](AGENTS.md)
+[![AGENTS.md](https://img.shields.io/badge/AGENTS.md-compliant-orange?logoColor=white)](AGENTS.md)
 
-**Out-of-the-box AI integration** with comprehensive guidelines for:
+**Out-of-the-box AI integration**, all built from one canonical guide — [`AGENTS.md`](AGENTS.md) — with tool-specific adapters for:
+- **Claude Code** (via [`CLAUDE.md`](CLAUDE.md), which imports `AGENTS.md` directly)
 - **GitHub Copilot** (VS Code, GoLand, Visual Studio)
 - **Cursor IDE** (with dedicated `.cursor/rules/`)
 - **Windsurf IDE** (with dedicated `.windsurf/rules/`)
 - **JetBrains AI** (via AGENTS.md standard)
-- Any AI assistant supporting AGENTS.md standard
+- Any AI assistant supporting the [AGENTS.md standard](https://agents.md)
+
+`AGENTS.md` is the single source of truth; the Copilot/Cursor/Windsurf files are condensed, manually-synced adapters. See [`.agents/AI-CONFIG.md`](.agents/AI-CONFIG.md) for the full file map and the rule for keeping them in sync.
 
 > **Note**: GoLand users get dual AI support through both GitHub Copilot (via `.github/copilot-instructions.md`) and JetBrains AI (via `AGENTS.md`). No IDE-specific configuration needed.
 
@@ -63,7 +67,7 @@ make quick-start  # ← One command. 90 seconds. You're building features.
 **This is the real deal.** The production-grade boilerplate you wish you had from day one:
 
 ✅ **Clean Architecture** — Handler → Service → Repository (GO industry standard)  
-✅ **AI-Optimized Guidelines** — Built-in rules for GitHub Copilot, Cursor, Windsurf & AGENTS.md  
+✅ **AI-Optimized Guidelines** — One canonical `AGENTS.md`, with adapters for Claude Code, GitHub Copilot, Cursor & Windsurf  
 ✅ **Security & JWT Auth** — OAuth 2.0 BCP compliant with refresh token rotation, rate limiting, CORS  
 ✅ **Role-Based Access Control** — Many-to-many RBAC with JWT integration and secure admin CLI  
 ✅ **Database Migrations** — PostgreSQL with version control & rollback  

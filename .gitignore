@@ -44,3 +44,9 @@ api/docs/docs.go
 api/docs/swagger.json
 api/docs/swagger.yaml
 
+# Documentation site (github.com/vahiiiid/go-rest-api-docs), cloned locally for reference
+/docs/
+
+# Personal AI assistant overrides (not for the team)
+CLAUDE.local.md
+

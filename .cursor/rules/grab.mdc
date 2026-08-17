@@ -4,8 +4,11 @@ alwaysApply: true
 
 # GRAB Development Rules for Cursor
 
-**Version**: v2.0.0  
-**Last Updated**: 2025-12-10  
+<!-- Condensed from AGENTS.md (repo root), the canonical source of truth. -->
+<!-- When a project-wide convention changes there, sync it here too — see .agents/AI-CONFIG.md. -->
+
+**Version**: v2.0.0
+**Last Updated**: 2025-12-10
 **Purpose**: Developer guidelines for building APIs with GRAB (Go REST API Boilerplate)
 
 ---

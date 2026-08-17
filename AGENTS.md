@@ -4,7 +4,9 @@
 **Last Updated**: 2025-12-10  
 **Purpose**: Universal AI assistant guidelines for GRAB (Go REST API Boilerplate)
 
-> This file follows the OpenAI AGENTS.md standard and is compatible with all major AI coding assistants including GitHub Copilot, Cursor, Windsurf, JetBrains AI, and others.
+> This file follows the [AGENTS.md standard](https://agents.md) (stewarded by the Agentic AI Foundation) and is compatible with all major AI coding assistants including GitHub Copilot, Cursor, Windsurf, Claude Code, JetBrains AI, and others.
+>
+> **This is the canonical source of truth for GRAB's AI guidelines.** Claude Code reads it via `CLAUDE.md`'s `@AGENTS.md` import; Copilot, Cursor, and Windsurf each keep a condensed, manually-synced adapter. See [`.agents/AI-CONFIG.md`](.agents/AI-CONFIG.md) for the full file map and the rule for keeping them in sync.
 
 ---
 
