@@ -1,0 +1,13 @@
+# My Personal AI Preferences — Claude Code
+
+<!-- This file is gitignored. Only you see this. -->
+<!-- Claude reads this in addition to CLAUDE.md (which imports AGENTS.md). -->
+<!-- Copy this to CLAUDE.local.md and customize. -->
+
+## Example: Code style preferences
+<!-- Uncomment and customize as needed:
+
+- I prefer `assert` over `require` in tests unless the test truly can't continue.
+- Always run `make lint-fix` before showing me a diff, not just before committing.
+
+-->

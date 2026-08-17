@@ -212,6 +212,10 @@ When making significant changes to the codebase:
 - Update the README.md if it affects quick start or basic usage
 - Consider updating the full documentation in the docs repository
 
+#### Updating AI Assistant Guidelines
+
+`AGENTS.md` is the canonical source of truth for GRAB's AI coding guidelines. If your change affects a project-wide convention (architecture pattern, error handling, migration naming, testing pattern, commit format), update `AGENTS.md` first, then check whether `.github/copilot-instructions.md`, `.cursor/rules/grab.mdc`, and `.windsurf/rules/grab.md` need the same update — see [`.agents/AI-CONFIG.md`](.agents/AI-CONFIG.md) for the full file map and sync rule. Claude Code reads `AGENTS.md` automatically via `CLAUDE.md`, so it needs no separate edit.
+
 ## Feature Requests
 
 - Check existing issues first

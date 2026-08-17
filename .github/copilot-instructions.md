@@ -1,5 +1,8 @@
 # GitHub Copilot Instructions for GRAB (Go REST API Boilerplate)
 
+<!-- Condensed from AGENTS.md (repo root), the canonical source of truth. -->
+<!-- When a project-wide convention changes there, sync it here too — see .agents/AI-CONFIG.md. -->
+
 **Version**: v2.0.0  
 **Last Updated**: 2025-12-10  
 **Purpose**: Developer-focused guidelines for building APIs with GRAB
