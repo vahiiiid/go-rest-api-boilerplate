@@ -47,7 +47,7 @@ func TestSetupRouter_HealthEndpoint(t *testing.T) {
 		},
 	}
 
-	router := SetupRouter(mockUserHandler, mockAuthService, testConfig, db)
+	router := SetupRouter(mockUserHandler, mockAuthService, testConfig, db, "1.0.0", "test-commit", "test-build")
 
 	assert.NotNil(t, router)
 

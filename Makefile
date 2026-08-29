@@ -3,6 +3,11 @@
 # Container name (from docker-compose.yml)
 CONTAINER_NAME := go_api_app
 
+# Version info for native builds
+VERSION ?= $(shell git describe --tags --always --dirty)
+COMMIT ?= $(shell git rev-parse HEAD)
+BUILD_DATE ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+
 # Check if container is running
 CONTAINER_RUNNING := $(shell docker ps --format '{{.Names}}' 2>/dev/null | grep -E '^$(CONTAINER_NAME)$$')
 
@@ -377,8 +382,11 @@ build-binary:
 		exit 1; \
 	fi
 	@echo "🔨 Building Go binary..."
+	@echo "📌 Version: $(VERSION)"
+	@echo "📌 Commit: $(COMMIT)"
+	@echo "📌 Build Date: $(BUILD_DATE)"
 	@mkdir -p bin
-	@go build -o bin/server ./cmd/server
+	@go build -ldflags="-X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.buildDate=$(BUILD_DATE)" -o bin/server ./cmd/server
 	@echo "✅ Binary built successfully: bin/server"
 	@echo ""
 	@echo "To run the binary:"

@@ -3,6 +3,7 @@ package health
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"time"
 )
 
@@ -10,6 +11,7 @@ type Service interface {
 	GetHealth(ctx context.Context) HealthResponse
 	GetLiveness(ctx context.Context) HealthResponse
 	GetReadiness(ctx context.Context) HealthResponse
+	GetVersion(ctx context.Context) VersionResponse
 }
 
 type service struct {
@@ -17,14 +19,18 @@ type service struct {
 	startTime   time.Time
 	version     string
 	environment string
+	commit      string
+	buildDate   string
 }
 
-func NewService(checkers []Checker, version, environment string) Service {
+func NewService(checkers []Checker, version, environment, commit, buildDate string) Service {
 	return &service{
 		checkers:    checkers,
 		startTime:   time.Now(),
 		version:     version,
 		environment: environment,
+		commit:      commit,
+		buildDate:   buildDate,
 	}
 }
 
@@ -88,4 +94,13 @@ func (s *service) formatUptime() string {
 		return fmt.Sprintf("%dh %dm", hours, minutes)
 	}
 	return fmt.Sprintf("%dm", minutes)
+}
+
+func (s *service) GetVersion(ctx context.Context) VersionResponse {
+	return VersionResponse{
+		Version:   s.version,
+		Commit:    s.commit,
+		BuildDate: s.buildDate,
+		GoVersion: runtime.Version(),
+	}
 }

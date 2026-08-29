@@ -64,3 +64,17 @@ func (h *Handler) Ready(c *gin.Context) {
 
 	c.JSON(statusCode, response)
 }
+
+// Version godoc
+// @Summary      Get application version information
+// @Description  Returns version, commit, build date, and Go version
+// @Tags         Health
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  VersionResponse
+// @Router       /version [get]
+func (h *Handler) Version(c *gin.Context) {
+	ctx := c.Request.Context()
+	response := h.service.GetVersion(ctx)
+	c.JSON(http.StatusOK, response)
+}
