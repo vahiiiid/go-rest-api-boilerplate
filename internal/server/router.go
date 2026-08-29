@@ -16,7 +16,7 @@ import (
 )
 
 // SetupRouter creates and configures the Gin router
-func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *config.Config, db *gorm.DB) *gin.Engine {
+func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *config.Config, db *gorm.DB, version, commit, buildDate string) *gin.Engine {
 	router := gin.New()
 
 	if cfg.App.Environment == "production" {
@@ -44,12 +44,20 @@ func SetupRouter(userHandler *user.Handler, authService auth.Service, cfg *confi
 		dbChecker := health.NewDatabaseChecker(db)
 		checkers = append(checkers, dbChecker)
 	}
-	healthService := health.NewService(checkers, cfg.App.Version, cfg.App.Environment)
+	// Prefer build-time version if provided, otherwise fall back to config file
+	svcVersion := cfg.App.Version
+	if version != "" {
+		svcVersion = version
+	}
+	healthService := health.NewService(checkers, svcVersion, cfg.App.Environment, commit, buildDate)
 	healthHandler := health.NewHandler(healthService)
 
 	router.GET("/health", healthHandler.Health)
 	router.GET("/health/live", healthHandler.Live)
 	router.GET("/health/ready", healthHandler.Ready)
+
+	// internal/server/router.go
+	router.GET("/version", healthHandler.Version)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

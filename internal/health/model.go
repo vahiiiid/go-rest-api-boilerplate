@@ -33,3 +33,10 @@ type CheckResult struct {
 	ResponseTime string      `json:"response_time,omitempty"`
 	Details      interface{} `json:"details,omitempty"`
 }
+
+type VersionResponse struct {
+	Version   string `json:"version"`
+	Commit    string `json:"commit"`
+	BuildDate string `json:"buildDate"`
+	GoVersion string `json:"goVersion"`
+}

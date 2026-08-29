@@ -22,7 +22,7 @@ func (m *mockChecker) Check(ctx context.Context) CheckResult {
 }
 
 func TestService_GetHealth(t *testing.T) {
-	svc := NewService([]Checker{}, "1.0.0", "test")
+	svc := NewService([]Checker{}, "1.0.0", "test", "abc1234", "2025-10-18T10:30:00Z")
 
 	response := svc.GetHealth(context.Background())
 
@@ -33,7 +33,7 @@ func TestService_GetHealth(t *testing.T) {
 }
 
 func TestService_GetLiveness(t *testing.T) {
-	svc := NewService([]Checker{}, "1.0.0", "test")
+	svc := NewService([]Checker{}, "1.0.0", "test", "abc1234", "2025-10-18T10:30:00Z")
 
 	response := svc.GetLiveness(context.Background())
 
@@ -80,7 +80,7 @@ func TestService_GetReadiness(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc := NewService(tt.checkers, "1.0.0", "test")
+			svc := NewService(tt.checkers, "1.0.0", "test", "abc1234", "2025-10-18T10:30:00Z")
 
 			response := svc.GetReadiness(context.Background())
 
@@ -88,6 +88,17 @@ func TestService_GetReadiness(t *testing.T) {
 			assert.Len(t, response.Checks, len(tt.checkers))
 		})
 	}
+}
+
+func TestService_GetVersion(t *testing.T) {
+	svc := NewService([]Checker{}, "1.2.3", "production", "abc1234567890abcdef", "2025-10-18T10:30:00Z")
+
+	response := svc.GetVersion(context.Background())
+
+	assert.Equal(t, "1.2.3", response.Version)
+	assert.Equal(t, "abc1234567890abcdef", response.Commit)
+	assert.Equal(t, "2025-10-18T10:30:00Z", response.BuildDate)
+	assert.NotEmpty(t, response.GoVersion)
 }
 
 func TestService_FormatUptime(t *testing.T) {

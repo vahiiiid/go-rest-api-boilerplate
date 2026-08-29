@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -40,11 +42,27 @@ import (
 // @in header
 // @name Authorization
 // @description Type "Bearer" followed by a space and JWT token.
+var (
+	version   = "dev"     // Set via -ldflags at build time
+	commit    = "none"    // Git commit hash
+	buildDate = "unknown" // Build timestamp
+	goVersion = runtime.Version()
+)
 
 func main() {
+	log.Printf("Starting %s", getVersionInfo())
 	if err := run(); err != nil {
 		os.Exit(1)
 	}
+}
+
+func getVersionInfo() string {
+	commitStr := commit
+	if len(commit) > 7 {
+		commitStr = commit[:7]
+	}
+	return fmt.Sprintf("v%s (commit: %s, built: %s, go: %s)",
+		version, commitStr, buildDate, goVersion)
 }
 
 func run() error {
@@ -83,7 +101,7 @@ func run() error {
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService, authService)
 
-	router := server.SetupRouter(userHandler, authService, cfg, database)
+	router := server.SetupRouter(userHandler, authService, cfg, database, version, commit, buildDate)
 
 	port := cfg.Server.Port
 	if port == "" {

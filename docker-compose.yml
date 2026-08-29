@@ -26,6 +26,10 @@ services:
       context: .
       dockerfile: Dockerfile
       target: development  # Use development stage
+      args:
+        VERSION: ${VERSION:-2.0.0}
+        COMMIT: ${COMMIT:-unknown}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
     container_name: ${APP_CONTAINER_NAME:-go_api_app}
     environment:
       - DOCKER_ENV=true

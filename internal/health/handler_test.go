@@ -13,6 +13,7 @@ import (
 
 type mockService struct {
 	response HealthResponse
+	version  VersionResponse
 }
 
 func (m *mockService) GetHealth(ctx context.Context) HealthResponse {
@@ -25,6 +26,10 @@ func (m *mockService) GetLiveness(ctx context.Context) HealthResponse {
 
 func (m *mockService) GetReadiness(ctx context.Context) HealthResponse {
 	return m.response
+}
+
+func (m *mockService) GetVersion(ctx context.Context) VersionResponse {
+	return m.version
 }
 
 func TestHandler_Health(t *testing.T) {
@@ -91,6 +96,41 @@ func TestHandler_Live(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Contains(t, w.Body.String(), "status")
+}
+
+func TestHandler_Version(t *testing.T) {
+	mockSvc := &mockService{
+		response: HealthResponse{
+			Status:      StatusHealthy,
+			Version:     "1.0.0",
+			Timestamp:   time.Now(),
+			Uptime:      "1h 30m",
+			Environment: "test",
+			Checks:      make(map[string]CheckResult),
+		},
+		version: VersionResponse{
+			Version:   "1.0.0",
+			Commit:    "abc1234",
+			BuildDate: "2025-10-18T10:30:00Z",
+			GoVersion: "go1.24.0",
+		},
+	}
+	handler := NewHandler(mockSvc)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.GET("/version", handler.Version)
+
+	req := httptest.NewRequest(http.MethodGet, "/version", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "version")
+	assert.Contains(t, w.Body.String(), "commit")
+	assert.Contains(t, w.Body.String(), "buildDate")
+	assert.Contains(t, w.Body.String(), "goVersion")
 }
 
 func TestHandler_Ready(t *testing.T) {

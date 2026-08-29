@@ -27,6 +27,10 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production  # Use production stage
+      args:
+        VERSION: ${VERSION:-2.0.0}
+        COMMIT: ${COMMIT:-unknown}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
     container_name: ${APP_CONTAINER_NAME_PROD:-go_api_app_prod}
     env_file:
       - .env
